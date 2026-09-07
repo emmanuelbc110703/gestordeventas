@@ -26,3 +26,4 @@ yarn-error.log
 firebase/credentials.json
 vendor/
 node_modules/
+resources/js/firebase-auth.js
