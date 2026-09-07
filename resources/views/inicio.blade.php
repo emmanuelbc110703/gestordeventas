@@ -700,8 +700,7 @@
             <h1>Orquídeas y más Los Amates</h1>
 
             <p>
-                Naturaleza, color y vida para transformar
-                cada uno de tus espacios.
+                JOrge es puto
             </p>
 
             <div class="botones-portada">
