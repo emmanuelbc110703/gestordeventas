@@ -700,7 +700,8 @@
             <h1>Orquídeas y más Los Amates</h1>
 
             <p>
-                JOrge es puto
+                Naturaleza, color y vida para transformar
+                cada uno de tus espacios.
             </p>
 
             <div class="botones-portada">
@@ -783,7 +784,7 @@
 
         <div class="titulo-seccion">
 
-            <h2>Nuestros productos</h2>
+            <h2>Nuestros productos enviados desde la casa de jorsh</h2>
 
             <p>
                 Conoce algunos de los productos que puedes encontrar con nosotros.
