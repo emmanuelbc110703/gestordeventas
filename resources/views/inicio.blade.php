@@ -862,7 +862,7 @@
 
                     <p>
                         Diferentes estilos de macetas para acompañar
-                        y complementar tus plantas favoritas.
+                        y complementar tus plantas favoritas.PRUEBAAA DE ACTUALIZACION EN EL SERVIDOR
                     </p>
 
                 </div>
