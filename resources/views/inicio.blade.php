@@ -784,7 +784,7 @@
 
         <div class="titulo-seccion">
 
-            <h2>Nuestros productos enviados desde la casa de jorsh</h2>
+            <h2>Nuestros productos</h2>
 
             <p>
                 Conoce algunos de los productos que puedes encontrar con nosotros.
