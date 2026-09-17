@@ -10,6 +10,84 @@ use App\Http\Controllers\Admin\EmpleadoController;
 use App\Http\Controllers\PuntoVentaController;
 use App\Http\Controllers\VentaController;
 use App\Http\Controllers\CotizacionController;
+use App\Http\Controllers\Admin\GastoComercialController;
+use App\Http\Controllers\Admin\PagoServicioController;
+
+Route::prefix('admin/pago-servicios')
+    ->name('admin.pago_servicios.')
+    ->group(function () {
+
+        Route::get(
+            '/',
+            [PagoServicioController::class, 'index']
+        )->name('index');
+
+        Route::get(
+            '/crear',
+            [PagoServicioController::class, 'create']
+        )->name('create');
+
+        Route::post(
+            '/',
+            [PagoServicioController::class, 'store']
+        )->name('store');
+
+        Route::get(
+            '/{pagoServicio}/editar',
+            [PagoServicioController::class, 'edit']
+        )->name('edit');
+
+        Route::put(
+            '/{pagoServicio}',
+            [PagoServicioController::class, 'update']
+        )->name('update');
+
+        Route::delete(
+            '/{pagoServicio}',
+            [PagoServicioController::class, 'destroy']
+        )->name('destroy');
+
+    });
+
+// ========================================
+// ADMIN - GASTOS COMERCIALES
+// ========================================
+
+// Lista de gastos
+Route::get(
+    '/admin/gastos-comerciales',
+    [GastoComercialController::class, 'index']
+)->name('admin.gastos_comerciales');
+
+// Mostrar formulario para registrar
+Route::get(
+    '/admin/gastos-comerciales/registrar',
+    [GastoComercialController::class, 'create']
+)->name('admin.gastos_comerciales.create');
+
+// Guardar gasto
+Route::post(
+    '/admin/gastos-comerciales',
+    [GastoComercialController::class, 'store']
+)->name('admin.gastos_comerciales.store');
+
+// Mostrar formulario para editar
+Route::get(
+    '/admin/gastos-comerciales/{id}/editar',
+    [GastoComercialController::class, 'edit']
+)->name('admin.gastos_comerciales.edit');
+
+// Actualizar gasto
+Route::put(
+    '/admin/gastos-comerciales/{id}',
+    [GastoComercialController::class, 'update']
+)->name('admin.gastos_comerciales.update');
+
+// Eliminar gasto
+Route::delete(
+    '/admin/gastos-comerciales/{id}',
+    [GastoComercialController::class, 'destroy']
+)->name('admin.gastos_comerciales.destroy');
 
 // ========================================
 // COTIZACIONES - CLIENTE

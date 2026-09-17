@@ -557,16 +557,39 @@
 
             <!-- GASTOS COMERCIALES -->
 
-            <a
-                href="#"
-                class="boton"
-            >
+<a
+    href="{{ route('admin.gastos_comerciales') }}"
+    class="boton"
+>
+    <i class="fa-solid fa-money-bill-wave"></i>
+    Gastos Comerciales
+</a>
 
-                <i class="fa-solid fa-money-bill-wave"></i>
+<!-- CUENTA DEL NEGOCIO -->
 
-                Gastos Comerciales
+<a
+    href="#"
+    class="boton"
+>
+    <i class="fa-solid fa-building-columns"></i>
+    Cuenta del negocio
+</a>
 
-            </a>
+
+<!-- PAGO DE SERVICIOS -->
+
+<a
+href="{{ route('admin.pago_servicios.index') }}"
+class="boton">
+
+<i class="fa-solid fa-file-invoice"></i>
+
+
+Pago de servicios
+
+
+</a>
+
 
 
             <!-- =========================
