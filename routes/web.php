@@ -13,6 +13,42 @@ use App\Http\Controllers\CotizacionController;
 use App\Http\Controllers\Admin\GastoComercialController;
 use App\Http\Controllers\Admin\PagoServicioController;
 
+// ========================================
+// DASHBOARD ADMINISTRADOR
+// ========================================
+
+Route::get(
+    '/admin/dashboard',
+    [AdminController::class, 'dashboard']
+)
+->middleware('rol:admin')
+->name('admin.dashboard');
+
+
+// ========================================
+// DASHBOARD VENDEDOR
+// ========================================
+
+Route::get(
+    '/vendedor/dashboard',
+    [VendedorController::class, 'dashboard']
+)
+->middleware('rol:vendedor')
+->name('vendedor.dashboard');
+
+
+// ========================================
+// DASHBOARD CLIENTE
+// ========================================
+
+Route::get(
+    '/cliente/dashboard',
+    [ClienteController::class, 'dashboard']
+)
+->middleware('rol:cliente')
+->name('cliente.dashboard');
+
+
 Route::prefix('admin/pago-servicios')
     ->name('admin.pago_servicios.')
     ->group(function () {
@@ -164,17 +200,17 @@ Route::post('/ventas/registrar', [VentaController::class, 'registrar'])
 Route::post('/ventas', [VentaController::class, 'store'])
     ->name('venta.store');
 
+Route::post(
+    '/punto-venta/guardar-venta',
+    [PuntoVentaController::class, 'guardarVenta']
+)->name('punto_venta.guardar_venta');
+
 Route::get('/ventas/{venta}/ticket', [VentaController::class, 'ticket'])
     ->name('venta.ticket');
 
 // ========================================
 // PUNTO DE VENTA
 // ========================================
-
-Route::post(
-    '/punto-venta/cliente/registrar',
-    [PuntoVentaController::class, 'registrarCliente']
-)->name('cliente.registrar.caja');
 
 Route::post(
     '/punto-venta/cerrar',
@@ -200,7 +236,9 @@ Route::get(
             compact('puntoVenta')
         );
     }
-)->name('empleado.punto_venta');
+)
+->middleware('rol:admin,vendedor')
+->name('empleado.punto_venta');
 
 
 // ========================================
@@ -210,7 +248,9 @@ Route::get(
 Route::post(
     '/empleado/punto-venta/abrir/{id}',
     [PuntoVentaController::class, 'abrir']
-)->name('punto_venta.abrir');
+)
+->middleware('rol:admin,vendedor')
+->name('punto_venta.abrir');
 
 
 // ========================================
@@ -220,7 +260,9 @@ Route::post(
 Route::get(
     '/empleado/punto-venta/caja/{id}',
     [PuntoVentaController::class, 'caja']
-)->name('punto_venta.caja');
+)
+->middleware('rol:admin,vendedor')
+->name('punto_venta.caja');
 
 
 // ========================================
@@ -714,26 +756,3 @@ Route::get(
         return view('inicio');
     }
 )->name('inicio');
-
-
-// ========================================
-// DASHBOARDS
-// ========================================
-
-// Dashboard administrador
-Route::get(
-    '/admin/dashboard',
-    [AdminController::class, 'dashboard']
-)->name('admin.dashboard');
-
-// Dashboard vendedor
-Route::get(
-    '/vendedor/dashboard',
-    [VendedorController::class, 'dashboard']
-)->name('vendedor.dashboard');
-
-// Dashboard cliente
-Route::get(
-    '/cliente/dashboard',
-    [ClienteController::class, 'dashboard']
-)->name('cliente.dashboard');

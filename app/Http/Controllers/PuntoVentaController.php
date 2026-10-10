@@ -227,7 +227,27 @@ class PuntoVentaController extends Controller
 
 public function abrir(Request $request, $id)
 {
+
     $puntoVenta = PuntoVenta::findOrFail($id);
+
+    // Verificar si ya existe una caja abierta
+    if (session('caja_abierta')) {
+
+        if (session('punto_venta_id') == $puntoVenta->id) {
+
+            return redirect()
+                ->route(
+                    'punto_venta.caja',
+                    $puntoVenta->id
+                );
+        }
+
+        return back()
+            ->with(
+                'error',
+                'Ya tienes una caja abierta. Debes cerrarla antes de abrir otra.'
+            );
+    }
 
     $horaActual = now()->hour;
 
@@ -301,14 +321,14 @@ public function abrir(Request $request, $id)
     */
 
     return redirect()
-        ->route(
-            'punto_venta.caja',
-            $puntoVenta->id
-        )
-        ->with(
-            'apertura_fuera_horario',
-            $fueraHorario
-        );
+    ->route('empleado.punto_venta')
+    ->with([
+        'mostrar_apertura' => true,
+        'dinero_inicial' => $dineroInicial,
+        'fecha_apertura' => now()->format('d/m/Y'),
+        'hora_apertura' => now()->format('H:i:s'),
+        'caja_fuera_horario' => $fueraHorario,
+    ]);
 }
 
 
@@ -406,6 +426,7 @@ public function cerrar(Request $request)
         'dinero_inicial',
         'fecha_apertura',
         'hora_apertura',
+        'caja_fuera_horario',
     ]);
 
     return redirect()
@@ -414,34 +435,6 @@ public function cerrar(Request $request)
             'success',
             'La caja se cerró correctamente.'
         );
-}
-
-public function registrarCliente(Request $request)
-{
-    $datos = $request->validate([
-        'name' => 'required|string|max:255',
-        'apellido' => 'required|string|max:255',
-        'telefono' => 'nullable|string|max:20',
-    ]);
-
-    $cliente = User::create([
-        'name' => $datos['name'],
-        'apellido' => $datos['apellido'],
-        'telefono' => $datos['telefono'] ?? null,
-
-        'email' => null,
-        'direccion' => null,
-        'fecha_nacimiento' => null,
-        'foto_perfil' => null,
-        'color_perfil' => null,
-
-        'rol' => 'cliente',
-        'password' => null,
-    ]);
-
-    return redirect()
-        ->route('punto_venta.caja', session('punto_venta_id'))
-        ->with('cliente_registrado', $cliente->id);
 }
 
 // ========================================
@@ -636,10 +629,10 @@ public function guardarVenta(Request $request)
             $venta->id,
 
         'ticket_url' =>
-            route(
-                'punto_venta.ticket',
-                $venta->id
-            ),
+    route(
+        'venta.ticket',
+        $venta->id
+    ),
 
     ]);
 }
