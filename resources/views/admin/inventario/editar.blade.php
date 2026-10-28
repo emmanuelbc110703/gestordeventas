@@ -443,7 +443,7 @@
                     </div>
 
                     <div class="campo">
-                        <label for="precio">Precio Unitario (USD) *</label>
+                        <label for="precio">Precio Unitario (MXN) *</label>
                         <div class="campo-control con-prefijo">
                             <span class="prefijo">$</span>
                             <input
