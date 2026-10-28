@@ -75,7 +75,7 @@
     .buscador input { 
         width: 100%; 
         height: 44px; 
-        padding: 0 18px 0 46px; 
+        padding: 0 44px 0 46px;
         background: #fff; 
         border: 1px solid var(--borde); 
         border-radius: 0; 
@@ -151,6 +151,36 @@
         background: var(--primario-suave); color: var(--primario); 
     }
 
+    /* ===== BOTÓN LIMPIAR BÚSQUEDA ===== */
+    .btn-limpiar { 
+        display: none; 
+        position: absolute; 
+        right: 8px; 
+        top: 50%; 
+        transform: translateY(-50%); 
+        width: 28px; 
+        height: 28px; 
+        align-items: center; 
+        justify-content: center; 
+        background: none; 
+        border: none; 
+        border-radius: 0; 
+        color: #9ca3af; 
+        cursor: pointer; 
+        transition: color 0.2s ease, background 0.2s ease; 
+    }
+    .btn-limpiar:hover { 
+        color: var(--primario); 
+        background: var(--primario-suave); 
+    }
+    /* Anula el estilo de la lupa (.buscador i) para el icono de la X */
+    .buscador .btn-limpiar i { 
+        position: static; 
+        transform: none; 
+        font-size: 14px; 
+        color: inherit; 
+    }
+
     /* ===== TARJETA DE BIEN ===== */
     .bienes-grid { 
         display: grid; 
@@ -162,7 +192,7 @@
         display: block; 
         background: #fff; 
         border: 1px solid var(--borde); 
-        border-radius: 8px; 
+        border-radius: 0; 
         overflow: hidden; 
         text-decoration: none; 
         color: inherit; 
@@ -251,7 +281,7 @@
         padding: 48px 20px; 
         background: #fff; 
         border: 1px solid var(--borde); 
-        border-radius: 8px; 
+        border-radius: 0; 
         text-align: center; 
         color: var(--texto-suave); 
     }
@@ -271,12 +301,43 @@
 
     /* ===== PIE DE LA LISTA ===== */
     .pie-lista { 
-        padding: 22px 28px; 
+          display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        gap: 16px; 
+        padding: 10px 28px;
         background: #fff; 
         border: 1px solid var(--borde); 
-        border-radius: 8px; 
+        border-radius: 0;
         font-size: 15px; 
         color: var(--texto-suave); 
+    }
+
+    /* ===== PAGINACIÓN ===== */
+    .paginacion { 
+        display: flex; 
+        align-items: center; 
+        gap: 20px; 
+    }
+    .paginacion-enlace { 
+        font-size: 15px; 
+        color: #9ca3af; 
+        text-decoration: none; 
+        cursor: pointer; 
+        transition: color 0.2s ease; 
+    }
+    .paginacion-enlace:hover { 
+        color: var(--primario); 
+    }
+    .paginacion-actual { 
+        min-width: 34px; 
+        padding: 4px 10px; 
+        background: var(--primario); 
+        color: #fff; 
+        font-size: 15px; 
+        font-weight: 500; 
+        text-align: center; 
+        border-radius: 0;
     }
 
     /* ===== MODAL ELIMINAR (se usará en la edición) ===== */
@@ -298,7 +359,7 @@
         max-width: 400px; 
         padding: 30px; 
         background: #fff; 
-        border-radius: 12px; 
+        border-radius: 0; 
         text-align: center; 
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25); 
         animation: aparecerModal 0.25s ease; 
@@ -396,6 +457,9 @@
         <div class="buscador">
             <i class="fa-solid fa-magnifying-glass"></i>
             <input type="text" id="buscadorBienes" placeholder="Buscar por nombre..." autocomplete="off">
+            <button type="button" class="btn-limpiar" id="btnLimpiar" aria-label="Limpiar búsqueda">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
         </div>
         <div class="filtro">
             <button type="button" class="boton-filtro" id="botonFiltro">
@@ -468,7 +532,7 @@
         <div class="sin-resultados" id="sinResultados" style="display: none;">
             <i class="fa-solid fa-box-open"></i>
             <h3>No se encontraron bienes</h3>
-            <p>Intenta buscar utilizando otro nombre.</p>
+            <p>Intenta buscar utilizando otro nombrebien-card</p>
         </div>
 
     </div>
@@ -479,6 +543,12 @@
     @if($bienes->count() > 0)
         <div class="pie-lista">
             <span id="contadorBienes">{{ $bienes->count() }} {{ $bienes->count() == 1 ? 'bien' : 'bienes' }} en total</span>
+
+            <div class="paginacion">
+                <a class="paginacion-enlace">Anterior</a>
+                <span class="paginacion-actual">1</span>
+                <a class="paginacion-enlace">Siguiente</a>
+            </div>
         </div>
     @endif
 
@@ -519,6 +589,7 @@
     const menuFiltro = document.getElementById('menuFiltro');
     const contador = document.getElementById('contadorBienes');
     const totalBienes = listaBienes.querySelectorAll('.bien-card').length;
+    const btnLimpiar = document.getElementById('btnLimpiar');
 
     /* ===== UTILIDADES ===== */
     // Minúsculas y sin acentos: "Orquídea" coincide con "orquidea"
@@ -535,6 +606,7 @@
 
     /* ===== BUSCADOR ===== */
     function filtrarBienes() {
+        btnLimpiar.style.display = buscador.value ? 'flex' : 'none';
         const texto = normalizar(buscador.value);
         let encontrados = 0;
         listaBienes.querySelectorAll('.bien-card').forEach(function (bien) {
@@ -547,6 +619,12 @@
     }
 
     if (buscador) buscador.addEventListener('input', filtrarBienes);
+    
+    btnLimpiar.addEventListener('click', function () {
+        buscador.value = '';
+        filtrarBienes();
+        buscador.focus();
+    });
 
     /* ===== ORDENAR ===== */
     function ordenarBienes(tipo) {
