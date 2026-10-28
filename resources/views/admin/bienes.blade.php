@@ -3,7 +3,8 @@
     :regresar="route('admin.inventario')"
     :migas="[
         ['texto' => 'Administración', 'url' => route('admin.dashboard')],
-        ['texto' => 'Inventario'],
+        ['texto' => 'Inventario', 'url' => route('admin.inventario')],
+        ['texto' => 'Bienes', 'url' => route('admin.bienes')],
     ]"
 >
 
