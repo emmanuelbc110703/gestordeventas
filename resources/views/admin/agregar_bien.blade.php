@@ -326,7 +326,6 @@
 
         <div class="editar-acciones">
             <a href="{{ route('admin.bienes') }}" class="btn-cancelar">Cancelar</a>
-            <!-- El botón está fuera del form, por eso usa el atributo form -->
             <button type="submit" form="formAgregar" class="btn-guardar">
                 <i class="fa-solid fa-check"></i>
                 Guardar Bien
@@ -360,8 +359,6 @@
         @csrf
 
         <div class="editar-grid">
-
-            <!-- ===== COLUMNA IZQUIERDA: FOTOGRAFÍA ===== -->
             <div class="tarjeta tarjeta-foto">
                 <div class="foto-cabecera">
                     <h2>Fotografía del producto</h2>
@@ -398,7 +395,6 @@
                 </div>
             </div>
 
-            <!-- ===== COLUMNA DERECHA: DATOS ===== -->
             <div class="tarjeta tarjeta-form">
 
                 <!-- Nombre -->
@@ -514,7 +510,6 @@
             };
             lector.readAsDataURL(archivo);
         } else {
-            // Si se cancela la selección, vuelve al estado inicial
             imagenPrevia.removeAttribute('src');
             imagenPrevia.style.display = 'none';
             sinImagen.style.display = 'flex';

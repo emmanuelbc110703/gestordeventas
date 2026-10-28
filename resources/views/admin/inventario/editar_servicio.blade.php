@@ -1,728 +1,501 @@
-<!DOCTYPE html>
-<html lang="es">
+<x-layouts.panel
+    titulo="Editar Servicio"
+    :regresar="route('admin.servicios')"
+    :migas="[
+        ['texto' => 'Administración', 'url' => route('admin.dashboard')],
+        ['texto' => 'Inventario', 'url' => route('admin.inventario')],
+        ['texto' => 'Servicios', 'url' => route('admin.servicios')],
+        ['texto' => 'Editar'],
+    ]"
+>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+@push('estilos')
+<style>
+    .pagina-editar {
+        padding: 40px 0 56px;
+    }
 
-    <title>Editar Servicio - Orquídeas y más Los Amates</title>
+    /* ===== ENCABEZADO ===== */
+    .editar-encabezado {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        padding-bottom: 28px;
+        margin-bottom: 32px;
+        border-bottom: 1px solid var(--borde);
+    }
+    .editar-titulo {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        flex-wrap: wrap;
+    }
+    .editar-titulo h1 {
+        margin: 0;
+        font-size: 32px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        color: var(--texto);
+    }
+    .badge-codigo {
+        padding: 4px 12px;
+        background: #eef0f4;
+        border: 1px solid var(--borde);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 14px;
+        color: var(--texto-suave);
+    }
+    .editar-subtitulo {
+        margin: 8px 0 0;
+        font-size: 15px;
+        color: var(--texto-suave);
+    }
 
-    <!-- Font Awesome -->
-    <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-    >
+    .editar-acciones {
+        display: flex;
+        gap: 12px;
+    }
+    .btn-cancelar,
+    .btn-guardar {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        height: 44px;
+        padding: 0 22px;
+        border-radius: 0;
+        font-family: inherit;
+        font-size: 15px;
+        font-weight: 600;
+        text-decoration: none;
+        white-space: nowrap;
+        cursor: pointer;
+        transition: background 0.2s ease, border-color 0.2s ease;
+    }
+    .btn-cancelar {
+        background: #fff;
+        border: 1px solid var(--borde);
+        color: var(--texto);
+    }
+    .btn-cancelar:hover {
+        border-color: #c4b5fd;
+        background: #fcfbff;
+    }
+    .btn-guardar {
+        background: var(--primario);
+        border: 1px solid var(--primario);
+        color: #fff;
+    }
+    .btn-guardar:hover {
+        background: var(--primario-oscuro);
+        border-color: var(--primario-oscuro);
+    }
 
-    <style>
+    /* ===== ERRORES ===== */
+    .errores {
+        margin-bottom: 24px;
+        padding: 16px 20px;
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #b42318;
+        font-size: 14px;
+    }
+    .errores ul {
+        margin: 8px 0 0;
+        padding-left: 20px;
+    }
 
-        * {
-            box-sizing: border-box;
-        }
+    /* ===== LAYOUT DE DOS COLUMNAS ===== */
+    .editar-grid {
+        display: grid;
+        grid-template-columns: 4fr 5fr;
+        gap: 48px;
+        align-items: start;
+    }
+    .tarjeta {
+        background: #fff;
+        border: 1px solid var(--borde);
+        border-radius: 0;
+    }
 
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f5f5f5;
-            color: #333;
-        }
+    /* ===== FOTOGRAFÍA ===== */
+    .tarjeta-foto {
+        padding: 32px;
+    }
+    .foto-cabecera {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 12px;
+        margin-bottom: 24px;
+    }
+    .foto-cabecera h2 {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--texto);
+    }
+    .foto-dimensiones {
+        font-size: 15px;
+        color: #9ca3af;
+    }
+    .foto-vista {
+        width: 100%;
+        height: 420px;
+        background: #f1f4f9;
+        border: 1px solid var(--borde);
+        overflow: hidden;
+    }
+    .foto-vista img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+    .foto-vacia {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        color: #9ca3af;
+        font-size: 14px;
+    }
+    .foto-vacia i {
+        font-size: 40px;
+        color: #c4b5fd;
+    }
+    .foto-pie {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-top: 28px;
+    }
+    .foto-archivo {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 14px;
+        color: var(--texto-suave);
+    }
+    .btn-cambiar-imagen {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        height: 44px;
+        padding: 0 20px;
+        background: #f9fafb;
+        border: 1px solid var(--borde);
+        border-radius: 0;
+        font-family: inherit;
+        font-size: 15px;
+        font-weight: 500;
+        color: var(--texto);
+        white-space: nowrap;
+        cursor: pointer;
+        transition: border-color 0.2s ease, background 0.2s ease;
+    }
+    .btn-cambiar-imagen:hover {
+        border-color: #c4b5fd;
+        background: #fcfbff;
+    }
+    .foto-ayuda {
+        margin: 16px 0 0;
+        font-size: 13px;
+        color: #9ca3af;
+    }
+    .input-oculto { display: none; }
 
-        /* =========================
-           BARRA SUPERIOR
-        ========================= */
+    /* ===== FORMULARIO ===== */
+    .tarjeta-form {
+        padding: 44px;
+    }
+    .campo {
+        margin-bottom: 28px;
+    }
+    .campo:last-child { margin-bottom: 0; }
+    .campo-fila {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        margin-bottom: 28px;
+    }
+    .campo-fila .campo { margin-bottom: 0; }
 
-        .barra-superior {
-            width: 100%;
-            background: #6a1b9a;
-            color: white;
-            padding: 17px 7%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15);
-        }
+    .campo label {
+        display: block;
+        margin-bottom: 10px;
+        font-size: 15px;
+        font-weight: 600;
+        color: #1f2937;
+    }
+    .campo-control {
+        position: relative;
+    }
+    .campo-control input,
+    .campo-control textarea {
+        width: 100%;
+        height: 52px;
+        padding: 0 16px;
+        background: #fff;
+        border: 1px solid var(--borde);
+        border-radius: 0;
+        font-family: inherit;
+        font-size: 15px;
+        color: var(--texto);
+        outline: none;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .campo-control textarea {
+        height: auto;
+        min-height: 150px;
+        padding: 16px;
+        line-height: 1.6;
+        resize: vertical;
+    }
+    .campo-control input:focus,
+    .campo-control textarea:focus {
+        border-color: var(--primario);
+        box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.1);
+    }
+    .con-prefijo input { padding-left: 38px; }
+    .prefijo {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9ca3af;
+        font-size: 15px;
+        pointer-events: none;
+    }
 
-        .titulo-barra {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 21px;
-            font-weight: bold;
-        }
+    /* ===== RESPONSIVO ===== */
+    @media (max-width: 950px) {
+        .editar-grid { grid-template-columns: 1fr; gap: 32px; }
+        .foto-vista { height: 340px; }
+    }
+    @media (max-width: 650px) {
+        .pagina-editar { padding: 28px 0 40px; }
+        .editar-encabezado { flex-direction: column; align-items: stretch; }
+        .editar-titulo h1 { font-size: 26px; }
+        .editar-acciones { width: 100%; }
+        .btn-cancelar, .btn-guardar { flex: 1; }
+        .tarjeta-foto, .tarjeta-form { padding: 22px; }
+        .campo-fila { grid-template-columns: 1fr; gap: 28px; }
+        .foto-vista { height: 260px; }
+        .foto-pie { flex-direction: column; align-items: stretch; }
+        .btn-cambiar-imagen { justify-content: center; }
+    }
+</style>
+@endpush
 
-        .titulo-barra i {
-            font-size: 24px;
-        }
-
-        .btn-regresar {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 17px;
-            background: white;
-            color: #6a1b9a;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: bold;
-            transition: 0.3s;
-        }
-
-        .btn-regresar:hover {
-            background: #f0f0f0;
-            transform: translateY(-2px);
-        }
-
-        /* =========================
-           CONTENEDOR
-        ========================= */
-
-        .contenedor {
-            width: 92%;
-            max-width: 1000px;
-            margin: 40px auto;
-        }
-
-        .encabezado {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .encabezado h1 {
-            margin: 0 0 8px;
-            color: #6a1b9a;
-            font-size: 36px;
-        }
-
-        .encabezado p {
-            margin: 0;
-            color: #777;
-            font-size: 16px;
-        }
-
-        /* =========================
-           ERRORES
-        ========================= */
-
-        .errores {
-            background: #fde8e8;
-            color: #b42318;
-            border: 1px solid #f5b5b5;
-            border-radius: 10px;
-            padding: 15px 18px;
-            margin-bottom: 20px;
-        }
-
-        .errores ul {
-            margin: 0;
-            padding-left: 20px;
-        }
-
-        /* =========================
-           FORMULARIO
-        ========================= */
-
-        .formulario-card {
-            background: white;
-            border-radius: 15px;
-            padding: 35px;
-            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
-        }
-
-        .formulario-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
-        }
-
-        .campo {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .campo-completo {
-            grid-column: 1 / -1;
-        }
-
-        label {
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #444;
-        }
-
-        label i {
-            color: #6a1b9a;
-            margin-right: 6px;
-        }
-
-        input,
-        textarea {
-            width: 100%;
-            padding: 13px 14px;
-            border: 1px solid #d2d2d2;
-            border-radius: 8px;
-            font-size: 15px;
-            font-family: Arial, sans-serif;
-            outline: none;
-            transition: 0.2s;
-        }
-
-        input:focus,
-        textarea:focus {
-            border-color: #6a1b9a;
-            box-shadow: 0 0 0 2px rgba(106, 27, 154, 0.08);
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 120px;
-        }
-
-        /* =========================
-           FOTO
-        ========================= */
-
-        .foto-area {
-            border: 2px dashed #c9a7db;
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-            background: #faf7fc;
-        }
-
-        .vista-previa {
-            width: 100%;
-            max-width: 300px;
-            height: 200px;
-            margin: 0 auto 18px;
-            border-radius: 10px;
-            overflow: hidden;
-            background: #eee;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .vista-previa img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .sin-imagen {
-            color: #888;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .sin-imagen i {
-            font-size: 50px;
-            color: #6a1b9a;
-        }
-
-        .input-imagen {
-            display: none;
-        }
-
-        .btn-seleccionar-imagen {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: white;
-            color: #6a1b9a;
-            border: 2px solid #6a1b9a;
-            padding: 11px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.3s;
-        }
-
-        .btn-seleccionar-imagen:hover {
-            background: #6a1b9a;
-            color: white;
-        }
-
-        .texto-foto {
-            margin-top: 12px;
-            color: #777;
-            font-size: 13px;
-        }
-
-        /* =========================
-           BOTÓN ACTUALIZAR
-        ========================= */
-
-        .acciones {
-            display: flex;
-            justify-content: center;
-            margin-top: 30px;
-        }
-
-        .btn-actualizar {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 9px;
-            min-width: 220px;
-            padding: 14px 25px;
-            border: none;
-            border-radius: 9px;
-            background: #6a1b9a;
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-            box-shadow: 0 4px 10px rgba(106, 27, 154, 0.25);
-        }
-
-        .btn-actualizar:hover {
-            background: #4a126d;
-            transform: translateY(-2px);
-        }
-
-        /* =========================
-           RESPONSIVO
-        ========================= */
-
-        @media (max-width: 700px) {
-
-            .barra-superior {
-                flex-direction: column;
-                gap: 14px;
-                text-align: center;
-            }
-
-            .btn-regresar {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .contenedor {
-                width: 94%;
-                margin: 30px auto;
-            }
-
-            .encabezado h1 {
-                font-size: 29px;
-            }
-
-            .formulario-card {
-                padding: 22px;
-            }
-
-            .formulario-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-
-            .campo-completo {
-                grid-column: auto;
-            }
-
-            .btn-actualizar {
-                width: 100%;
-            }
-        }
-
-        @media (max-width: 400px) {
-
-            .formulario-card {
-                padding: 17px;
-            }
-
-            .encabezado h1 {
-                font-size: 25px;
-            }
-
-            .titulo-barra {
-                font-size: 18px;
-            }
-        }
-
-    </style>
-
-</head>
-
-<body>
+<div class="pagina-editar">
 
     <!-- =========================
-         BARRA SUPERIOR
-    ========================== -->
-
-    <header class="barra-superior">
-
-        <div class="titulo-barra">
-
-            <i class="fa-solid fa-screwdriver-wrench"></i>
-
-            Editar Servicio
-
-        </div>
-
-
-        <a
-            href="{{ route('admin.servicios') }}"
-            class="btn-regresar"
-        >
-
-            <i class="fa-solid fa-arrow-left"></i>
-
-            Regresar
-
-        </a>
-
-    </header>
-
-
-    <!-- =========================
-         CONTENIDO
-    ========================== -->
-
-    <main class="contenedor">
-
-        <div class="encabezado">
-
-            <h1>
-
-                <i class="fa-solid fa-pen-to-square"></i>
-
-                Editar Servicio
-
-            </h1>
-
-            <p>
-
-                Modifica la información del servicio seleccionado.
-
-            </p>
-
-        </div>
-
-
-        <!-- =========================
-             ERRORES
-        ========================== -->
-
-        @if ($errors->any())
-
-            <div class="errores">
-
-                <strong>Hay algunos errores:</strong>
-
-                <ul>
-
-                    @foreach ($errors->all() as $error)
-
-                        <li>{{ $error }}</li>
-
-                    @endforeach
-
-                </ul>
-
+         ENCABEZADO
+    ========================= -->
+    <div class="editar-encabezado">
+        <div>
+            <div class="editar-titulo">
+                <h1>Editar Servicio</h1>
+                <span class="badge-codigo">{{ $inventario->codigo ?? 'ID-' . str_pad($inventario->id, 3, '0', STR_PAD_LEFT) }}</span>
             </div>
+            <p class="editar-subtitulo">Modifica la información del servicio seleccionado.</p>
+        </div>
 
-        @endif
+        <div class="editar-acciones">
+            <a href="{{ route('admin.servicios') }}" class="btn-cancelar">Cancelar</a>
+            <!-- El botón está fuera del form, por eso usa el atributo form -->
+            <button type="submit" form="formEditar" class="btn-guardar">
+                <i class="fa-solid fa-check"></i>
+                Actualizar Servicio
+            </button>
+        </div>
+    </div>
 
+    <!-- =========================
+         ERRORES
+    ========================= -->
+    @if ($errors->any())
+        <div class="errores">
+            <strong>Hay algunos errores:</strong>
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
-        <!-- =========================
-             FORMULARIO
-        ========================== -->
+    <!-- =========================
+         FORMULARIO
+    ========================= -->
+    <form
+        id="formEditar"
+        action="{{ route('admin.inventario.actualizar', $inventario->id) }}"
+        method="POST"
+        enctype="multipart/form-data"
+    >
+        @csrf
+        @method('PUT')
 
-        <form
-            action="{{ route('admin.inventario.actualizar', $inventario->id) }}"
-            method="POST"
-            enctype="multipart/form-data"
-            class="formulario-card"
-        >
-
-            @csrf
-
-            @method('PUT')
-
-
-            <div class="formulario-grid">
-
-
-                <!-- =========================
-                     NOMBRE
-                ========================== -->
-
-                <div class="campo campo-completo">
-
-                    <label for="nombre">
-
-                        <i class="fa-solid fa-tag"></i>
-
-                        Nombre del servicio
-
-                    </label>
-
-                    <input
-                        type="text"
-                        id="nombre"
-                        name="nombre"
-                        value="{{ old('nombre', $inventario->nombre) }}"
-                        placeholder="Ej. Mantenimiento de jardín"
-                        required
-                    >
-
+        <div class="editar-grid">
+            <div class="tarjeta tarjeta-foto">
+                <div class="foto-cabecera">
+                    <h2>Foto del servicio</h2>
+                    <span class="foto-dimensiones" id="fotoDimensiones"></span>
                 </div>
 
+                <div class="foto-vista">
+                    <img
+                        id="imagenPrevia"
+                        src="{{ $inventario->foto ? asset('storage/' . $inventario->foto) : '' }}"
+                        alt="{{ $inventario->nombre }}"
+                        style="{{ $inventario->foto ? '' : 'display: none;' }}"
+                    >
+                    <div class="foto-vacia" id="sinImagen" style="{{ $inventario->foto ? 'display: none;' : '' }}">
+                        <i class="fa-regular fa-image"></i>
+                        <span>Sin imagen</span>
+                    </div>
+                </div>
 
-                <!-- =========================
-                     FOTO
-                ========================== -->
+                <div class="foto-pie">
+                    <span class="foto-archivo" id="nombreArchivo">{{ $inventario->foto ? basename($inventario->foto) : 'Ningún archivo' }}</span>
 
-                <div class="campo campo-completo">
-
-                    <label>
-
-                        <i class="fa-solid fa-image"></i>
-
-                        Foto del servicio
-
+                    <label for="foto" class="btn-cambiar-imagen">
+                        <i class="fa-solid fa-camera"></i>
+                        Cambiar imagen
                     </label>
+                    <input
+                        type="file"
+                        id="foto"
+                        name="foto"
+                        class="input-oculto"
+                        accept="image/jpg,image/jpeg,image/png,image/webp"
+                    >
+                </div>
 
+                <p class="foto-ayuda">Selecciona una nueva imagen solamente si deseas cambiarla.</p>
+            </div>
 
-                    <div class="foto-area">
-
-                        <div class="vista-previa">
-
-                            @if($inventario->foto)
-
-                                <img
-                                    id="imagenPrevia"
-                                    src="{{ asset('storage/' . $inventario->foto) }}"
-                                    alt="{{ $inventario->nombre }}"
-                                >
-
-                                <div
-                                    class="sin-imagen"
-                                    id="sinImagen"
-                                    style="display: none;"
-                                >
-
-                                    <i class="fa-regular fa-image"></i>
-
-                                    <span>
-                                        Vista previa de la imagen
-                                    </span>
-
-                                </div>
-
-                            @else
-
-                                <img
-                                    id="imagenPrevia"
-                                    src=""
-                                    alt="Vista previa"
-                                    style="display: none;"
-                                >
-
-                                <div
-                                    class="sin-imagen"
-                                    id="sinImagen"
-                                >
-
-                                    <i class="fa-regular fa-image"></i>
-
-                                    <span>
-                                        Sin imagen
-                                    </span>
-
-                                </div>
-
-                            @endif
-
-                        </div>
-
-
-                        <label
-                            for="foto"
-                            class="btn-seleccionar-imagen"
-                        >
-
-                            <i class="fa-solid fa-folder-open"></i>
-
-                            Cambiar imagen
-
-                        </label>
-
-
+            <div class="tarjeta tarjeta-form">
+                <!-- Nombre -->
+                <div class="campo">
+                    <label for="nombre">Nombre del servicio *</label>
+                    <div class="campo-control">
                         <input
-                            type="file"
-                            id="foto"
-                            name="foto"
-                            class="input-imagen"
-                            accept="image/jpg,image/jpeg,image/png,image/webp"
+                            type="text"
+                            id="nombre"
+                            name="nombre"
+                            value="{{ old('nombre', $inventario->nombre) }}"
+                            placeholder="Ej. Mantenimiento de jardín"
+                            required
                         >
+                    </div>
+                </div>
 
-
-                        <div class="texto-foto">
-
-                            Selecciona una nueva imagen solamente si deseas cambiarla.
-
+                <!-- Cantidad y precio -->
+                <div class="campo-fila">
+                    <div class="campo">
+                        <label for="cantidad">Cantidad *</label>
+                        <div class="campo-control">
+                            <input
+                                type="number"
+                                id="cantidad"
+                                name="cantidad"
+                                min="0"
+                                value="{{ old('cantidad', $inventario->cantidad) }}"
+                                placeholder="Ej. 5"
+                                required
+                            >
                         </div>
-
                     </div>
 
+                    <div class="campo">
+                        <label for="precio">Precio del servicio (MXN) *</label>
+                        <div class="campo-control con-prefijo">
+                            <span class="prefijo">$</span>
+                            <input
+                                type="number"
+                                id="precio"
+                                name="precio"
+                                min="0"
+                                step="0.01"
+                                value="{{ old('precio', $inventario->precio) }}"
+                                placeholder="Ej. 2500.00"
+                                required
+                            >
+                        </div>
+                    </div>
                 </div>
 
-
-                <!-- =========================
-                     DESCRIPCIÓN
-                ========================== -->
-
-                <div class="campo campo-completo">
-
-                    <label for="descripcion">
-
-                        <i class="fa-solid fa-align-left"></i>
-
-                        Descripción
-
-                    </label>
-
-                    <textarea
-                        id="descripcion"
-                        name="descripcion"
-                        placeholder="Describe las características del servicio..."
-                    >{{ old('descripcion', $inventario->descripcion) }}</textarea>
-
-                </div>
-
-
-                <!-- =========================
-                     CANTIDAD
-                ========================== -->
-
+                <!-- Descripción -->
                 <div class="campo">
-
-                    <label for="cantidad">
-
-                        <i class="fa-solid fa-boxes-stacked"></i>
-
-                        Cantidad
-
-                    </label>
-
-                    <input
-                        type="number"
-                        id="cantidad"
-                        name="cantidad"
-                        min="0"
-                        value="{{ old('cantidad', $inventario->cantidad) }}"
-                        placeholder="Ej. 5"
-                        required
-                    >
-
-                </div>
-
-
-                <!-- =========================
-                     PRECIO
-                ========================== -->
-
-                <div class="campo">
-
-                    <label for="precio">
-
-                        <i class="fa-solid fa-dollar-sign"></i>
-
-                        Precio del servicio
-
-                    </label>
-
-                    <input
-                        type="number"
-                        id="precio"
-                        name="precio"
-                        min="0"
-                        step="0.01"
-                        value="{{ old('precio', $inventario->precio) }}"
-                        placeholder="Ej. 2500.00"
-                        required
-                    >
-
+                    <label for="descripcion">Descripción</label>
+                    <div class="campo-control">
+                        <textarea
+                            id="descripcion"
+                            name="descripcion"
+                            placeholder="Describe las características del servicio..."
+                        >{{ old('descripcion', $inventario->descripcion) }}</textarea>
+                    </div>
                 </div>
 
             </div>
+        </div>
+    </form>
 
+</div>
 
-            <!-- =========================
-                 ACTUALIZAR
-            ========================== -->
+@push('scripts')
+<script>
+    const inputFoto = document.getElementById('foto');
+    const imagenPrevia = document.getElementById('imagenPrevia');
+    const sinImagen = document.getElementById('sinImagen');
+    const nombreArchivo = document.getElementById('nombreArchivo');
+    const fotoDimensiones = document.getElementById('fotoDimensiones');
 
-            <div class="acciones">
+    // Muestra las dimensiones reales de la imagen (ancho × alto)
+    function mostrarDimensiones() {
+        if (imagenPrevia.naturalWidth) {
+            fotoDimensiones.textContent = imagenPrevia.naturalWidth + ' × ' + imagenPrevia.naturalHeight + ' px';
+        } else {
+            fotoDimensiones.textContent = '';
+        }
+    }
 
-                <button
-                    type="submit"
-                    class="btn-actualizar"
-                >
+    // Si la imagen guardada no carga, muestra el marcador "Sin imagen"
+    imagenPrevia.addEventListener('load', mostrarDimensiones);
+    imagenPrevia.addEventListener('error', function () {
+        imagenPrevia.style.display = 'none';
+        sinImagen.style.display = 'flex';
+        fotoDimensiones.textContent = '';
+    });
+    if (imagenPrevia.complete) mostrarDimensiones();
 
-                    <i class="fa-solid fa-floppy-disk"></i>
+    // Vista previa al elegir una nueva imagen
+    inputFoto.addEventListener('change', function () {
+        const archivo = this.files[0];
+        if (!archivo) return;
 
-                    Actualizar Servicio
+        const lector = new FileReader();
+        lector.onload = function (evento) {
+            imagenPrevia.src = evento.target.result;
+            imagenPrevia.style.display = 'block';
+            sinImagen.style.display = 'none';
+            nombreArchivo.textContent = archivo.name;
+        };
+        lector.readAsDataURL(archivo);
+    });
+</script>
+@endpush
 
-                </button>
-
-            </div>
-
-        </form>
-
-    </main>
-
-
-    <!-- =========================
-         VISTA PREVIA
-    ========================== -->
-
-    <script>
-
-        const inputFoto =
-            document.getElementById('foto');
-
-        const imagenPrevia =
-            document.getElementById('imagenPrevia');
-
-        const sinImagen =
-            document.getElementById('sinImagen');
-
-
-        inputFoto.addEventListener('change', function () {
-
-            const archivo = this.files[0];
-
-
-            if (archivo) {
-
-                const lector = new FileReader();
-
-
-                lector.onload = function (evento) {
-
-                    imagenPrevia.src =
-                        evento.target.result;
-
-                    imagenPrevia.style.display =
-                        'block';
-
-                    sinImagen.style.display =
-                        'none';
-
-                };
-
-
-                lector.readAsDataURL(archivo);
-
-            }
-
-        });
-
-    </script>
-
-</body>
-
-</html>
+</x-layouts.panel>
