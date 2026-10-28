@@ -1,1693 +1,858 @@
-<!DOCTYPE html>
-<html lang="es">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Inventario - Orquídeas y más Los Amates</title>
-
-    <!-- Font Awesome -->
-    <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-    >
-
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        :root {
-            --morado: #6a1b9a;
-            --morado-oscuro: #4a126d;
-            --morado-claro: #f3e8f8;
-            --blanco: #ffffff;
-            --fondo: #f6f5f8;
-            --texto: #29252d;
-            --texto-suave: #77727c;
-            --borde: #e9e5ec;
-            --verde: #2e9d67;
-            --azul: #3978d4;
-            --naranja: #e58a35;
-            --rojo: #d9534f;
-        }
-
-        body {
-            margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
-            background: var(--fondo);
-            color: var(--texto);
-        }
-
-        /* =====================================
-           ESTRUCTURA PRINCIPAL
-        ===================================== */
-
-        .dashboard {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        /* =====================================
-           BARRA LATERAL
-        ===================================== */
-
-        .sidebar {
-            width: 250px;
-            min-height: 100vh;
-            background: var(--morado);
-            color: white;
-            padding: 25px 18px;
-            position: fixed;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            overflow-y: auto;
-            z-index: 100;
-        }
-
-        .logo-container {
-            text-align: center;
-            padding-bottom: 25px;
-            margin-bottom: 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.18);
-        }
-
-        .logo {
-            width: 90px;
-            height: 90px;
-            object-fit: contain;
-            background: white;
-            border-radius: 18px;
-            padding: 8px;
-            margin-bottom: 12px;
-        }
-
-        .logo-container h2 {
-            margin: 0;
-            font-size: 18px;
-            font-weight: bold;
-        }
-
-        .logo-container p {
-            margin: 5px 0 0;
-            font-size: 12px;
-            opacity: 0.75;
-        }
-
-        .menu-titulo {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            opacity: 0.6;
-            margin: 25px 12px 10px;
-        }
-
-        .menu {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .menu a {
-            display: flex;
-            align-items: center;
-            gap: 13px;
-            padding: 12px 14px;
-            border-radius: 10px;
-            color: white;
-            text-decoration: none;
-            font-size: 14px;
-            transition: 0.25s ease;
-        }
-
-        .menu a i {
-            width: 20px;
-            text-align: center;
-            font-size: 16px;
-        }
-
-        .menu a:hover {
-            background: rgba(255,255,255,0.14);
-            transform: translateX(3px);
-        }
-
-        .menu a.activo {
-            background: white;
-            color: var(--morado);
-            font-weight: bold;
-        }
-
-        /* =====================================
-           CONTENIDO
-        ===================================== */
-
-        .contenido {
-            width: calc(100% - 250px);
-            margin-left: 250px;
-            min-height: 100vh;
-        }
-
-        /* =====================================
-           HEADER
-        ===================================== */
-
-        .topbar {
-            height: 82px;
-            background: white;
-            border-bottom: 1px solid var(--borde);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 35px;
-            position: sticky;
-            top: 0;
-            z-index: 50;
-        }
-
-        .saludo h1 {
-            margin: 0;
-            font-size: 23px;
-            color: var(--texto);
-        }
-
-        .saludo p {
-            margin: 5px 0 0;
-            color: var(--texto-suave);
-            font-size: 13px;
-        }
-
-        /* =====================================
-           PERFIL
-        ===================================== */
-
-        .perfil {
-            position: relative;
-        }
-
-        .avatar {
-            width: 45px;
-            height: 45px;
-            border: 3px solid var(--morado-claro);
-            border-radius: 50%;
-            background-color:
-                {{ auth()->user()->color_perfil ?? '#6a1b9a' }};
-            color: white;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            padding: 0;
-            transition: 0.25s;
-        }
-
-        .avatar:hover {
-            transform: scale(1.06);
-            border-color: var(--morado);
-        }
-
-        .avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        /* =====================================
-           MENÚ PERFIL
-        ===================================== */
-
-        .menu-perfil {
-            display: none;
-            position: absolute;
-            top: 58px;
-            right: 0;
-            width: 210px;
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            border: 1px solid var(--borde);
-        }
-
-        .menu-perfil.activo {
-            display: block;
-        }
-
-        .nombre-usuario {
-            padding: 16px;
-            font-weight: bold;
-            color: var(--texto);
-            border-bottom: 1px solid var(--borde);
-        }
-
-        .nombre-usuario small {
-            display: block;
-            margin-top: 4px;
-            color: var(--texto-suave);
-            font-weight: normal;
-        }
-
-        .logout-form {
-            margin: 0;
-        }
-
-        .boton-logout {
-            width: 100%;
-            padding: 14px 16px;
-            background: white;
-            color: #d33d3d;
-            border: none;
-            text-align: left;
-            font-size: 14px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .boton-logout:hover {
-            background: #fff0f0;
-        }
-
-        .boton-logout i {
-            width: 22px;
-            margin-right: 6px;
-        }
-
-        /* =====================================
-           CONTENEDOR
-        ===================================== */
-
-        .contenedor {
-            padding: 35px;
-            max-width: 1500px;
-            margin: auto;
-        }
-
-        .titulo-seccion {
-            margin-bottom: 25px;
-        }
-
-        .titulo-seccion h2 {
-            margin: 0;
-            font-size: 22px;
-        }
-
-        .titulo-seccion p {
-            color: var(--texto-suave);
-            margin: 7px 0 0;
-            font-size: 14px;
-        }
-
-        /* =====================================
-           MENSAJE DE ÉXITO
-        ===================================== */
-
-        .mensaje-exito {
-            background: #e6f4ec;
-            color: var(--verde);
-            border: 1px solid #c8e6d5;
-            padding: 14px 18px;
-            border-radius: 12px;
-            margin-bottom: 22px;
-            font-size: 14px;
-            font-weight: bold;
-        }
-
-        /* =====================================
-           TARJETA DE OPCIONES
-        ===================================== */
-
-        .opciones-card {
-            background: white;
-            border: 1px solid var(--borde);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 18px;
-        }
-
-        .opciones-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        .opciones-header h3 {
-            margin: 0;
-            font-size: 17px;
-        }
-
-        .opciones-header span {
-            color: var(--texto-suave);
-            font-size: 13px;
-        }
-
-        .opciones-inventario {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .btn-inventario {
-            display: inline-flex;
-            align-items: center;
-            gap: 9px;
-            padding: 11px 17px;
-            border-radius: 10px;
-            border: 1px solid var(--borde);
-            background: white;
-            color: var(--texto);
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: bold;
-            transition: 0.25s;
-        }
-
-        .btn-inventario:hover {
-            border-color: var(--morado);
-            color: var(--morado);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(106,27,154,0.08);
-        }
-
-        .btn-inventario.activo {
-            background: var(--morado);
-            color: white;
-            border-color: var(--morado);
-        }
-
-        /* =====================================
-           TARJETAS DE FILTROS Y BUSCADOR
-        ===================================== */
-
-        .filtros-contenedor,
-        .buscador-contenedor {
-            background: white;
-            border: 1px solid var(--borde);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 18px;
-        }
-
-        .titulo-filtros {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: bold;
-            font-size: 15px;
-            margin-bottom: 15px;
-        }
-
-        .titulo-filtros i {
-            color: var(--morado);
-        }
-
-        .filtros {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .btn-filtro {
-            border: 1px solid var(--borde);
-            background: white;
-            color: var(--texto-suave);
-            padding: 10px 15px;
-            border-radius: 10px;
-            font-size: 13px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.25s;
-        }
-
-        .btn-filtro i {
-            margin-right: 6px;
-        }
-
-        .btn-filtro:hover {
-            border-color: var(--morado);
-            color: var(--morado);
-        }
-
-        .btn-filtro.activo {
-            background: var(--morado);
-            color: white;
-            border-color: var(--morado);
-        }
-
-        /* =====================================
-           BUSCADOR
-        ===================================== */
-
-        .buscador {
-            position: relative;
-        }
-
-        .buscador i {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--morado);
-        }
-
-        .buscador input {
-            width: 100%;
-            padding: 13px 15px 13px 45px;
-            border: 1px solid var(--borde);
-            border-radius: 10px;
-            font-size: 14px;
-            outline: none;
-            color: var(--texto);
-            background: white;
-            transition: 0.25s;
-        }
-
-        .buscador input:focus {
-            border-color: var(--morado);
-            box-shadow: 0 0 0 3px rgba(106,27,154,0.08);
-        }
-
-        /* =====================================
-           TABLA
-        ===================================== */
-
-        .tabla-seccion {
-            margin-top: 25px;
-        }
-
-        .tabla-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .tabla-header h3 {
-            margin: 0;
-            font-size: 18px;
-        }
-
-        .tabla-header span {
-            color: var(--texto-suave);
-            font-size: 13px;
-        }
-
-        .tabla-contenedor {
-            background: white;
-            border: 1px solid var(--borde);
-            border-radius: 15px;
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 900px;
-        }
-
-        thead {
-            background: var(--morado);
-            color: white;
-        }
-
-        th {
-            padding: 15px 16px;
-            text-align: left;
-            font-size: 13px;
-            font-weight: bold;
-            white-space: nowrap;
-        }
-
-        td {
-            padding: 14px 16px;
-            border-bottom: 1px solid var(--borde);
-            vertical-align: middle;
-            font-size: 14px;
-        }
-
-        tbody tr {
-            transition: 0.2s;
-        }
-
-        tbody tr:hover {
-            background: var(--morado-claro);
-        }
-
-        tbody tr:last-child td {
-            border-bottom: none;
-        }
-
-        /* =====================================
-           FOTO
-        ===================================== */
-
-        .foto-producto {
-            width: 58px;
-            height: 58px;
-            border-radius: 10px;
-            object-fit: cover;
-            background: #f0edf2;
-            display: block;
-        }
-
-        .foto-sin-imagen {
-            width: 58px;
-            height: 58px;
-            border-radius: 10px;
-            background: var(--morado-claro);
-            color: var(--morado);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 21px;
-        }
-
-        /* =====================================
-           NOMBRE
-        ===================================== */
-
-        .nombre-producto {
-            color: var(--morado);
-            font-weight: bold;
-        }
-
-        /* =====================================
-           PRECIO
-        ===================================== */
-
-        .precio {
-            font-weight: bold;
-            color: var(--texto);
-        }
-
-        /* =====================================
-           CANTIDAD
-        ===================================== */
-
-        .cantidad {
-            font-weight: bold;
-            color: var(--texto);
-        }
-
-        /* =====================================
-           TIPO
-        ===================================== */
-
-        .tipo {
-            padding: 6px 11px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .bien {
-            background: var(--morado-claro);
-            color: var(--morado);
-        }
-
-        .servicio {
-            background: #e6f4ec;
-            color: var(--verde);
-        }
-
-        /* =====================================
-           SIN REGISTROS
-        ===================================== */
-
-        .sin-registros {
-            text-align: center;
-            padding: 55px 20px;
-            color: var(--texto-suave);
-        }
-
-        .sin-registros i {
-            font-size: 42px;
-            color: var(--morado);
-            margin-bottom: 15px;
-        }
-
-        .sin-registros h3 {
-            margin: 5px 0 8px;
-            color: var(--texto);
-            font-size: 17px;
-        }
-
-        .sin-registros p {
-            margin: 0;
-            font-size: 13px;
-        }
-
-        /* =====================================
-           SIN RESULTADOS
-        ===================================== */
-
-        .sin-resultados {
-            display: none;
-            background: white;
-            padding: 45px 20px;
-            border-radius: 15px;
-            text-align: center;
-            color: var(--texto-suave);
-            border: 1px solid var(--borde);
-            margin-top: 18px;
-        }
-
-        .sin-resultados i {
-            font-size: 40px;
-            color: var(--morado);
-            margin-bottom: 12px;
-        }
-
-        .sin-resultados h3 {
-            margin: 5px 0;
-            color: var(--texto);
-        }
-
-        .sin-resultados p {
-            margin: 5px 0 0;
-            font-size: 13px;
-        }
-
-        /* =====================================
-           RESPONSIVE
-        ===================================== */
-
-        @media (max-width: 1200px) {
-
-            .contenedor {
-                padding: 30px;
-            }
-        }
-
-        @media (max-width: 900px) {
-
-            .sidebar {
-                width: 210px;
-            }
-
-            .contenido {
-                width: calc(100% - 210px);
-                margin-left: 210px;
-            }
-
-            .topbar {
-                padding: 0 25px;
-            }
-        }
-
-        @media (max-width: 700px) {
-
-            .dashboard {
-                display: block;
-            }
-
-            .sidebar {
-                position: relative;
-                width: 100%;
-                min-height: auto;
-                padding: 15px;
-            }
-
-            .logo-container {
-                display: flex;
-                align-items: center;
-                text-align: left;
-                gap: 12px;
-                padding-bottom: 15px;
-                margin-bottom: 10px;
-            }
-
-            .logo {
-                width: 55px;
-                height: 55px;
-                margin: 0;
-            }
-
-            .logo-container p {
-                display: none;
-            }
-
-            .menu-titulo {
-                display: none;
-            }
-
-            .menu {
-                display: grid;
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .menu a {
-                font-size: 12px;
-                padding: 10px;
-            }
-
-            .contenido {
-                width: 100%;
-                margin-left: 0;
-            }
-
-            .topbar {
-                padding: 0 18px;
-                height: 72px;
-            }
-
-            .saludo h1 {
-                font-size: 18px;
-            }
-
-            .saludo p {
-                font-size: 11px;
-            }
-
-            .contenedor {
-                padding: 22px 16px;
-            }
-
-            .opciones-inventario {
-                flex-direction: column;
-            }
-
-            .btn-inventario {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .filtros {
-                flex-direction: column;
-            }
-
-            .btn-filtro {
-                width: 100%;
-            }
-
-            .tabla-header {
-                align-items: flex-start;
-                flex-direction: column;
-                gap: 5px;
-            }
-        }
-
-        @media (max-width: 450px) {
-
-            .menu {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .contenedor {
-                padding: 18px 12px;
-            }
-
-            .saludo h1 {
-                font-size: 16px;
-            }
-        }
-    </style>
-</head>
-
-<body>
-
-<div class="dashboard">
-
-    <!-- =====================================
-         BARRA LATERAL
-    ====================================== -->
-
-    <aside class="sidebar">
-
-        <div class="logo-container">
-
-            <img
-                src="{{ asset('images/logo-los-amates.png') }}"
-                alt="Logo Los Amates"
-                class="logo"
-            >
-
-            <div>
-                <h2>Los Amates</h2>
-                <p>Gestor de Ventas</p>
-            </div>
-
+<x-layouts.panel
+    titulo="Inventario"
+    :regresar="route('admin.dashboard')"
+    :migas="[
+        ['texto' => 'Administración', 'url' => route('admin.dashboard')],
+        ['texto' => 'Inventario'],
+    ]"
+>
+
+@push('estilos')
+<style>
+    .pagina-inv {
+        padding: 48px 0 56px;
+    }
+
+    /* ===== ENCABEZADO ===== */
+    .inv-encabezado {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 16px;
+        padding-bottom: 24px;
+        margin-bottom: 28px;
+        border-bottom: 1px solid var(--borde);
+    }
+    .inv-encabezado h1 {
+        margin: 0 0 6px;
+        font-size: 32px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        color: var(--texto);
+    }
+    .inv-encabezado p {
+        margin: 0;
+        font-size: 15px;
+        color: var(--texto-suave);
+    }
+    .inv-acciones {
+        display: flex;
+        gap: 12px;
+    }
+    .btn-exportar,
+    .btn-registrar {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        height: 44px;
+        padding: 0 20px;
+        border-radius: 0;
+        font-family: inherit;
+        font-size: 15px;
+        font-weight: 600;
+        white-space: nowrap;
+        cursor: pointer;
+        transition: background 0.2s ease, border-color 0.2s ease;
+    }
+    .btn-exportar {
+        background: #fff;
+        border: 1px solid var(--borde);
+        color: var(--texto);
+    }
+    .btn-exportar:hover {
+        border-color: #c4b5fd;
+        background: #fcfbff;
+    }
+    .btn-registrar {
+        background: var(--primario);
+        border: 1px solid var(--primario);
+        color: #fff;
+    }
+    .btn-registrar:hover {
+        background: var(--primario-oscuro);
+        border-color: var(--primario-oscuro);
+    }
+    .btn-registrar .fa-chevron-down {
+        font-size: 11px;
+    }
+
+    /* ===== MENÚ REGISTRAR NUEVO ===== */
+    .desplegable {
+        position: relative;
+    }
+    .menu-desplegable {
+        display: none;
+        position: absolute;
+        top: calc(100% + 6px);
+        right: 0;
+        width: 210px;
+        padding: 6px;
+        background: #fff;
+        border: 1px solid var(--borde);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        z-index: 100;
+    }
+    .menu-desplegable.activo { display: block; }
+    .menu-desplegable a {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        font-size: 14px;
+        color: var(--texto);
+        text-decoration: none;
+        transition: background 0.2s ease, color 0.2s ease;
+    }
+    .menu-desplegable a:hover {
+        background: var(--primario-suave);
+        color: var(--primario);
+    }
+    .menu-desplegable a i {
+        width: 16px;
+        text-align: center;
+    }
+
+    /* ===== MENSAJE DE ÉXITO ===== */
+    .mensaje-exito {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 24px;
+        padding: 14px 18px;
+        background: #ecfdf3;
+        border: 1px solid #bbf7d0;
+        color: #15803d;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    /* ===== BARRA DE HERRAMIENTAS ===== */
+    .inv-herramientas {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    .tabs {
+        display: inline-flex;
+        gap: 4px;
+        padding: 4px;
+        background: #f1f2f6;
+        border: 1px solid var(--borde);
+    }
+    .tab {
+        height: 36px;
+        padding: 0 18px;
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        font-family: inherit;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--texto-suave);
+        cursor: pointer;
+        transition: background 0.2s ease, color 0.2s ease;
+    }
+    .tab:hover { color: var(--primario); }
+    .tab.activo {
+        background: #fff;
+        color: var(--primario);
+        font-weight: 600;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+    }
+
+    .inv-controles {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .buscador {
+        position: relative;
+        width: 280px;
+    }
+    .buscador > i {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9ca3af;
+        font-size: 13px;
+        pointer-events: none;
+    }
+    .buscador input {
+        width: 100%;
+        height: 44px;
+        padding: 0 40px 0 38px;
+        background: #fff;
+        border: 1px solid var(--borde);
+        border-radius: 0;
+        font-family: inherit;
+        font-size: 14px;
+        color: var(--texto);
+        outline: none;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .buscador input::placeholder { color: #9ca3af; }
+    .buscador input:focus {
+        border-color: var(--primario);
+        box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.1);
+    }
+    .btn-limpiar {
+        display: none;
+        position: absolute;
+        right: 6px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 28px;
+        height: 28px;
+        align-items: center;
+        justify-content: center;
+        background: none;
+        border: none;
+        border-radius: 0;
+        color: #9ca3af;
+        font-size: 13px;
+        cursor: pointer;
+        transition: color 0.2s ease, background 0.2s ease;
+    }
+    .btn-limpiar:hover {
+        color: var(--primario);
+        background: var(--primario-suave);
+    }
+
+    .selector {
+        position: relative;
+    }
+    .selector select {
+        height: 44px;
+        min-width: 220px;
+        padding: 0 38px 0 16px;
+        background: #fff;
+        border: 1px solid var(--borde);
+        border-radius: 0;
+        appearance: none;
+        -webkit-appearance: none;
+        font-family: inherit;
+        font-size: 14px;
+        color: var(--texto);
+        outline: none;
+        cursor: pointer;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .selector select:focus {
+        border-color: var(--primario);
+        box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.1);
+    }
+    .selector i {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 11px;
+        color: var(--texto-suave);
+        pointer-events: none;
+    }
+
+    .vistas {
+        display: inline-flex;
+        height: 44px;
+        background: #fff;
+        border: 1px solid var(--borde);
+    }
+    .vista-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0 16px;
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        font-family: inherit;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--texto-suave);
+        cursor: pointer;
+        transition: background 0.2s ease, color 0.2s ease;
+    }
+    .vista-btn:hover { color: var(--primario); }
+    .vista-btn.activo {
+        background: var(--primario-suave);
+        color: var(--primario);
+        font-weight: 600;
+    }
+
+    .contador-registros {
+        font-size: 14px;
+        color: var(--texto-suave);
+        white-space: nowrap;
+    }
+    .contador-registros strong {
+        color: var(--texto);
+        font-weight: 700;
+    }
+
+    /* ===== CUADRÍCULA DE TARJETAS ===== */
+    .inv-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+    }
+    .inv-card {
+        display: flex;
+        flex-direction: column;
+        background: #fff;
+        border: 1px solid var(--borde);
+        border-radius: 0;
+        overflow: hidden;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .inv-card:hover {
+        border-color: #c4b5fd;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.07);
+    }
+
+    .inv-imagen {
+        position: relative;
+        flex-shrink: 0;
+        height: 260px;
+        background: #f3f4f6;
+    }
+    .inv-imagen img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+    .inv-centro {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        color: #9ca3af;
+        font-size: 13px;
+    }
+    .inv-centro .icono-bien {
+        font-size: 38px;
+        color: #c4b5fd;
+    }
+    .inv-centro .icono-servicio {
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #fff;
+        border: 1px solid #ddd6fe;
+        font-size: 20px;
+        color: var(--primario);
+    }
+
+    .badge-tipo {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 2;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 3px 9px;
+        background: #fff;
+        border: 1px solid var(--borde);
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--texto-suave);
+    }
+    .badge-tipo::before {
+        content: '';
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #9ca3af;
+    }
+    .badge-tipo.servicio {
+        background: var(--primario-suave);
+        border-color: #ddd6fe;
+        color: var(--primario);
+    }
+    .badge-tipo.servicio::before { background: var(--primario); }
+
+    .inv-cuerpo {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        padding: 18px 20px 20px;
+        min-width: 0;
+    }
+    .inv-nombre {
+        margin: 0 0 6px;
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--texto);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .inv-descripcion {
+        margin: 0;
+        font-size: 13px;
+        color: var(--texto-suave);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .inv-pie {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 12px;
+        margin-top: auto;
+        padding-top: 16px;
+        border-top: 1px solid #f0f0f3;
+    }
+    .inv-card .inv-descripcion {
+        margin-bottom: 16px;
+    }
+    .inv-etiqueta {
+        display: block;
+        margin-bottom: 2px;
+        font-size: 11px;
+        color: #9ca3af;
+    }
+    .inv-precio {
+        font-size: 17px;
+        font-weight: 700;
+        color: var(--texto);
+    }
+    .inv-precio small {
+        font-size: 12px;
+        font-weight: 400;
+        color: var(--texto-suave);
+    }
+    .btn-editar {
+        padding: 6px 16px;
+        background: var(--primario-suave);
+        border: 1px solid #ddd6fe;
+        border-radius: 0;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--primario);
+        text-decoration: none;
+        transition: background 0.2s ease, color 0.2s ease;
+    }
+    .btn-editar:hover {
+        background: var(--primario);
+        border-color: var(--primario);
+        color: #fff;
+    }
+
+    /* ===== VISTA EN LISTA ===== */
+    .inv-grid.lista {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    .inv-grid.lista .inv-card {
+        flex-direction: row;
+    }
+    .inv-grid.lista .inv-imagen {
+        width: 200px;
+        height: auto;
+        min-height: 130px;
+    }
+    .inv-grid.lista .inv-cuerpo {
+        justify-content: center;
+    }
+
+    /* ===== SIN RESULTADOS ===== */
+    .sin-resultados {
+        display: none;
+        padding: 56px 20px;
+        background: #fff;
+        border: 1px solid var(--borde);
+        text-align: center;
+        color: var(--texto-suave);
+    }
+    .sin-resultados.visible { display: block; }
+    .sin-resultados i {
+        margin-bottom: 12px;
+        font-size: 36px;
+        color: #c4b5fd;
+    }
+    .sin-resultados h3 {
+        margin: 4px 0;
+        font-size: 17px;
+        color: var(--texto);
+    }
+    .sin-resultados p {
+        margin: 0;
+        font-size: 14px;
+    }
+
+    /* ===== PIE Y PAGINACIÓN ===== */
+    .inv-pie-lista {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        margin-top: 32px;
+        padding-top: 22px;
+        border-top: 1px solid var(--borde);
+        font-size: 13px;
+        color: var(--texto-suave);
+    }
+    .inv-pie-lista strong {
+        color: var(--texto);
+        font-weight: 600;
+    }
+    .paginacion {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .pag-btn {
+        width: 26px;
+        height: 26px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        font-family: inherit;
+        font-size: 12px;
+        color: #c9ccd3;
+        cursor: default;
+    }
+    .pag-btn.actual {
+        background: var(--primario);
+        color: #fff;
+        font-weight: 600;
+    }
+
+    /* ===== RESPONSIVO ===== */
+    @media (max-width: 1100px) {
+        .inv-herramientas { flex-direction: column; align-items: stretch; }
+        .inv-controles { flex-wrap: wrap; }
+        .buscador { flex: 1; min-width: 220px; }
+    }
+    @media (max-width: 950px) {
+        .inv-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 650px) {
+        .pagina-inv { padding: 28px 0 40px; }
+        .inv-encabezado { flex-direction: column; align-items: stretch; }
+        .inv-encabezado h1 { font-size: 26px; }
+        .inv-acciones { flex-direction: column; }
+        .btn-exportar, .btn-registrar { width: 100%; }
+        .menu-desplegable { width: 100%; }
+        .tabs { display: flex; }
+        .tab { flex: 1; padding: 0 8px; }
+        .inv-controles { flex-direction: column; align-items: stretch; }
+        .buscador { width: 100%; }
+        .selector select { width: 100%; }
+        .vistas { width: 100%; }
+        .vista-btn { flex: 1; justify-content: center; }
+        .inv-grid { grid-template-columns: 1fr; }
+        .inv-grid.lista .inv-card { flex-direction: column; }
+        .inv-grid.lista .inv-imagen { width: 100%; height: 200px; }
+        .inv-pie-lista { flex-direction: column; align-items: flex-start; }
+    }
+</style>
+@endpush
+
+<div class="pagina-inv">
+
+    <!-- =========================
+         ENCABEZADO Y ACCIONES
+    ========================= -->
+    <div class="inv-encabezado">
+        <div>
+            <h1>Inventario</h1>
+            <p>Consulta y gestión centralizada de activos, insumos y servicios de la empresa.</p>
         </div>
 
-        <div class="menu-titulo">
-            Administración
-        </div>
+        <div class="inv-acciones">
+            <button type="button" class="btn-exportar">
+                <i class="fa-solid fa-arrow-up-from-bracket"></i>
+                Exportar
+            </button>
 
-        <nav class="menu">
-
-            <a href="{{ route('admin.dashboard') }}">
-                <i class="fa-solid fa-house"></i>
-                Menu Principal
-            </a>
-
-            <a href="{{ route('admin.inventario') }}" class="activo">
-                <i class="fa-solid fa-boxes-stacked"></i>
-                Inventario
-            </a>
-
-            <a href="{{ route('admin.puntos_venta') }}">
-                <i class="fa-solid fa-store"></i>
-                Puntos de venta
-            </a>
-
-            <a href="{{ route('admin.empleados') }}">
-                <i class="fa-solid fa-users"></i>
-                Empleados
-            </a>
-
-            <a href="{{ route('admin.clientes') }}">
-                <i class="fa-solid fa-user-group"></i>
-                Clientes
-            </a>
-
-            <a href="{{ route('admin.cotizaciones') }}">
-                <i class="fa-solid fa-file-invoice-dollar"></i>
-                Pedidos
-            </a>
-
-            <a href="{{ route('admin.gastos_comerciales') }}">
-                <i class="fa-solid fa-money-bill-wave"></i>
-                Gastos comerciales
-            </a>
-
-            <a href="#">
-                <i class="fa-solid fa-building-columns"></i>
-                Cuenta del negocio
-            </a>
-
-            <a href="{{ route('admin.pago_servicios.index') }}">
-                <i class="fa-solid fa-file-invoice"></i>
-                Pago de servicios
-            </a>
-
-        </nav>
-
-        <div class="menu-titulo">
-            Mi cuenta
-        </div>
-
-        <nav class="menu">
-
-            <a href="{{ route('admin.informacion') }}">
-                <i class="fa-solid fa-user"></i>
-                Mi información
-            </a>
-
-            @if(auth()->user()->puntoVenta)
-
-                <a href="{{ route('empleado.punto_venta') }}">
-                    <i class="fa-solid fa-cash-register"></i>
-                    Punto de venta
-                </a>
-
-            @endif
-
-        </nav>
-
-    </aside>
-
-
-    <!-- =====================================
-         CONTENIDO PRINCIPAL
-    ====================================== -->
-
-    <main class="contenido">
-
-        <!-- TOPBAR -->
-
-        <header class="topbar">
-
-            <div class="saludo">
-
-                <h1>
-                    Gestión de Inventario
-                </h1>
-
-                <p>
-                    Administración de bienes y servicios · Los Amates
-                </p>
-
-            </div>
-
-
-            <!-- PERFIL -->
-
-            <div class="perfil">
-
-                <button
-                    type="button"
-                    class="avatar"
-                    onclick="toggleMenuPerfil()"
-                >
-
-                    @if(auth()->user()->foto_perfil)
-
-                        <img
-                            src="{{ asset('storage/' . auth()->user()->foto_perfil) }}"
-                            alt="Foto de perfil"
-                        >
-
-                    @else
-
-                        {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
-
-                    @endif
-
+            <div class="desplegable">
+                <button type="button" class="btn-registrar" id="btnRegistrar">
+                    <i class="fa-solid fa-plus"></i>
+                    Registrar Nuevo
+                    <i class="fa-solid fa-chevron-down"></i>
                 </button>
+                <div class="menu-desplegable" id="menuRegistrar">
+                    <a href="{{ route('admin.agregar_bien') }}">
+                        <i class="fa-solid fa-box"></i>
+                        Bien
+                    </a>
+                    <a href="{{ \Illuminate\Support\Facades\Route::has('admin.agregar_servicio') ? route('admin.agregar_servicio') : route('admin.servicios') }}">
+                        <i class="fa-solid fa-screwdriver-wrench"></i>
+                        Servicio
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <!-- =========================
+         MENSAJE DE ÉXITO
+    ========================= -->
+    @if(session('success'))
+        <div class="mensaje-exito">
+            <i class="fa-solid fa-circle-check"></i>
+            {{ session('success') }}
+        </div>
+    @endif
 
-                <!-- MENÚ PERFIL -->
+    <!-- =========================
+         PESTAÑAS Y CONTROLES
+    ========================= -->
+    <div class="inv-herramientas">
 
-                <div
-                    class="menu-perfil"
-                    id="menuPerfil"
+        <div class="tabs">
+            <button type="button" class="tab activo" data-tipo="todos">Todos</button>
+            <button type="button" class="tab" data-tipo="bien">Bienes</button>
+            <button type="button" class="tab" data-tipo="servicio">Servicios</button>
+        </div>
+
+        <div class="inv-controles">
+
+            <div class="buscador">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="buscadorInventario" placeholder="Buscar por nombre..." autocomplete="off">
+                <button type="button" class="btn-limpiar" id="btnLimpiar" aria-label="Limpiar búsqueda">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="selector">
+                <select id="ordenInventario">
+                    <option value="az">Orden: Nombre (A – Z)</option>
+                    <option value="za">Orden: Nombre (Z – A)</option>
+                    <option value="precio-asc">Orden: Precio (menor a mayor)</option>
+                    <option value="precio-desc">Orden: Precio (mayor a menor)</option>
+                </select>
+                <i class="fa-solid fa-chevron-down"></i>
+            </div>
+
+            <div class="vistas">
+                <button type="button" class="vista-btn activo" data-vista="cuadricula">
+                    <i class="fa-solid fa-table-cells-large"></i>
+                    Cuadrícula
+                </button>
+                <button type="button" class="vista-btn" data-vista="lista">
+                    <i class="fa-solid fa-list"></i>
+                    Lista
+                </button>
+            </div>
+
+            <span class="contador-registros" id="contadorRegistros"><strong>{{ $inventarios->count() }}</strong> registros</span>
+
+        </div>
+    </div>
+
+    <!-- =========================
+         LISTA DE INVENTARIO
+    ========================= -->
+    @if($inventarios->count() > 0)
+
+        <div class="inv-grid" id="listaInventario">
+            @foreach($inventarios as $inventario)
+                <article
+                    class="inv-card"
+                    data-nombre="{{ $inventario->nombre }}"
+                    data-tipo="{{ $inventario->tipo }}"
+                    data-precio="{{ $inventario->precio }}"
                 >
 
-                    <div class="nombre-usuario">
+                    <!-- Imagen -->
+                    <div class="inv-imagen">
+                        <span class="badge-tipo {{ $inventario->tipo === 'servicio' ? 'servicio' : '' }}">
+                            {{ $inventario->tipo === 'servicio' ? 'Servicio' : 'Bien' }}
+                        </span>
 
-                        {{ auth()->user()->name }}
-
-                        <small>
-                            Administrador
-                        </small>
-
+                        @if($inventario->foto)
+                            <img
+                                src="{{ asset('storage/' . $inventario->foto) }}"
+                                alt=""
+                                loading="lazy"
+                                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                            >
+                            <div class="inv-centro" style="display: none;">
+                                @if($inventario->tipo === 'servicio')
+                                    <span class="icono-servicio"><i class="fa-solid fa-screwdriver-wrench"></i></span>
+                                @else
+                                    <i class="fa-regular fa-image icono-bien"></i>
+                                    <span>Sin imagen</span>
+                                @endif
+                            </div>
+                        @else
+                            <div class="inv-centro">
+                                @if($inventario->tipo === 'servicio')
+                                    <span class="icono-servicio"><i class="fa-solid fa-screwdriver-wrench"></i></span>
+                                @else
+                                    <i class="fa-regular fa-image icono-bien"></i>
+                                    <span>Sin imagen</span>
+                                @endif
+                            </div>
+                        @endif
                     </div>
 
-                    <form
-                        action="{{ route('logout') }}"
-                        method="POST"
-                        class="logout-form"
-                    >
+                    <!-- Información -->
+                    <div class="inv-cuerpo">
+                        <h3 class="inv-nombre" title="{{ $inventario->nombre }}">{{ $inventario->nombre }}</h3>
+                        <p class="inv-descripcion">{{ $inventario->descripcion ?: 'Sin descripción' }}</p>
 
-                        @csrf
+                        <div class="inv-pie">
+                            <div>
+                                <span class="inv-etiqueta">{{ $inventario->tipo === 'servicio' ? 'Tarifa' : 'Valor unitario' }}</span>
+                                <span class="inv-precio">$ {{ number_format($inventario->precio, 2) }}</span>
+                            </div>
+                            <a href="{{ route('admin.inventario.editar', $inventario->id) }}" class="btn-editar">Editar</a>
+                        </div>
+                    </div>
 
-                        <button
-                            type="submit"
-                            class="boton-logout"
-                        >
+                </article>
+            @endforeach
+        </div>
 
-                            <i class="fa-solid fa-right-from-bracket"></i>
+        <!-- SIN RESULTADOS DE BÚSQUEDA -->
+        <div class="sin-resultados" id="sinResultados">
+            <i class="fa-solid fa-box-open"></i>
+            <h3>No se encontraron resultados</h3>
+            <p>Intenta cambiar el filtro o realizar otra búsqueda.</p>
+        </div>
 
-                            Cerrar sesión
+        <!-- PIE Y PAGINACIÓN -->
+        <div class="inv-pie-lista">
+            <span id="textoMostrando">Mostrando <strong>1 – {{ $inventarios->count() }}</strong> de <strong>{{ $inventarios->count() }}</strong> elementos registrados</span>
 
-                        </button>
-
-                    </form>
-
-                </div>
-
+            <div class="paginacion">
+                <span class="pag-btn"><i class="fa-solid fa-chevron-left"></i></span>
+                <span class="pag-btn actual">1</span>
+                <span class="pag-btn"><i class="fa-solid fa-chevron-right"></i></span>
             </div>
+        </div>
 
-        </header>
+    @else
 
+        <!-- SIN REGISTROS -->
+        <div class="sin-resultados visible">
+            <i class="fa-solid fa-box-open"></i>
+            <h3>No hay registros en el inventario</h3>
+            <p>Agrega un bien o servicio para que aparezca aquí.</p>
+        </div>
 
-        <!-- =====================================
-             CONTENIDO
-        ====================================== -->
-
-        <section class="contenedor">
-
-            <div class="titulo-seccion">
-
-                <h2>
-                    Inventario
-                </h2>
-
-                <p>
-                    Administra y consulta los bienes y servicios disponibles.
-                </p>
-
-            </div>
-
-
-            <!-- MENSAJE DE ÉXITO -->
-
-            @if(session('success'))
-
-                <div class="mensaje-exito">
-
-                    <i class="fa-solid fa-circle-check"></i>
-
-                    {{ session('success') }}
-
-                </div>
-
-            @endif
-
-
-            <!-- =====================================
-                 OPCIONES DE INVENTARIO
-            ====================================== -->
-
-            <div class="opciones-card">
-
-                <div class="opciones-header">
-
-                    <h3>
-                        Gestión de inventario
-                    </h3>
-
-                    <span>
-                        Selecciona el tipo de registro
-                    </span>
-
-                </div>
-
-                <div class="opciones-inventario">
-
-                    <a
-                        href="{{ route('admin.bienes') }}"
-                        class="btn-inventario"
-                    >
-
-                        <i class="fa-solid fa-box"></i>
-
-                        Bienes
-
-                    </a>
-
-                    <a
-                        href="{{ route('admin.servicios') }}"
-                        class="btn-inventario"
-                    >
-
-                        <i class="fa-solid fa-screwdriver-wrench"></i>
-
-                        Servicios
-
-                    </a>
-
-                </div>
-
-            </div>
-
-
-            <!-- =====================================
-                 FILTROS
-            ====================================== -->
-
-            <div class="filtros-contenedor">
-
-                <div class="titulo-filtros">
-
-                    <i class="fa-solid fa-filter"></i>
-
-                    Filtrar inventario
-
-                </div>
-
-                <div class="filtros">
-
-                    <!-- TODOS -->
-
-                    <button
-                        type="button"
-                        class="btn-filtro activo"
-                        data-tipo="todos"
-                        id="filtroTodos"
-                    >
-
-                        <i class="fa-solid fa-list"></i>
-
-                        Todos
-
-                    </button>
-
-
-                    <!-- BIENES -->
-
-                    <button
-                        type="button"
-                        class="btn-filtro"
-                        data-tipo="bien"
-                    >
-
-                        <i class="fa-solid fa-box"></i>
-
-                        Solo bienes
-
-                    </button>
-
-
-                    <!-- SERVICIOS -->
-
-                    <button
-                        type="button"
-                        class="btn-filtro"
-                        data-tipo="servicio"
-                    >
-
-                        <i class="fa-solid fa-screwdriver-wrench"></i>
-
-                        Solo servicios
-
-                    </button>
-
-
-                    <!-- A-Z -->
-
-                    <button
-                        type="button"
-                        class="btn-filtro activo"
-                        id="ordenAZ"
-                    >
-
-                        <i class="fa-solid fa-arrow-down-a-z"></i>
-
-                        A → Z
-
-                    </button>
-
-
-                    <!-- Z-A -->
-
-                    <button
-                        type="button"
-                        class="btn-filtro"
-                        id="ordenZA"
-                    >
-
-                        <i class="fa-solid fa-arrow-down-z-a"></i>
-
-                        Z → A
-
-                    </button>
-
-                </div>
-
-            </div>
-
-
-            <!-- =====================================
-                 BUSCADOR
-            ====================================== -->
-
-            <div class="buscador-contenedor">
-
-                <div class="buscador">
-
-                    <i class="fa-solid fa-magnifying-glass"></i>
-
-                    <input
-                        type="text"
-                        id="buscadorInventario"
-                        placeholder="Buscar en el inventario por nombre..."
-                        autocomplete="off"
-                    >
-
-                </div>
-
-            </div>
-
-
-            <!-- =====================================
-                 TABLA
-            ====================================== -->
-
-            <div class="tabla-seccion">
-
-                <div class="tabla-header">
-
-                    <h3>
-                        Registros del inventario
-                    </h3>
-
-                    <span>
-                        Bienes y servicios registrados
-                    </span>
-
-                </div>
-
-                <div class="tabla-contenedor">
-
-                    <table>
-
-                        <thead>
-
-                            <tr>
-
-                                <th>Foto</th>
-
-                                <th>Nombre</th>
-
-                                <th>Descripción</th>
-
-                                <th>Precio</th>
-
-                                <th>Cantidad</th>
-
-                                <th>Tipo de inventario</th>
-
-                            </tr>
-
-                        </thead>
-
-
-                        <tbody id="tablaInventario">
-
-                            @forelse($inventarios as $inventario)
-
-                                <tr
-                                    class="fila-inventario"
-                                    data-nombre="{{ strtolower($inventario->nombre) }}"
-                                    data-tipo="{{ $inventario->tipo }}"
-                                >
-
-                                    <!-- FOTO -->
-
-                                    <td>
-
-                                        @if($inventario->foto)
-
-                                            <img
-                                                src="{{ asset('storage/' . $inventario->foto) }}"
-                                                alt="{{ $inventario->nombre }}"
-                                                class="foto-producto"
-                                            >
-
-                                        @else
-
-                                            <div class="foto-sin-imagen">
-
-                                                <i class="fa-solid fa-image"></i>
-
-                                            </div>
-
-                                        @endif
-
-                                    </td>
-
-
-                                    <!-- NOMBRE -->
-
-                                    <td>
-
-                                        <span class="nombre-producto">
-
-                                            {{ $inventario->nombre }}
-
-                                        </span>
-
-                                    </td>
-
-
-                                    <!-- DESCRIPCIÓN -->
-
-                                    <td>
-
-                                        {{ $inventario->descripcion ?: 'Sin descripción' }}
-
-                                    </td>
-
-
-                                    <!-- PRECIO -->
-
-                                    <td>
-
-                                        <span class="precio">
-
-                                            ${{ number_format($inventario->precio, 2) }}
-
-                                        </span>
-
-                                    </td>
-
-
-                                    <!-- CANTIDAD -->
-
-                                    <td>
-
-                                        <span class="cantidad">
-
-                                            {{ $inventario->cantidad }}
-
-                                        </span>
-
-                                    </td>
-
-
-                                    <!-- TIPO -->
-
-                                    <td>
-
-                                        @if($inventario->tipo === 'bien')
-
-                                            <span class="tipo bien">
-
-                                                <i class="fa-solid fa-box"></i>
-
-                                                Bien
-
-                                            </span>
-
-                                        @elseif($inventario->tipo === 'servicio')
-
-                                            <span class="tipo servicio">
-
-                                                <i class="fa-solid fa-screwdriver-wrench"></i>
-
-                                                Servicio
-
-                                            </span>
-
-                                        @endif
-
-                                    </td>
-
-                                </tr>
-
-                            @empty
-
-                                <tr id="filaSinRegistros">
-
-                                    <td colspan="6">
-
-                                        <div class="sin-registros">
-
-                                            <i class="fa-solid fa-box-open"></i>
-
-                                            <h3>
-                                                No hay registros en el inventario
-                                            </h3>
-
-                                            <p>
-                                                Agrega un bien o servicio para que aparezca aquí.
-                                            </p>
-
-                                        </div>
-
-                                    </td>
-
-                                </tr>
-
-                            @endforelse
-
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-
-                <!-- SIN RESULTADOS -->
-
-                <div
-                    class="sin-resultados"
-                    id="sinResultados"
-                >
-
-                    <i class="fa-solid fa-box-open"></i>
-
-                    <h3>
-                        No se encontraron resultados
-                    </h3>
-
-                    <p>
-                        Intenta cambiar el filtro o realizar otra búsqueda.
-                    </p>
-
-                </div>
-
-            </div>
-
-        </section>
-
-    </main>
+    @endif
 
 </div>
 
-
-<!-- =====================================
-     JAVASCRIPT
-====================================== -->
-
+@push('scripts')
 <script>
+    const lista = document.getElementById('listaInventario');
 
-    /* =====================================
-       MENÚ DE PERFIL
-    ====================================== */
+    /* ===== MENÚ REGISTRAR NUEVO ===== */
+    const btnRegistrar = document.getElementById('btnRegistrar');
+    const menuRegistrar = document.getElementById('menuRegistrar');
 
-    function toggleMenuPerfil() {
-
-        document
-            .getElementById('menuPerfil')
-            .classList
-            .toggle('activo');
-
-    }
-
-
-    document.addEventListener('click', function(event) {
-
-        const perfil =
-            document.querySelector('.perfil');
-
-        const menu =
-            document.getElementById('menuPerfil');
-
-        if (!perfil.contains(event.target)) {
-
-            menu.classList.remove('activo');
-
-        }
-
+    btnRegistrar.addEventListener('click', function (event) {
+        event.stopPropagation();
+        menuRegistrar.classList.toggle('activo');
+    });
+    document.addEventListener('click', function (event) {
+        if (!event.target.closest('.desplegable')) menuRegistrar.classList.remove('activo');
     });
 
+    /* ===== FILTROS, BÚSQUEDA, ORDEN Y VISTA ===== */
+    if (lista) {
+        const buscador = document.getElementById('buscadorInventario');
+        const btnLimpiar = document.getElementById('btnLimpiar');
+        const orden = document.getElementById('ordenInventario');
+        const tabs = document.querySelectorAll('.tab');
+        const botonesVista = document.querySelectorAll('.vista-btn');
+        const sinResultados = document.getElementById('sinResultados');
+        const contador = document.getElementById('contadorRegistros');
+        const textoMostrando = document.getElementById('textoMostrando');
+        const total = lista.querySelectorAll('.inv-card').length;
 
-    /* =====================================
-       FILTROS + BUSCADOR + ORDEN
-    ====================================== */
+        let tipoActual = 'todos';
 
-    const buscador =
-        document.getElementById('buscadorInventario');
-
-    const tabla =
-        document.getElementById('tablaInventario');
-
-    const sinResultados =
-        document.getElementById('sinResultados');
-
-    const botonesTipo =
-        document.querySelectorAll('[data-tipo]');
-
-    const botonAZ =
-        document.getElementById('ordenAZ');
-
-    const botonZA =
-        document.getElementById('ordenZA');
-
-
-    let tipoSeleccionado = 'todos';
-
-    let ordenSeleccionado = 'az';
-
-
-    function obtenerFilas() {
-
-        return Array.from(
-            document.querySelectorAll('.fila-inventario')
-        );
-
-    }
-
-
-    function aplicarFiltros() {
-
-        const filas = obtenerFilas();
-
-        const texto =
-            buscador.value
-                .toLowerCase()
-                .trim();
-
-
-        /* ORDENAR */
-
-        filas.sort(function(a, b) {
-
-            const nombreA =
-                a.dataset.nombre;
-
-            const nombreB =
-                b.dataset.nombre;
-
-
-            if (ordenSeleccionado === 'az') {
-
-                return nombreA.localeCompare(
-                    nombreB,
-                    'es',
-                    {
-                        sensitivity: 'base'
-                    }
-                );
-
-            } else {
-
-                return nombreB.localeCompare(
-                    nombreA,
-                    'es',
-                    {
-                        sensitivity: 'base'
-                    }
-                );
-
-            }
-
-        });
-
-
-        /* INSERTAR FILAS ORDENADAS */
-
-        filas.forEach(function(fila) {
-
-            tabla.appendChild(fila);
-
-        });
-
-
-        /* FILTRAR */
-
-        let encontrados = 0;
-
-
-        filas.forEach(function(fila) {
-
-            const nombre =
-                fila.dataset.nombre;
-
-            const tipo =
-                fila.dataset.tipo;
-
-
-            const coincideTipo =
-                tipoSeleccionado === 'todos' ||
-                tipo === tipoSeleccionado;
-
-
-            const coincideBusqueda =
-                nombre.includes(texto);
-
-
-            if (coincideTipo && coincideBusqueda) {
-
-                fila.style.display = '';
-
-                encontrados++;
-
-            } else {
-
-                fila.style.display = 'none';
-
-            }
-
-        });
-
-
-        /* MENSAJE SIN RESULTADOS */
-
-        if (encontrados === 0 && filas.length > 0) {
-
-            sinResultados.style.display = 'block';
-
-        } else {
-
-            sinResultados.style.display = 'none';
-
+        function normalizar(texto) {
+            return texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
         }
 
-    }
+        function aplicar() {
+            const texto = normalizar(buscador.value);
+            btnLimpiar.style.display = buscador.value ? 'flex' : 'none';
 
-
-    /* =====================================
-       FILTROS DE TIPO
-    ====================================== */
-
-    botonesTipo.forEach(function(boton) {
-
-        boton.addEventListener('click', function() {
-
-            tipoSeleccionado =
-                this.dataset.tipo;
-
-
-            botonesTipo.forEach(function(btn) {
-
-                btn.classList.remove('activo');
-
+            const tarjetas = Array.from(lista.querySelectorAll('.inv-card'));
+            tarjetas.sort(function (a, b) {
+                switch (orden.value) {
+                    case 'za':
+                        return b.dataset.nombre.localeCompare(a.dataset.nombre, 'es', { sensitivity: 'base' });
+                    case 'precio-asc':
+                        return parseFloat(a.dataset.precio) - parseFloat(b.dataset.precio);
+                    case 'precio-desc':
+                        return parseFloat(b.dataset.precio) - parseFloat(a.dataset.precio);
+                    default:
+                        return a.dataset.nombre.localeCompare(b.dataset.nombre, 'es', { sensitivity: 'base' });
+                }
             });
 
+            let visibles = 0;
+            tarjetas.forEach(function (tarjeta) {
+                lista.appendChild(tarjeta);
+                const coincideTipo = tipoActual === 'todos' || tarjeta.dataset.tipo === tipoActual;
+                const coincideTexto = normalizar(tarjeta.dataset.nombre).includes(texto);
+                const mostrar = coincideTipo && coincideTexto;
+                tarjeta.style.display = mostrar ? '' : 'none';
+                if (mostrar) visibles++;
+            });
 
-            this.classList.add('activo');
+            sinResultados.classList.toggle('visible', visibles === 0);
+            contador.innerHTML = '<strong>' + visibles + '</strong> ' + (visibles === 1 ? 'registro' : 'registros');
+            textoMostrando.innerHTML = visibles === 0
+                ? 'Mostrando <strong>0</strong> de <strong>' + total + '</strong> elementos registrados'
+                : 'Mostrando <strong>1 – ' + visibles + '</strong> de <strong>' + total + '</strong> elementos registrados';
+        }
 
-            aplicarFiltros();
-
+        tabs.forEach(function (tab) {
+            tab.addEventListener('click', function () {
+                tabs.forEach(function (t) { t.classList.remove('activo'); });
+                this.classList.add('activo');
+                tipoActual = this.dataset.tipo;
+                aplicar();
+            });
         });
 
-    });
+        botonesVista.forEach(function (boton) {
+            boton.addEventListener('click', function () {
+                botonesVista.forEach(function (b) { b.classList.remove('activo'); });
+                this.classList.add('activo');
+                lista.classList.toggle('lista', this.dataset.vista === 'lista');
+            });
+        });
 
+        buscador.addEventListener('input', aplicar);
+        orden.addEventListener('change', aplicar);
 
-    /* =====================================
-       A → Z
-    ====================================== */
+        btnLimpiar.addEventListener('click', function () {
+            buscador.value = '';
+            aplicar();
+            buscador.focus();
+        });
 
-    botonAZ.addEventListener('click', function() {
-
-        ordenSeleccionado = 'az';
-
-        botonAZ.classList.add('activo');
-
-        botonZA.classList.remove('activo');
-
-        aplicarFiltros();
-
-    });
-
-
-    /* =====================================
-       Z → A
-    ====================================== */
-
-    botonZA.addEventListener('click', function() {
-
-        ordenSeleccionado = 'za';
-
-        botonZA.classList.add('activo');
-
-        botonAZ.classList.remove('activo');
-
-        aplicarFiltros();
-
-    });
-
-
-    /* =====================================
-       BUSCADOR
-    ====================================== */
-
-    buscador.addEventListener('input', function() {
-
-        aplicarFiltros();
-
-    });
-
-
-    /* =====================================
-       INICIAR
-    ====================================== */
-
-    aplicarFiltros();
-
+        aplicar();
+    }
 </script>
+@endpush
 
-</body>
-
-</html>
+</x-layouts.panel>
