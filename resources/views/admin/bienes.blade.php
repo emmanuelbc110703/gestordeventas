@@ -40,10 +40,10 @@
         display: inline-flex; 
         align-items: center; 
         gap: 10px; 
-        padding: 14px 20px; 
+        padding: 11px 20px; 
         background: var(--primario); 
         color: #fff; 
-        border-radius: 6px; 
+        border-radius: 0; 
         font-size: 15px; 
         font-weight: 600; 
         text-decoration: none; 
@@ -74,11 +74,11 @@
     }
     .buscador input { 
         width: 100%; 
-        height: 52px; 
+        height: 44px; 
         padding: 0 18px 0 46px; 
         background: #fff; 
         border: 1px solid var(--borde); 
-        border-radius: 6px; 
+        border-radius: 0; 
         font-family: inherit; 
         font-size: 15px; 
         color: var(--texto); 
@@ -96,14 +96,14 @@
         position: relative; 
     }
     .boton-filtro { 
-        height: 52px; 
+        height: 44px; 
         display: inline-flex; 
         align-items: center; 
         gap: 10px; 
         padding: 0 20px; 
         background: #fff; 
         border: 1px solid var(--borde); 
-        border-radius: 6px; 
+        border-radius: 0; 
         font-family: inherit; 
         font-size: 15px; 
         font-weight: 500; 
@@ -125,7 +125,7 @@
         padding: 6px; 
         background: #fff; 
         border: 1px solid var(--borde); 
-        border-radius: 8px; 
+        border-radius: 0; 
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1); 
         z-index: 100; 
     }
@@ -139,7 +139,7 @@
         gap: 10px; 
         padding: 10px 12px; 
         background: none; border: none; 
-        border-radius: 6px; 
+        border-radius: 0; 
         font-family: inherit; 
         font-size: 14px; 
         color: var(--texto); 
@@ -233,9 +233,9 @@
         border-top: 1px solid #f0f0f3; 
     }
     .btn-editar { 
-        padding: 8px 18px; 
+        padding: 6px 18px;
         border: 1px solid #ddd6fe; 
-        border-radius: 6px; 
+        border-radius: 0; 
         font-size: 15px; 
         font-weight: 500; 
         color: var(--primario); 
@@ -330,9 +330,9 @@
     }
     .boton-cancelar, .boton-confirmar { 
         flex: 1; 
-        padding: 12px; 
+        padding: 10px;
         border: none; 
-        border-radius: 6px; 
+        border-radius: 0; 
         font-family: inherit; 
         font-size: 14px; 
         font-weight: 600; 
