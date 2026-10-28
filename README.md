@@ -23,3 +23,28 @@ In order to ensure that the Laravel community is welcoming to all, please review
 ## License
 
 The Laravel + Livewire starter kit is open-sourced software licensed under the MIT license.
+
+
+## Instalacion
+Primero que nada es necesario clonar el repositorio dentro de tu computadora o servidor, lo puedes hacer con el siguiente comando
+
+Una vez tengas el codigo fuente del proyecto es necesario intalar lo que ```composer``` necesita para funcionar unicamente ejecutando el siguiente comando en tu terminal 
+```bashs
+composer install
+```
+
+
+Para que las imagenes de tu perfil o de los productos bienes o servicios funcionen es necesario ejecutar el siguiente comando dentro de la terminal
+```bash
+php artisan storage:link
+```
+
+Para confirmar los cambios y limpiar la cache del servidor ejecuta
+```bash
+php artisan view:clear
+```
+Ahora puedes correr el servicio con 
+```bash
+composer run dev
+```
+
