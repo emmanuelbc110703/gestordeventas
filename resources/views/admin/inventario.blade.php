@@ -24,11 +24,17 @@
         border-bottom: 1px solid var(--borde);
     }
     .inv-encabezado h1 {
-        margin: 0 0 6px;
+        margin: 0;
         font-size: 32px;
         font-weight: 700;
         letter-spacing: -0.02em;
         color: var(--texto);
+    }
+    .inv-titulo-fila {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 6px;
     }
     .inv-encabezado p {
         margin: 0;
@@ -564,7 +570,7 @@
     }
 </style>
 @endpush
-
+<x-sidebar activo="inventario" :total-inventario="$inventarios->count()" />
 <div class="pagina-inv">
 
     <!-- =========================
@@ -572,7 +578,12 @@
     ========================= -->
     <div class="inv-encabezado">
         <div>
-            <h1>Inventario</h1>
+            <div class="inv-titulo-fila">
+                <button type="button" class="btn-menu-lateral" data-abrir-sidebar aria-label="Mostrar menú lateral">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <h1>Inventario</h1>
+            </div>
             <p>Consulta y gestión centralizada de activos, insumos y servicios de la empresa.</p>
         </div>
 
