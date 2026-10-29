@@ -95,6 +95,19 @@
             min-width: 0;
         }
 
+        /* ===== LOGO ===== */
+        .logo-app {
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .logo-app img {
+            height: 48px;
+            width: auto;
+            display: block;
+        }
+
         .enlace-regresar {
             display: inline-flex;
             align-items: center;
@@ -236,16 +249,15 @@
 
             <div class="encabezado-izq">
 
-                @if($regresar)
-                    <a href="{{ $regresar }}" class="enlace-regresar">
-                        <i class="fa-solid fa-arrow-left"></i>
-                        Regresar
-                    </a>
-                @endif
+                <span class="logo-app">
+                    <img
+                        src="{{ asset('images/logo-los-amates.png') }}"
+                        alt="Los Amates"
+                        onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='none';"
+                    >
+                </span>
 
-                @if($regresar && count($migas))
-                    <span class="separador-vertical"></span>
-                @endif
+                <span class="separador-vertical logo-sep"></span>
 
                 @if(count($migas))
                     <nav class="migas" aria-label="Ruta de navegación">
@@ -267,6 +279,11 @@
 
             @if($usuario)
                 <div class="encabezado-der">
+
+                    {{-- Buscador de módulos (solo administrador) --}}
+                    @if($usuario->rol === 'admin')
+                        <x-buscador-modulos />
+                    @endif
 
                     <button type="button" class="btn-notificaciones" title="Notificaciones">
                         <i class="fa-regular fa-bell"></i>
@@ -298,9 +315,12 @@
         </div>
     </header>
 
-    <main class="contenedor-pagina">
-        {{ $slot }}
-    </main>
+    {{-- Envoltorio: la barra lateral solo mueve esta zona, nunca el header --}}
+    <div class="cuerpo-app">
+        <main class="contenedor-pagina">
+            {{ $slot }}
+        </main>
+    </div>
 
     @stack('scripts')
 

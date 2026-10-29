@@ -6,50 +6,62 @@
 
 @php
     $usuario = auth()->user();
-    $nombreCompleto = $usuario ? trim($usuario->name . ' ' . ($usuario->apellido ?? '')) : '';
-    $iniciales = $usuario
-        ? mb_strtoupper(mb_substr($usuario->name, 0, 1) . mb_substr($usuario->apellido ?? '', 0, 1))
-        : '';
 
-    $administracion = [
-        ['clave' => 'dashboard',      'texto' => 'Menú Principal',       'icono' => 'fa-table-cells-large', 'url' => route('admin.dashboard')],
-        ['clave' => 'inventario',     'texto' => 'Inventario',           'icono' => 'fa-boxes-stacked',     'url' => route('admin.inventario'), 'badge' => $totalInventario],
-        ['clave' => 'puntos_venta',   'texto' => 'Puntos de venta',      'icono' => 'fa-store',             'url' => route('admin.puntos_venta')],
-        ['clave' => 'empleados',      'texto' => 'Empleados',            'icono' => 'fa-id-badge',          'url' => route('admin.empleados')],
-        ['clave' => 'clientes',       'texto' => 'Clientes',             'icono' => 'fa-user-group',        'url' => route('admin.clientes')],
-        ['clave' => 'pedidos',        'texto' => 'Pedidos',              'icono' => 'fa-file-lines',        'url' => route('admin.cotizaciones'), 'badge' => $pedidosPendientes],
-        ['clave' => 'gastos',         'texto' => 'Gastos comerciales',   'icono' => 'fa-wallet',            'url' => route('admin.gastos_comerciales')],
-        ['clave' => 'cuenta',         'texto' => 'Cuenta del negocio',   'icono' => 'fa-building-columns',  'url' => '#'],
-        ['clave' => 'pagos',          'texto' => 'Pago de servicios',    'icono' => 'fa-file-invoice',      'url' => route('admin.pago_servicios.index')],
-    ];
-
-    $miCuenta = [
-        ['clave' => 'informacion',    'texto' => 'Mi información',       'icono' => 'fa-circle-user',       'url' => route('admin.informacion')],
-        ['clave' => 'configuracion',  'texto' => 'Configuración',        'icono' => 'fa-gear',              'url' => '#'],
-    ];
+    // Los módulos vienen de config/modulos.php (misma lista que usa el buscador del header)
+    $secciones = [];
+    foreach (config('modulos', []) as $titulo => $items) {
+        $secciones[$titulo] = array_map(function ($item) use ($totalInventario, $pedidosPendientes) {
+            $item['url'] = !empty($item['ruta']) ? route($item['ruta']) : '#';
+            $item['badge'] = match ($item['clave']) {
+                'inventario' => $totalInventario,
+                'pedidos'    => $pedidosPendientes,
+                default      => null,
+            };
+            return $item;
+        }, $items);
+    }
 
     // Solo aparece si el usuario tiene un punto de venta asignado
     if ($usuario && $usuario->puntoVenta) {
-        $miCuenta[] = ['clave' => 'punto_venta', 'texto' => 'Punto de venta', 'icono' => 'fa-cash-register', 'url' => route('empleado.punto_venta')];
+        $secciones['Mi cuenta'][] = [
+            'clave' => 'punto_venta',
+            'texto' => 'Punto de venta',
+            'icono' => 'fa-cash-register',
+            'url'   => route('empleado.punto_venta'),
+            'badge' => null,
+        ];
     }
 
-    $secciones = [
-        'Administración' => $administracion,
-        'Mi cuenta'      => $miCuenta,
-    ];
+    // Nombre del módulo actual (el que se muestra en grande arriba, como en ERPNext)
+    $nombreModulo = 'Menú';
+    foreach ($secciones as $items) {
+        foreach ($items as $item) {
+            if ($item['clave'] === $activo) {
+                $nombreModulo = $item['texto'];
+            }
+        }
+    }
 @endphp
 
 @push('estilos')
 <style>
-    :root { --ancho-sidebar: 260px; }
+    :root {
+        --ancho-sidebar: 260px;
+        --alto-header: 64px;
+    }
 
     /* ===== ESTADO ABIERTO / OCULTO ===== */
-    body.con-sidebar { padding-left: var(--ancho-sidebar); }
-    body.sb-listo { transition: padding-left 0.25s ease; }
+    /* Solo el contenido de la página se corre a la derecha; el header nunca cambia */
+    body.con-sidebar .cuerpo-app { padding-left: var(--ancho-sidebar); }
+    body.sb-listo .cuerpo-app { transition: padding-left 0.25s ease; }
 
+    /* Con la barra abierta, el título grande vive en la barra: se oculta el de la página */
+    body.con-sidebar .titulo-pagina { display: none; }
+
+    /* La barra queda DEBAJO del header, sin tapar su espacio */
     .sidebar-app {
         position: fixed;
-        top: 0;
+        top: var(--alto-header);
         left: 0;
         bottom: 0;
         width: var(--ancho-sidebar);
@@ -57,7 +69,7 @@
         flex-direction: column;
         background: #fff;
         border-right: 1px solid var(--borde);
-        z-index: 600;
+        z-index: 400;
         transform: translateX(-100%);
         visibility: hidden;
     }
@@ -74,118 +86,69 @@
 
     /* ===== CABECERA ===== */
     .sb-cabecera {
-        height: 64px;
         flex-shrink: 0;
         display: flex;
         align-items: center;
-        justify-content: space-between;
         gap: 10px;
-        padding: 0 16px 0 18px;
-        border-bottom: 1px solid var(--borde);
+        padding: 22px 16px 16px 14px;
     }
-    .sb-marca {
-        display: flex;
-        align-items: center;
-        gap: 12px;
+    /* Mismo tamaño que el título grande de las páginas (h1) */
+    .sb-titulo-modulo {
+        margin: 0;
         min-width: 0;
-    }
-    .sb-logo {
-        width: 36px;
-        height: 36px;
-        flex-shrink: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: var(--primario);
-        color: #fff;
-        font-size: 14px;
+        font-size: 32px;
         font-weight: 700;
-    }
-    .sb-marca-texto {
-        display: flex;
-        flex-direction: column;
-        line-height: 1.25;
-        min-width: 0;
-    }
-    .sb-marca-texto strong {
-        font-size: 14px;
-        font-weight: 700;
+        letter-spacing: -0.02em;
+        line-height: 1.15;
         color: var(--texto);
-        white-space: nowrap;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        word-break: break-word;
     }
-    .sb-marca-texto small {
-        font-size: 12px;
-        color: var(--texto-suave);
-        white-space: nowrap;
-    }
+
+    /* Botón hamburguesa que al pasar el mouse se vuelve una flecha a la izquierda */
     .sb-cerrar {
-        width: 28px;
-        height: 28px;
+        position: relative;
+        width: 38px;
+        height: 38px;
         flex-shrink: 0;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
         background: none;
         border: none;
         border-radius: 0;
-        color: #9ca3af;
-        font-size: 12px;
+        color: var(--texto-suave);
         cursor: pointer;
         transition: background 0.2s ease, color 0.2s ease;
     }
-    .sb-cerrar:hover {
+    .sb-cerrar i {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 17px;
+        transition: opacity 0.18s ease, transform 0.18s ease;
+    }
+    .sb-cerrar .ic-flecha {
+        opacity: 0;
+        transform: translateX(8px);
+    }
+    .sb-cerrar:hover,
+    .sb-cerrar:focus-visible {
         background: var(--primario-suave);
         color: var(--primario);
-    }
-
-    /* ===== BUSCADOR DE MÓDULOS ===== */
-    .sb-buscador-caja {
-        flex-shrink: 0;
-        padding: 16px 16px 8px;
-    }
-    .sb-buscador {
-        position: relative;
-    }
-    .sb-buscador > i {
-        position: absolute;
-        left: 12px;
-        top: 50%;
-        transform: translateY(-50%);
-        font-size: 12px;
-        color: #9ca3af;
-        pointer-events: none;
-    }
-    .sb-buscador input {
-        width: 100%;
-        height: 36px;
-        padding: 0 54px 0 34px;
-        background: #f9fafb;
-        border: 1px solid var(--borde);
-        border-radius: 0;
-        font-family: inherit;
-        font-size: 13px;
-        color: var(--texto);
         outline: none;
-        transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
     }
-    .sb-buscador input::placeholder { color: #9ca3af; }
-    .sb-buscador input:focus {
-        background: #fff;
-        border-color: var(--primario);
-        box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.1);
+    .sb-cerrar:hover .ic-barras,
+    .sb-cerrar:focus-visible .ic-barras {
+        opacity: 0;
+        transform: translateX(-8px);
     }
-    .sb-atajo {
-        position: absolute;
-        right: 8px;
-        top: 50%;
-        transform: translateY(-50%);
-        padding: 1px 6px;
-        background: #eef0f4;
-        border: 1px solid var(--borde);
-        font-size: 11px;
-        font-weight: 500;
-        color: var(--texto-suave);
-        pointer-events: none;
+    .sb-cerrar:hover .ic-flecha,
+    .sb-cerrar:focus-visible .ic-flecha {
+        opacity: 1;
+        transform: none;
     }
 
     /* ===== NAVEGACIÓN ===== */
@@ -246,76 +209,6 @@
         color: var(--primario);
     }
 
-    /* ===== PIE: USUARIO ===== */
-    .sb-pie {
-        flex-shrink: 0;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 14px 16px;
-        border-top: 1px solid var(--borde);
-    }
-    .sb-avatar {
-        width: 32px;
-        height: 32px;
-        flex-shrink: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
-        background: #e5e7eb;
-        color: #374151;
-        font-size: 12px;
-        font-weight: 700;
-    }
-    .sb-avatar img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-    }
-    .sb-usuario {
-        flex: 1;
-        min-width: 0;
-        display: flex;
-        flex-direction: column;
-        line-height: 1.3;
-    }
-    .sb-usuario strong {
-        font-size: 13px;
-        font-weight: 600;
-        color: var(--texto);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    .sb-usuario small {
-        font-size: 11px;
-        color: var(--texto-suave);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    .sb-pie form { margin: 0; }
-    .sb-salir {
-        width: 30px;
-        height: 30px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        background: none;
-        border: none;
-        border-radius: 0;
-        color: #9ca3af;
-        font-size: 14px;
-        cursor: pointer;
-        transition: background 0.2s ease, color 0.2s ease;
-    }
-    .sb-salir:hover {
-        background: #fef2f2;
-        color: #dc2626;
-    }
-
     /* ===== BOTÓN HAMBURGUESA (solo visible con el menú oculto) ===== */
     .btn-menu-lateral {
         display: none;
@@ -343,13 +236,17 @@
     .sb-fondo {
         display: none;
         position: fixed;
-        inset: 0;
+        top: var(--alto-header);
+        left: 0;
+        right: 0;
+        bottom: 0;
         background: rgba(17, 24, 39, 0.45);
-        z-index: 550;
+        z-index: 350;
     }
 
     @media (max-width: 900px) {
-        body.con-sidebar { padding-left: 0; }
+        body.con-sidebar .cuerpo-app { padding-left: 0; }
+        body.con-sidebar .titulo-pagina { display: block; }
         body.con-sidebar .sb-fondo { display: block; }
         body.con-sidebar .sidebar-app { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25); }
     }
@@ -369,25 +266,18 @@
 </script>
 
 <aside class="sidebar-app" id="sidebarApp" aria-label="Menú lateral">
+
+    <!-- Cabecera -->
     <div class="sb-cabecera">
-        <div class="sb-marca">
-            <span class="sb-logo">LA</span>
-            <span class="sb-marca-texto">
-                <strong>Los Amates</strong>
-                <small>Gestor de Ventas</small>
-            </span>
-        </div>
         <button type="button" class="sb-cerrar" id="sbCerrar" aria-label="Ocultar menú lateral" title="Ocultar menú">
-            <i class="fa-solid fa-chevron-left"></i>
+            <i class="fa-solid fa-bars ic-barras"></i>
+            <i class="fa-solid fa-arrow-left ic-flecha"></i>
         </button>
+
+        <h2 class="sb-titulo-modulo" title="{{ $nombreModulo }}">{{ $nombreModulo }}</h2>
     </div>
-    <div class="sb-buscador-caja">
-        <div class="sb-buscador">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" id="sbBuscar" placeholder="Buscar módulo..." autocomplete="off">
-            <span class="sb-atajo" id="sbAtajo">⌘K</span>
-        </div>
-    </div>
+
+    <!-- Navegación -->
     <nav class="sb-nav">
         @foreach($secciones as $titulo => $items)
             <div class="sb-seccion">
@@ -397,7 +287,6 @@
                     <a
                         href="{{ $item['url'] }}"
                         class="sb-link {{ $activo === $item['clave'] ? 'activo' : '' }}"
-                        data-texto="{{ $item['texto'] }}"
                     >
                         <i class="fa-solid {{ $item['icono'] }}"></i>
                         <span>{{ $item['texto'] }}</span>
@@ -409,32 +298,6 @@
             </div>
         @endforeach
     </nav>
-    @if($usuario)
-        <div class="sb-pie">
-            <span class="sb-avatar">
-                @if($usuario->foto_perfil)
-                    <img
-                        src="{{ asset('storage/' . $usuario->foto_perfil) }}"
-                        alt=""
-                        onerror="this.remove();"
-                    >
-                @endif
-                <span class="sb-iniciales">{{ $iniciales }}</span>
-            </span>
-
-            <span class="sb-usuario">
-                <strong>{{ $nombreCompleto }}</strong>
-                <small>{{ $usuario->email }}</small>
-            </span>
-
-            <form action="{{ route('logout') }}" method="POST">
-                @csrf
-                <button type="submit" class="sb-salir" aria-label="Cerrar sesión" title="Cerrar sesión">
-                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                </button>
-            </form>
-        </div>
-    @endif
 
 </aside>
 
@@ -444,8 +307,6 @@
 <script>
     (function () {
         var cuerpo = document.body;
-        var buscar = document.getElementById('sbBuscar');
-        var atajo = document.getElementById('sbAtajo');
 
         function esMovil() { return window.innerWidth <= 900; }
 
@@ -465,12 +326,16 @@
 
         // Botón de la cabecera: ocultar
         document.getElementById('sbCerrar').addEventListener('click', ocultar);
+
+        // Fondo oscuro (móvil): ocultar
         document.getElementById('sbFondo').addEventListener('click', ocultar);
 
+        // Cualquier botón con data-abrir-sidebar (la hamburguesa) abre el menú
         document.querySelectorAll('[data-abrir-sidebar]').forEach(function (boton) {
             boton.addEventListener('click', abrir);
         });
 
+        // Al cambiar el tamaño de la ventana, ajusta el estado
         window.addEventListener('resize', function () {
             if (esMovil()) {
                 cuerpo.classList.remove('con-sidebar');
@@ -481,35 +346,9 @@
             }
         });
 
-        if (!/Mac|iPhone|iPad/.test(navigator.platform)) atajo.textContent = 'Ctrl K';
-
+        // Esc cierra el menú en móvil
         document.addEventListener('keydown', function (evento) {
-            if ((evento.ctrlKey || evento.metaKey) && evento.key.toLowerCase() === 'k') {
-                evento.preventDefault();
-                abrir();
-                buscar.focus();
-            }
             if (evento.key === 'Escape' && esMovil()) ocultar();
-        });
-
-        function normalizar(texto) {
-            return texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
-        }
-
-        buscar.addEventListener('input', function () {
-            var consulta = normalizar(this.value);
-
-            document.querySelectorAll('.sb-seccion').forEach(function (seccion) {
-                var visibles = 0;
-
-                seccion.querySelectorAll('.sb-link').forEach(function (enlace) {
-                    var coincide = normalizar(enlace.dataset.texto).includes(consulta);
-                    enlace.style.display = coincide ? '' : 'none';
-                    if (coincide) visibles++;
-                });
-
-                seccion.style.display = visibles ? '' : 'none';
-            });
         });
     })();
 </script>
