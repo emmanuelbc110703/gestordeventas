@@ -2,8 +2,7 @@
     titulo="Inventario"
     :regresar="route('admin.dashboard')"
     :migas="[
-        ['texto' => 'Administración', 'url' => route('admin.dashboard')],
-        ['texto' => 'Inventario'],
+        ['texto' => 'Inventario', 'url' => route('admin.inventario')],
     ]"
 >
 
@@ -60,6 +59,7 @@
         white-space: nowrap;
         cursor: pointer;
         transition: background 0.2s ease, border-color 0.2s ease;
+        text-decoration: none; 
     }
     .btn-exportar {
         background: #fff;
@@ -610,6 +610,10 @@
                     </a>
                 </div>
             </div>
+            <a href="#" class="btn-registrar" id="btnAgregarDirecto" style="display: none;">
+                <i class="fa-solid fa-plus"></i>
+                <span id="textoAgregar">Agregar Bien</span>
+            </a>
         </div>
     </div>
 
@@ -793,11 +797,59 @@
         const contador = document.getElementById('contadorRegistros');
         const textoMostrando = document.getElementById('textoMostrando');
         const total = lista.querySelectorAll('.inv-card').length;
+        const desplegable = document.querySelector('.desplegable');
+        const btnAgregarDirecto = document.getElementById('btnAgregarDirecto');
+        const textoAgregar = document.getElementById('textoAgregar');
+        const enlacesRegistrar = menuRegistrar.querySelectorAll('a');
+        const migasPanel = document.getElementById('migasPanel');
+        const nombresTipo = { bien: 'Bienes', servicio: 'Servicios' };
 
         let tipoActual = 'todos';
 
         function normalizar(texto) {
             return texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+        }
+
+        function actualizarBotonAgregar() {
+            if (tipoActual === 'todos') {
+                desplegable.style.display = '';
+                btnAgregarDirecto.style.display = 'none';
+                return;
+            }
+
+            const esBien = tipoActual === 'bien';
+            desplegable.style.display = 'none';
+            menuRegistrar.classList.remove('activo');
+            btnAgregarDirecto.style.display = '';
+            btnAgregarDirecto.href = enlacesRegistrar[esBien ? 0 : 1].href;
+            textoAgregar.textContent = esBien ? 'Agregar Bien' : 'Agregar Servicio';
+        }
+
+        function actualizarMigas() {
+            if (!migasPanel) return;
+            migasPanel.innerHTML = '';
+
+            if (!nombresTipo[tipoActual]) {
+                migasPanel.innerHTML = '<span class="miga-actual">Inventario</span>';
+                return;
+            }
+
+            const enlace = document.createElement('a');
+            enlace.href = '{{ route('admin.inventario') }}';
+            enlace.textContent = 'Inventario';
+            enlace.addEventListener('click', function (evento) {
+                evento.preventDefault();
+                document.querySelector('.tab[data-tipo="todos"]').click();
+            });
+
+            const separador = document.createElement('i');
+            separador.className = 'fa-solid fa-chevron-right migas-sep';
+
+            const actual = document.createElement('span');
+            actual.className = 'miga-actual';
+            actual.textContent = nombresTipo[tipoActual];
+
+            migasPanel.append(enlace, separador, actual);
         }
 
         function aplicar() {
@@ -840,6 +892,8 @@
                 tabs.forEach(function (t) { t.classList.remove('activo'); });
                 this.classList.add('activo');
                 tipoActual = this.dataset.tipo;
+                actualizarMigas();
+                actualizarBotonAgregar();
                 aplicar();
             });
         });
@@ -861,7 +915,14 @@
             buscador.focus();
         });
 
-        aplicar();
+        const tipoUrl = new URLSearchParams(window.location.search).get('tipo');
+        const tabInicial = document.querySelector('.tab[data-tipo="' + tipoUrl + '"]');
+
+        if (tabInicial) {
+            tabInicial.click();
+        } else {
+            aplicar();
+        }
     }
 </script>
 @endpush

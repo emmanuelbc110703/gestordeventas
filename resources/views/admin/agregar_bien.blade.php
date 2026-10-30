@@ -1,10 +1,8 @@
 <x-layouts.panel
     titulo="Agregar Bien"
-    :regresar="route('admin.bienes')"
     :migas="[
-        ['texto' => 'Administración', 'url' => route('admin.dashboard')],
         ['texto' => 'Inventario', 'url' => route('admin.inventario')],
-        ['texto' => 'Bienes', 'url' => route('admin.bienes')],
+        ['texto' => 'Bienes', 'url' => route('admin.inventario', ['tipo' => 'bien'])],
         ['texto' => 'Nuevo'],
     ]"
 >
@@ -325,7 +323,7 @@
         </div>
 
         <div class="editar-acciones">
-            <a href="{{ route('admin.bienes') }}" class="btn-cancelar">Cancelar</a>
+            <a href="{{ route('admin.inventario', ['tipo' => 'bien']) }}" class="btn-cancelar">Cancelar</a>
             <button type="submit" form="formAgregar" class="btn-guardar">
                 <i class="fa-solid fa-check"></i>
                 Guardar Bien

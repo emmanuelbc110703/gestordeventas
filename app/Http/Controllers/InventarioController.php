@@ -61,7 +61,7 @@ class InventarioController extends Controller
 
         Inventario::create($datos);
 
-        return redirect()->route('admin.bienes');
+        return redirect()->route('admin.inventario', ['tipo' => 'bien'])->with('success', 'Bien registrado correctamente.');
     }
 
 
@@ -217,7 +217,7 @@ class InventarioController extends Controller
             return redirect()->route('admin.servicios');
         }
 
-        return redirect()->route('admin.bienes');
+        return redirect()->route('admin.inventario', ['tipo' => 'bien'])->with('success', 'Bien actualizado correctamente.');
     }
 
 
@@ -248,19 +248,6 @@ class InventarioController extends Controller
             return redirect()->route('admin.servicios');
         }
 
-        return redirect()->route('admin.bienes');
-    }
-
-
-    /**
-     * Mostrar todos los bienes.
-     */
-    public function bienes()
-    {
-        $bienes = Inventario::where('tipo', 'bien')
-            ->orderBy('nombre', 'asc')
-            ->get();
-
-        return view('admin.bienes', compact('bienes'));
+        return redirect()->route('admin.inventario', ['tipo' => 'bien'])->with('success', 'Bien eliminado correctamente.');
     }
 }

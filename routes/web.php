@@ -728,11 +728,9 @@ Route::post(
     [InventarioController::class, 'storeBien']
 )->name('admin.bienes.guardar');
 
-// Lista de bienes
-Route::get(
-    '/admin/bienes',
-    [InventarioController::class, 'bienes']
-)->name('admin.bienes');
+Route::get('/admin/bienes', function () {
+    return redirect()->route('admin.inventario', ['tipo' => 'bien']);
+})->name('admin.bienes');
 
 
 // ========================================

@@ -3,10 +3,12 @@
     'regresar' => null,
     'migas' => [],
     'notificaciones' => 0,
+    'inicio' => null,
 ])
 
 @php
     $usuario = auth()->user();
+    $urlInicio = $inicio ?: (($usuario && $usuario->rol === 'admin') ? route('admin.dashboard') : url('/'));
 
     if ($usuario) {
         $nombreCompleto = trim($usuario->name . ' ' . $usuario->apellido);
@@ -249,18 +251,18 @@
 
             <div class="encabezado-izq">
 
-                <span class="logo-app">
+                <a href="{{ $urlInicio }}" class="logo-app" title="Ir al inicio">
                     <img
                         src="{{ asset('images/logo-los-amates.png') }}"
                         alt="Los Amates"
                         onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='none';"
                     >
-                </span>
+                </a>
 
                 <span class="separador-vertical logo-sep"></span>
 
                 @if(count($migas))
-                    <nav class="migas" aria-label="Ruta de navegación">
+                    <nav class="migas" id="migasPanel" aria-label="Ruta de navegación">
                         @foreach($migas as $miga)
                             @if(!$loop->first)
                                 <i class="fa-solid fa-chevron-right migas-sep"></i>
