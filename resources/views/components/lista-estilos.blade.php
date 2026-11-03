@@ -79,37 +79,27 @@
 
     .lst-herramientas {
         display: flex;
-        justify-content: space-between;
+        flex-wrap: wrap;
         align-items: center;
-        gap: 16px;
+        gap: 12px 16px;
         margin-bottom: 20px;
     }
     .lst-controles {
         display: flex;
+        flex-wrap: wrap;
         align-items: center;
-        gap: 14px;
+        gap: 10px 14px;
+        margin-left: auto;
+        min-width: 0;
     }
 
     .lst-tabs {
-        display: inline-flex;
-        gap: 4px;
-        padding: 4px;
-        background: #f1f2f6;
-        border: 1px solid var(--borde);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0;
+        min-width: 0;
     }
-    .lst-tab {
-        height: 36px;
-        padding: 0 18px;
-        background: transparent;
-        border: none;
-        border-radius: 0;
-        font-family: inherit;
-        font-size: 14px;
-        font-weight: 500;
-        color: var(--texto-suave);
-        cursor: pointer;
-        transition: background 0.2s ease, color 0.2s ease;
-    }
+    .lst-tab { white-space: nowrap; }
     .lst-tab:hover { color: var(--primario); }
     .lst-tab.activo {
         background: #fff;
@@ -120,7 +110,10 @@
 
     .lst-buscador {
         position: relative;
-        width: 320px;
+        flex: 1 1 220px;
+        width: auto;
+        max-width: 320px;
+        min-width: 180px;
     }
     .lst-buscador > i {
         position: absolute;
@@ -442,16 +435,8 @@
     }
 
     @media (max-width: 650px) {
-        .lst-pagina { padding: 28px 0 40px; }
-        .lst-encabezado { flex-direction: column; align-items: stretch; }
-        .lst-encabezado h1 { font-size: 26px; }
-        .lst-btn-principal { width: 100%; }
-        .lst-controles { flex-direction: column; align-items: stretch; }
-        .lst-tabs { display: flex; }
-        .lst-tab { flex: 1; padding: 0 8px; }
-        .lst-selector select { width: 100%; }
-        .lst-modal-botones { flex-direction: column-reverse; }
-        .lst-btn-cancelar, .lst-btn-confirmar { width: 100%; }
+        .lst-controles { margin-left: 0; width: 100%; }
+        .lst-buscador  { max-width: none; flex-basis: 100%; }
     }
 </style>
 @endpush
