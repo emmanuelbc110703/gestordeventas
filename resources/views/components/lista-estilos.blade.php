@@ -94,12 +94,28 @@
     }
 
     .lst-tabs {
-        display: flex;
+        display: inline-flex;
         flex-wrap: wrap;
-        gap: 0;
+        gap: 4px;
+        padding: 4px;
         min-width: 0;
+        background: #f1f2f6;
+        border: 1px solid var(--borde);
     }
-    .lst-tab { white-space: nowrap; }
+    .lst-tab {
+        height: 36px;
+        padding: 0 18px;
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        font-family: inherit;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--texto-suave);
+        white-space: nowrap;
+        cursor: pointer;
+        transition: background 0.2s ease, color 0.2s ease;
+    }
     .lst-tab:hover { color: var(--primario); }
     .lst-tab.activo {
         background: #fff;
