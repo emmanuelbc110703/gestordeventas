@@ -11,6 +11,28 @@
     $estadoActual = old('estado', $esEdicion ? $pago->estado : 'Pendiente');
 @endphp
 
+<style>
+    .frm-control textarea {
+        width: 100%;
+        min-height: 120px;
+        padding: 12px 14px;
+        background: #fff;
+        border: 1px solid var(--borde);
+        border-radius: 0;
+        font-family: inherit;
+        font-size: 15px;
+        color: var(--texto);
+        outline: none;
+        resize: vertical;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .frm-control textarea::placeholder { color: #9ca3af; }
+    .frm-control textarea:focus {
+        border-color: var(--primario);
+        box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.1);
+    }
+</style>
+
 <div class="frm-pagina">
 
     <form method="POST" action="{{ $action }}" id="formPago" novalidate>
@@ -43,8 +65,8 @@
 
                 <div class="frm-campo">
                     <label for="servicio">Servicio</label>
-                    <div style="position:relative;">
-                        <select name="servicio" id="servicio" class="frm-control" required>
+                    <div class="frm-control">
+                        <select name="servicio" id="servicio" class="{{ $errors->has('servicio') ? 'invalido' : '' }}" required>
                             <option value="">Selecciona un servicio</option>
                             @foreach($opcionesServicio as $opcion)
                                 <option value="{{ $opcion }}" @selected($servicioActual === $opcion)>{{ $opcion }}</option>
@@ -57,16 +79,22 @@
 
                 <div class="frm-campo">
                     <label for="descripcion">Descripción</label>
-                    <input type="text" name="descripcion" id="descripcion" class="frm-control" maxlength="255"
-                           value="{{ old('descripcion', $esEdicion ? $pago->descripcion : '') }}"
-                           placeholder="Ej. Recibo CFE">
+                    <div class="frm-control">
+                        <input type="text" name="descripcion" id="descripcion" maxlength="255"
+                               class="{{ $errors->has('descripcion') ? 'invalido' : '' }}"
+                               value="{{ old('descripcion', $esEdicion ? $pago->descripcion : '') }}"
+                               placeholder="Ej. Recibo CFE">
+                    </div>
                     @error('descripcion') <span class="frm-error">{{ $message }}</span> @enderror
                 </div>
 
                 <div class="frm-campo">
                     <label for="observaciones">Observaciones</label>
-                    <textarea name="observaciones" id="observaciones" class="frm-control" rows="5"
-                              placeholder="Información adicional...">{{ old('observaciones', $esEdicion ? $pago->observaciones : '') }}</textarea>
+                    <div class="frm-control">
+                        <textarea name="observaciones" id="observaciones" rows="5"
+                                  class="{{ $errors->has('observaciones') ? 'invalido' : '' }}"
+                                  placeholder="Información adicional...">{{ old('observaciones', $esEdicion ? $pago->observaciones : '') }}</textarea>
+                    </div>
                     @error('observaciones') <span class="frm-error">{{ $message }}</span> @enderror
                 </div>
             </div>
@@ -76,29 +104,38 @@
 
                 <div class="frm-campo">
                     <label for="fecha_pago">Fecha de pago</label>
-                    <input type="date" name="fecha_pago" id="fecha_pago" class="frm-control" required
-                           value="{{ old('fecha_pago', $esEdicion ? $pago->fecha_pago?->format('Y-m-d') : '') }}">
+                    <div class="frm-control">
+                        <input type="date" name="fecha_pago" id="fecha_pago" required
+                               class="{{ $errors->has('fecha_pago') ? 'invalido' : '' }}"
+                               value="{{ old('fecha_pago', $esEdicion ? $pago->fecha_pago?->format('Y-m-d') : '') }}">
+                    </div>
                     @error('fecha_pago') <span class="frm-error">{{ $message }}</span> @enderror
                 </div>
 
                 <div class="frm-campo">
                     <label for="fecha_vencimiento">Fecha de vencimiento</label>
-                    <input type="date" name="fecha_vencimiento" id="fecha_vencimiento" class="frm-control"
-                           value="{{ old('fecha_vencimiento', $esEdicion ? $pago->fecha_vencimiento?->format('Y-m-d') : '') }}">
+                    <div class="frm-control">
+                        <input type="date" name="fecha_vencimiento" id="fecha_vencimiento"
+                               class="{{ $errors->has('fecha_vencimiento') ? 'invalido' : '' }}"
+                               value="{{ old('fecha_vencimiento', $esEdicion ? $pago->fecha_vencimiento?->format('Y-m-d') : '') }}">
+                    </div>
                     @error('fecha_vencimiento') <span class="frm-error">{{ $message }}</span> @enderror
                 </div>
 
                 <div class="frm-campo">
                     <label for="monto">Monto</label>
-                    <input type="number" name="monto" id="monto" class="frm-control" min="0" step="0.01"
-                           value="{{ old('monto', $esEdicion ? $pago->monto : '') }}" placeholder="0.00">
+                    <div class="frm-control">
+                        <input type="number" name="monto" id="monto" min="0" step="0.01" placeholder="0.00"
+                               class="{{ $errors->has('monto') ? 'invalido' : '' }}"
+                               value="{{ old('monto', $esEdicion ? $pago->monto : '') }}">
+                    </div>
                     @error('monto') <span class="frm-error">{{ $message }}</span> @enderror
                 </div>
 
                 <div class="frm-campo">
                     <label for="estado">Estado</label>
-                    <div style="position:relative;">
-                        <select name="estado" id="estado" class="frm-control" required>
+                    <div class="frm-control">
+                        <select name="estado" id="estado" required class="{{ $errors->has('estado') ? 'invalido' : '' }}">
                             <option value="Pendiente" @selected($estadoActual === 'Pendiente')>Pendiente</option>
                             <option value="Pagado" @selected($estadoActual === 'Pagado')>Pagado</option>
                         </select>

@@ -34,8 +34,9 @@
     :migas="[['texto' => 'Pago de servicios', 'url' => null]]"
 >
 
+<x-lista-estilos />
+
 @push('estilos')
-    <x-lista-estilos />
     <style>
         .pg-resumen {
             display: grid; 

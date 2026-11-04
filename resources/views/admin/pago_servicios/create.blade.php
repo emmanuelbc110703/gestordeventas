@@ -5,9 +5,7 @@
         ['texto' => 'Agregar servicio', 'url' => null],
     ]"
 >
-    @push('estilos')
-        <x-formulario-estilos />
-    @endpush
+    <x-formulario-estilos />
 
     @include('admin.pago_servicios._formulario', [
         'pago'       => null,
