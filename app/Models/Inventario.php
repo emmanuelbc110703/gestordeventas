@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Inventario extends Model
@@ -15,12 +16,20 @@ class Inventario extends Model
         'descripcion',
         'precio',
         'tipo',
+        'categoria_id',
+        'fecha_adquisicion',
         'cantidad',
     ];
 
-    /**
-     * Detalles de cotizaciones donde aparece este servicio.
-     */
+    protected $casts = [
+        'fecha_adquisicion' => 'date',
+    ];
+
+    public function categoria(): BelongsTo
+    {
+        return $this->belongsTo(Categoria::class, 'categoria_id');
+    }
+
     public function cotizacionDetalles(): HasMany
     {
         return $this->hasMany(

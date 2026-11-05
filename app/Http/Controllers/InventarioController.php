@@ -5,26 +5,40 @@ namespace App\Http\Controllers;
 use App\Models\Inventario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Categoria;
+use Illuminate\Validation\Rule;
 
 class InventarioController extends Controller
 {
-    /**
-     * Mostrar todo el inventario.
-     */
+    private function categoriasDeBien()
+    {
+        return Categoria::where('tipo', 'bien')->orderBy('nombre')->get();
+    }
+
+    private function mensajesBien(): array
+    {
+        return [
+            'categoria_id.required'             => 'Selecciona una categoría.',
+            'categoria_id.exists'               => 'La categoría seleccionada no es válida.',
+            'fecha_adquisicion.required'        => 'La fecha de adquisición es obligatoria.',
+            'fecha_adquisicion.date'            => 'La fecha de adquisición no es válida.',
+            'fecha_adquisicion.before_or_equal' => 'La fecha de adquisición no puede ser futura.',
+        ];
+    }
+
     public function index()
     {
-        $inventarios = Inventario::orderBy('nombre', 'asc')->get();
+        $inventarios = Inventario::with('categoria')->orderBy('nombre', 'asc')->get();
 
         return view('admin.inventario', compact('inventarios'));
     }
 
 
-    /**
-     * Mostrar formulario para agregar un bien.
-     */
     public function createBien()
     {
-        return view('admin.agregar_bien');
+        $categorias = $this->categoriasDeBien();
+
+        return view('admin.agregar_bien', compact('categorias'));
     }
 
 
@@ -37,9 +51,6 @@ class InventarioController extends Controller
     }
 
 
-    /**
-     * Guardar un nuevo bien.
-     */
     public function storeBien(Request $request)
     {
         $datos = $request->validate([
@@ -48,15 +59,14 @@ class InventarioController extends Controller
             'descripcion' => 'nullable|string',
             'precio' => 'required|numeric|min:0',
             'cantidad' => 'required|integer|min:0',
-        ]);
+            'categoria_id' => ['required', Rule::exists('categorias', 'id')->where('tipo', 'bien')],
+            'fecha_adquisicion' => ['required', 'date', 'before_or_equal:today'],
+        ], $this->mensajesBien());
 
         $datos['tipo'] = 'bien';
 
         if ($request->hasFile('foto')) {
-
-            $datos['foto'] = $request
-                ->file('foto')
-                ->store('inventario', 'public');
+            $datos['foto'] = $request->file('foto')->store('inventario', 'public');
         }
 
         Inventario::create($datos);
@@ -147,73 +157,52 @@ class InventarioController extends Controller
     }
 
 
-    /**
-     * Mostrar formulario para editar un bien o servicio.
-     *
-     * Cada uno utiliza su propio Blade.
-     */
     public function edit($id)
     {
         $inventario = Inventario::findOrFail($id);
 
-        // Si es servicio, abrir editar_servicio.blade.php
         if ($inventario->tipo === 'servicio') {
-
-            return view(
-                'admin.inventario.editar_servicio',
-                compact('inventario')
-            );
+            return view('admin.inventario.editar_servicio', compact('inventario'));
         }
 
-        // Si es bien, abrir editar.blade.php
-        return view(
-            'admin.inventario.editar',
-            compact('inventario')
-        );
+        $categorias = $this->categoriasDeBien();
+
+        return view('admin.inventario.editar', compact('inventario', 'categorias'));
     }
 
 
-    /**
-     * Actualizar un bien o servicio.
-     */
     public function update(Request $request, $id)
     {
         $inventario = Inventario::findOrFail($id);
 
-        $datos = $request->validate([
+        $reglas = [
             'nombre' => 'required|string|max:255',
             'foto' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'descripcion' => 'nullable|string',
             'precio' => 'required|numeric|min:0',
             'cantidad' => 'required|integer|min:0',
-        ]);
+        ];
 
-        // Mantener el tipo original.
-        $datos['tipo'] = $inventario->tipo;
-
-        // Cambiar fotografía solamente si se seleccionó otra.
-        if ($request->hasFile('foto')) {
-
-            // Eliminar fotografía anterior.
-            if ($inventario->foto) {
-
-                Storage::disk('public')->delete(
-                    $inventario->foto
-                );
-            }
-
-            // Guardar nueva fotografía.
-            $datos['foto'] = $request
-                ->file('foto')
-                ->store('inventario', 'public');
+        if ($inventario->tipo === 'bien') {
+            $reglas['categoria_id'] = ['required', Rule::exists('categorias', 'id')->where('tipo', 'bien')];
+            $reglas['fecha_adquisicion'] = ['required', 'date', 'before_or_equal:today'];
         }
 
-        // Actualizar registro.
+        $datos = $request->validate($reglas, $this->mensajesBien());
+
+        $datos['tipo'] = $inventario->tipo;
+
+        if ($request->hasFile('foto')) {
+            if ($inventario->foto) {
+                Storage::disk('public')->delete($inventario->foto);
+            }
+
+            $datos['foto'] = $request->file('foto')->store('inventario', 'public');
+        }
+
         $inventario->update($datos);
 
-        // Regresar a la lista correspondiente.
         if ($inventario->tipo === 'servicio') {
-
             return redirect()->route('admin.servicios');
         }
 

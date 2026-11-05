@@ -12,7 +12,6 @@
         padding: 48px 0 56px;
     }
 
-    /* ===== ENCABEZADO ===== */
     .inv-encabezado {
         display: flex;
         justify-content: space-between;
@@ -83,7 +82,6 @@
         font-size: 11px;
     }
 
-    /* ===== MENÚ REGISTRAR NUEVO ===== */
     .desplegable {
         position: relative;
     }
@@ -119,7 +117,6 @@
         text-align: center;
     }
 
-    /* ===== MENSAJE DE ÉXITO ===== */
     .mensaje-exito {
         display: flex;
         align-items: center;
@@ -133,7 +130,6 @@
         font-weight: 600;
     }
 
-    /* ===== BARRA DE HERRAMIENTAS ===== */
     .inv-herramientas {
         display: flex;
         justify-content: space-between;
@@ -300,7 +296,6 @@
         font-weight: 700;
     }
 
-    /* ===== CUADRÍCULA DE TARJETAS ===== */
     .inv-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
@@ -457,7 +452,6 @@
         color: #fff;
     }
 
-    /* ===== VISTA EN LISTA ===== */
     .inv-grid.lista {
         grid-template-columns: 1fr;
         gap: 16px;
@@ -474,7 +468,6 @@
         justify-content: center;
     }
 
-    /* ===== SIN RESULTADOS ===== */
     .sin-resultados {
         display: none;
         padding: 56px 20px;
@@ -499,7 +492,6 @@
         font-size: 14px;
     }
 
-    /* ===== PIE Y PAGINACIÓN ===== */
     .inv-pie-lista {
         display: flex;
         justify-content: space-between;
@@ -539,8 +531,12 @@
         color: #fff;
         font-weight: 600;
     }
+    .inv-meta {
+        margin: 0 0 12px;
+        font-size: 12px;
+        color: var(--texto-suave);
+    }
 
-    /* ===== RESPONSIVO ===== */
     @media (max-width: 1100px) {
         .inv-herramientas { flex-direction: column; align-items: stretch; }
         .inv-controles { flex-wrap: wrap; }
@@ -572,10 +568,6 @@
 @endpush
 <x-sidebar activo="inventario" :total-inventario="$inventarios->count()" />
 <div class="pagina-inv">
-
-    <!-- =========================
-         ENCABEZADO Y ACCIONES
-    ========================= -->
     <div class="inv-encabezado">
         <div>
             <div class="inv-titulo-fila">
@@ -592,7 +584,6 @@
                 <i class="fa-solid fa-arrow-up-from-bracket"></i>
                 Exportar
             </button>
-
             <div class="desplegable">
                 <button type="button" class="btn-registrar" id="btnRegistrar">
                     <i class="fa-solid fa-plus"></i>
@@ -617,29 +608,19 @@
         </div>
     </div>
 
-    <!-- =========================
-         MENSAJE DE ÉXITO
-    ========================= -->
     @if(session('success'))
         <div class="mensaje-exito">
             <i class="fa-solid fa-circle-check"></i>
             {{ session('success') }}
         </div>
     @endif
-
-    <!-- =========================
-         PESTAÑAS Y CONTROLES
-    ========================= -->
     <div class="inv-herramientas">
-
         <div class="tabs">
             <button type="button" class="tab activo" data-tipo="todos">Todos</button>
             <button type="button" class="tab" data-tipo="bien">Bienes</button>
             <button type="button" class="tab" data-tipo="servicio">Servicios</button>
         </div>
-
         <div class="inv-controles">
-
             <div class="buscador">
                 <i class="fa-solid fa-magnifying-glass"></i>
                 <input type="text" id="buscadorInventario" placeholder="Buscar por nombre..." autocomplete="off">
@@ -647,7 +628,6 @@
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
-
             <div class="selector">
                 <select id="ordenInventario">
                     <option value="az">Orden: Nombre (A – Z)</option>
@@ -657,7 +637,6 @@
                 </select>
                 <i class="fa-solid fa-chevron-down"></i>
             </div>
-
             <div class="vistas">
                 <button type="button" class="vista-btn activo" data-vista="cuadricula">
                     <i class="fa-solid fa-table-cells-large"></i>
@@ -668,17 +647,11 @@
                     Lista
                 </button>
             </div>
-
             <span class="contador-registros" id="contadorRegistros"><strong>{{ $inventarios->count() }}</strong> registros</span>
-
         </div>
     </div>
 
-    <!-- =========================
-         LISTA DE INVENTARIO
-    ========================= -->
     @if($inventarios->count() > 0)
-
         <div class="inv-grid" id="listaInventario">
             @foreach($inventarios as $inventario)
                 <article
@@ -687,8 +660,6 @@
                     data-tipo="{{ $inventario->tipo }}"
                     data-precio="{{ $inventario->precio }}"
                 >
-
-                    <!-- Imagen -->
                     <div class="inv-imagen">
                         <span class="badge-tipo {{ $inventario->tipo === 'servicio' ? 'servicio' : '' }}">
                             {{ $inventario->tipo === 'servicio' ? 'Servicio' : 'Bien' }}
@@ -721,10 +692,18 @@
                         @endif
                     </div>
 
-                    <!-- Información -->
                     <div class="inv-cuerpo">
                         <h3 class="inv-nombre" title="{{ $inventario->nombre }}">{{ $inventario->nombre }}</h3>
                         <p class="inv-descripcion">{{ $inventario->descripcion ?: 'Sin descripción' }}</p>
+
+                        @if($inventario->tipo === 'bien')
+                            <p class="inv-meta">
+                                {{ $inventario->categoria?->nombre ?? 'Sin categoría' }}
+                                @if($inventario->fecha_adquisicion)
+                                    · Adquirido el {{ $inventario->fecha_adquisicion->format('d/m/Y') }}
+                                @endif
+                            </p>
+                        @endif
 
                         <div class="inv-pie">
                             <div>
@@ -738,15 +717,11 @@
                 </article>
             @endforeach
         </div>
-
-        <!-- SIN RESULTADOS DE BÚSQUEDA -->
         <div class="sin-resultados" id="sinResultados">
             <i class="fa-solid fa-box-open"></i>
             <h3>No se encontraron resultados</h3>
             <p>Intenta cambiar el filtro o realizar otra búsqueda.</p>
         </div>
-
-        <!-- PIE Y PAGINACIÓN -->
         <div class="inv-pie-lista">
             <span id="textoMostrando">Mostrando <strong>1 – {{ $inventarios->count() }}</strong> de <strong>{{ $inventarios->count() }}</strong> elementos registrados</span>
 
@@ -756,10 +731,7 @@
                 <span class="pag-btn"><i class="fa-solid fa-chevron-right"></i></span>
             </div>
         </div>
-
     @else
-
-        <!-- SIN REGISTROS -->
         <div class="sin-resultados visible">
             <i class="fa-solid fa-box-open"></i>
             <h3>No hay registros en el inventario</h3>
@@ -773,8 +745,6 @@
 @push('scripts')
 <script>
     const lista = document.getElementById('listaInventario');
-
-    /* ===== MENÚ REGISTRAR NUEVO ===== */
     const btnRegistrar = document.getElementById('btnRegistrar');
     const menuRegistrar = document.getElementById('menuRegistrar');
 
@@ -786,7 +756,6 @@
         if (!event.target.closest('.desplegable')) menuRegistrar.classList.remove('activo');
     });
 
-    /* ===== FILTROS, BÚSQUEDA, ORDEN Y VISTA ===== */
     if (lista) {
         const buscador = document.getElementById('buscadorInventario');
         const btnLimpiar = document.getElementById('btnLimpiar');

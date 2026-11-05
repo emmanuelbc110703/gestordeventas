@@ -429,14 +429,15 @@
                 <!-- Categoría y precio -->
                 <div class="campo-fila">
                     <div class="campo">
-                        <label for="categoria">Categoría *</label>
+                        <label for="categoria_id">Categoría *</label>
                         <div class="campo-control">
-                            <select id="categoria" name="categoria">
-                                @php $categoriaActual = old('categoria', $inventario->categoria ?? ''); @endphp
-                                <option value="" disabled {{ $categoriaActual === '' ? 'selected' : '' }}>Selecciona una categoría</option>
-                                <option value="Accesorios de Baño" {{ $categoriaActual === 'Accesorios de Baño' ? 'selected' : '' }}>Accesorios de Baño</option>
-                                <option value="Muebles" {{ $categoriaActual === 'Muebles' ? 'selected' : '' }}>Muebles</option>
-                                <option value="Decoración" {{ $categoriaActual === 'Decoración' ? 'selected' : '' }}>Decoración</option>
+                            <select id="categoria_id" name="categoria_id" required>
+                                <option value="" disabled {{ old('categoria_id', $inventario->categoria_id) ? '' : 'selected' }}>Selecciona una categoría</option>
+                                @foreach($categorias as $categoria)
+                                    <option value="{{ $categoria->id }}" {{ (string) old('categoria_id', $inventario->categoria_id) === (string) $categoria->id ? 'selected' : '' }}>
+                                        {{ $categoria->nombre }}
+                                    </option>
+                                @endforeach
                             </select>
                             <i class="fa-solid fa-chevron-down icono-select"></i>
                         </div>
@@ -460,20 +461,36 @@
                     </div>
                 </div>
 
-                <!-- Cantidad -->
-                <div class="campo">
-                    <label for="cantidad">Cantidad disponible *</label>
-                    <div class="campo-control con-sufijo">
-                        <input
-                            type="number"
-                            id="cantidad"
-                            name="cantidad"
-                            min="0"
-                            value="{{ old('cantidad', $inventario->cantidad) }}"
-                            placeholder="0"
-                            required
-                        >
-                        <span class="sufijo">unid.</span>
+                <!-- Cantidad y fecha de adquisición -->
+                <div class="campo-fila">
+                    <div class="campo">
+                        <label for="cantidad">Cantidad disponible *</label>
+                        <div class="campo-control con-sufijo">
+                            <input
+                                type="number"
+                                id="cantidad"
+                                name="cantidad"
+                                min="0"
+                                value="{{ old('cantidad', $inventario->cantidad) }}"
+                                placeholder="0"
+                                required
+                            >
+                            <span class="sufijo">unid.</span>
+                        </div>
+                    </div>
+
+                    <div class="campo">
+                        <label for="fecha_adquisicion">Fecha de adquisición *</label>
+                        <div class="campo-control">
+                            <input
+                                type="date"
+                                id="fecha_adquisicion"
+                                name="fecha_adquisicion"
+                                max="{{ now()->toDateString() }}"
+                                value="{{ old('fecha_adquisicion', $inventario->fecha_adquisicion?->format('Y-m-d')) }}"
+                                required
+                            >
+                        </div>
                     </div>
                 </div>
 
