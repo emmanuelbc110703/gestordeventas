@@ -690,7 +690,7 @@
                 Gastos comerciales
             </a>
 
-            <a href="#">
+            <a href="{{ route('admin.cuentas.index') }}">
                 <i class="fa-solid fa-building-columns"></i>
                 Cuenta del negocio
             </a>
@@ -1073,7 +1073,7 @@
                 <!-- CUENTA DEL NEGOCIO -->
 
                 <a
-                    href="#"
+                    href="{{ route('admin.cuentas.index') }}"
                     class="boton"
                 >
 

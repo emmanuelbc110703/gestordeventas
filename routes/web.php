@@ -13,6 +13,7 @@ use App\Http\Controllers\CotizacionController;
 use App\Http\Controllers\Admin\GastoComercialController;
 use App\Http\Controllers\Admin\PagoServicioController;
 use App\Http\Controllers\RestablecerContrasenaController;
+use App\Http\Controllers\Admin\CuentaFinancieraController;
 
 // ========================================
 // DASHBOARD ADMINISTRADOR
@@ -769,4 +770,19 @@ Route::prefix('admin/respaldos')
         Route::get('/{archivo}/descargar', [\App\Http\Controllers\RespaldoController::class, 'descargar'])->name('.descargar');
         Route::post('/{archivo}/restaurar', [\App\Http\Controllers\RespaldoController::class, 'restaurar'])->name('.restaurar');
         Route::delete('/{archivo}', [\App\Http\Controllers\RespaldoController::class, 'eliminar'])->name('.eliminar');
+    });
+
+Route::prefix('admin/cuentas'
+)->name('admin.cuentas.')->middleware(['auth', 'rol:admin'])->group(function () {
+        Route::get('/', [CuentaFinancieraController::class, 'index'])->name('index');
+        Route::get('/agregar', [CuentaFinancieraController::class, 'create'])->name('create');
+        Route::post('/', [CuentaFinancieraController::class, 'store'])->name('store');
+        Route::get('/{cuenta}/editar', [CuentaFinancieraController::class, 'edit']
+        )->whereNumber('cuenta')->name('edit');
+        Route::put('/{cuenta}', [CuentaFinancieraController::class, 'update']
+        )->whereNumber('cuenta')->name('update');
+        Route::post('/{cuenta}/estado', [CuentaFinancieraController::class, 'cambiarEstado']
+        )->whereNumber('cuenta')->name('estado');
+        Route::delete('/{cuenta}', [CuentaFinancieraController::class, 'destroy']
+        )->whereNumber('cuenta')->name('destroy');
     });
