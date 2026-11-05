@@ -768,3 +768,15 @@ Route::get(
         return view('inicio');
     }
 )->name('inicio');
+
+Route::prefix('admin/respaldos')
+    ->name('admin.respaldos')
+    ->middleware(['auth', 'rol:admin'])
+    ->group(function () {
+        Route::get('/', [\App\Http\Controllers\RespaldoController::class, 'index']);
+        Route::post('/crear', [\App\Http\Controllers\RespaldoController::class, 'crear'])->name('.crear');
+        Route::post('/restaurar-archivo', [\App\Http\Controllers\RespaldoController::class, 'restaurarArchivo'])->name('.restaurar_archivo');
+        Route::get('/{archivo}/descargar', [\App\Http\Controllers\RespaldoController::class, 'descargar'])->name('.descargar');
+        Route::post('/{archivo}/restaurar', [\App\Http\Controllers\RespaldoController::class, 'restaurar'])->name('.restaurar');
+        Route::delete('/{archivo}', [\App\Http\Controllers\RespaldoController::class, 'eliminar'])->name('.eliminar');
+    });

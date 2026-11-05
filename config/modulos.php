@@ -11,6 +11,7 @@ return [
         ['clave' => 'gastos',        'texto' => 'Gastos comerciales', 'icono' => 'fa-wallet',            'ruta' => 'admin.gastos_comerciales'],
         ['clave' => 'cuenta',        'texto' => 'Cuenta del negocio', 'icono' => 'fa-building-columns',  'ruta' => null],
         ['clave' => 'pagos',         'texto' => 'Pago de servicios',  'icono' => 'fa-file-invoice',      'ruta' => 'admin.pago_servicios.index'],
+        ['clave' => 'respaldos',     'texto' => 'Respaldos',          'icono' => 'fa-database',          'ruta' => 'admin.respaldos'],
     ],
 
     'Mi cuenta' => [
