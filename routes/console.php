@@ -9,3 +9,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote')->hourly();
 
 Schedule::command('respaldo:crear')->dailyAt('02:00');
+Schedule::command('pagos-servicios:activar-pendientes')->dailyAt('00:05');
