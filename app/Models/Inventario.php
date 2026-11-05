@@ -15,14 +15,18 @@ class Inventario extends Model
         'foto',
         'descripcion',
         'precio',
+        'costo',
+        'referencia',
         'tipo',
         'categoria_id',
         'fecha_adquisicion',
         'cantidad',
+        'disponible_punto_venta',
     ];
 
     protected $casts = [
         'fecha_adquisicion' => 'date',
+        'disponible_punto_venta' => 'boolean',
     ];
 
     public function categoria(): BelongsTo

@@ -15,7 +15,6 @@
         padding: 40px 0 56px;
     }
 
-    /* ===== ENCABEZADO ===== */
     .editar-encabezado {
         display: flex;
         justify-content: space-between;
@@ -92,7 +91,6 @@
         border-color: var(--primario-oscuro);
     }
 
-    /* ===== ERRORES ===== */
     .errores {
         margin-bottom: 24px;
         padding: 16px 20px;
@@ -106,7 +104,6 @@
         padding-left: 20px;
     }
 
-    /* ===== LAYOUT DE DOS COLUMNAS ===== */
     .editar-grid {
         display: grid;
         grid-template-columns: 4fr 5fr;
@@ -119,7 +116,6 @@
         border-radius: 0;
     }
 
-    /* ===== FOTOGRAFÍA ===== */
     .tarjeta-foto {
         padding: 32px;
     }
@@ -214,7 +210,6 @@
     }
     .input-oculto { display: none; }
 
-    /* ===== FORMULARIO ===== */
     .tarjeta-form {
         padding: 44px;
     }
@@ -277,7 +272,6 @@
         pointer-events: none;
     }
 
-    /* ===== RESPONSIVO ===== */
     @media (max-width: 950px) {
         .editar-grid { grid-template-columns: 1fr; gap: 32px; }
         .foto-vista { height: 340px; }
@@ -298,10 +292,6 @@
 @endpush
 
 <div class="pagina-editar">
-
-    <!-- =========================
-         ENCABEZADO
-    ========================= -->
     <div class="editar-encabezado">
         <div>
             <div class="editar-titulo">
@@ -310,20 +300,14 @@
             </div>
             <p class="editar-subtitulo">Modifica la información del servicio seleccionado.</p>
         </div>
-
         <div class="editar-acciones">
             <a href="{{ route('admin.servicios') }}" class="btn-cancelar">Cancelar</a>
-            <!-- El botón está fuera del form, por eso usa el atributo form -->
             <button type="submit" form="formEditar" class="btn-guardar">
                 <i class="fa-solid fa-check"></i>
                 Actualizar Servicio
             </button>
         </div>
     </div>
-
-    <!-- =========================
-         ERRORES
-    ========================= -->
     @if ($errors->any())
         <div class="errores">
             <strong>Hay algunos errores:</strong>
@@ -334,10 +318,6 @@
             </ul>
         </div>
     @endif
-
-    <!-- =========================
-         FORMULARIO
-    ========================= -->
     <form
         id="formEditar"
         action="{{ route('admin.inventario.actualizar', $inventario->id) }}"
@@ -346,7 +326,6 @@
     >
         @csrf
         @method('PUT')
-
         <div class="editar-grid">
             <div class="tarjeta tarjeta-foto">
                 <div class="foto-cabecera">
@@ -382,62 +361,64 @@
                         accept="image/jpg,image/jpeg,image/png,image/webp"
                     >
                 </div>
-
                 <p class="foto-ayuda">Selecciona una nueva imagen solamente si deseas cambiarla.</p>
             </div>
-
             <div class="tarjeta tarjeta-form">
-                <!-- Nombre -->
-                <div class="campo">
-                    <label for="nombre">Nombre del servicio *</label>
-                    <div class="campo-control">
-                        <input
-                            type="text"
-                            id="nombre"
-                            name="nombre"
-                            value="{{ old('nombre', $inventario->nombre) }}"
-                            placeholder="Ej. Mantenimiento de jardín"
-                            required
-                        >
-                    </div>
-                </div>
-
-                <!-- Cantidad y precio -->
                 <div class="campo-fila">
                     <div class="campo">
-                        <label for="cantidad">Cantidad *</label>
+                        <label for="categoria_texto">Categoría *</label>
+                        <x-selector-categoria :categorias="$categorias" :seleccionada="$inventario->categoria_id" />
+                    </div>
+                    <div class="campo">
+                        <label for="referencia">Referencia</label>
                         <div class="campo-control">
                             <input
-                                type="number"
-                                id="cantidad"
-                                name="cantidad"
-                                min="0"
-                                value="{{ old('cantidad', $inventario->cantidad) }}"
-                                placeholder="Ej. 5"
-                                required
+                                type="text"
+                                id="referencia"
+                                name="referencia"
+                                maxlength="100"
+                                value="{{ old('referencia', $inventario->referencia) }}"
+                                placeholder="Ej. SRV-001"
                             >
                         </div>
                     </div>
-
+                </div>
+                <div class="campo-fila">
                     <div class="campo">
-                        <label for="precio">Precio del servicio (MXN) *</label>
+                        <label for="costo">Costo (MXN)</label>
                         <div class="campo-control con-prefijo">
                             <span class="prefijo">$</span>
                             <input
                                 type="number"
-                                id="precio"
-                                name="precio"
+                                id="costo"
+                                name="costo"
                                 min="0"
                                 step="0.01"
-                                value="{{ old('precio', $inventario->precio) }}"
-                                placeholder="Ej. 2500.00"
-                                required
+                                value="{{ old('costo', $inventario->costo) }}"
+                                placeholder="Ej. 800.00"
                             >
                         </div>
                     </div>
+                    <div class="campo">
+                        <label>Punto de venta</label>
+                        <style>
+                            .campo .check-pv { display: flex; align-items: center; gap: 10px; min-height: 44px; }
+                            .campo .check-pv input { width: 18px; height: 18px; margin: 0; accent-color: var(--primario); cursor: pointer; }
+                            .campo .check-pv label { display: inline; margin: 0; font-size: 14px; font-weight: 400; color: var(--texto); cursor: pointer; }
+                        </style>
+                        <div class="check-pv">
+                            <input type="hidden" name="disponible_punto_venta" value="0">
+                            <input
+                                type="checkbox"
+                                id="disponible_punto_venta"
+                                name="disponible_punto_venta"
+                                value="1"
+                                {{ old('disponible_punto_venta', $inventario->disponible_punto_venta ? '1' : '0') == '1' ? 'checked' : '' }}
+                            >
+                            <label for="disponible_punto_venta">Disponible en el punto de venta</label>
+                        </div>
+                    </div>
                 </div>
-
-                <!-- Descripción -->
                 <div class="campo">
                     <label for="descripcion">Descripción</label>
                     <div class="campo-control">
@@ -448,7 +429,6 @@
                         >{{ old('descripcion', $inventario->descripcion) }}</textarea>
                     </div>
                 </div>
-
             </div>
         </div>
     </form>
@@ -463,7 +443,6 @@
     const nombreArchivo = document.getElementById('nombreArchivo');
     const fotoDimensiones = document.getElementById('fotoDimensiones');
 
-    // Muestra las dimensiones reales de la imagen (ancho × alto)
     function mostrarDimensiones() {
         if (imagenPrevia.naturalWidth) {
             fotoDimensiones.textContent = imagenPrevia.naturalWidth + ' × ' + imagenPrevia.naturalHeight + ' px';
@@ -472,7 +451,6 @@
         }
     }
 
-    // Si la imagen guardada no carga, muestra el marcador "Sin imagen"
     imagenPrevia.addEventListener('load', mostrarDimensiones);
     imagenPrevia.addEventListener('error', function () {
         imagenPrevia.style.display = 'none';
@@ -481,7 +459,6 @@
     });
     if (imagenPrevia.complete) mostrarDimensiones();
 
-    // Vista previa al elegir una nueva imagen
     inputFoto.addEventListener('change', function () {
         const archivo = this.files[0];
         if (!archivo) return;

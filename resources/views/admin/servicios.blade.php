@@ -10,7 +10,6 @@
 
 @push('estilos')
 <style>
-    /* ===== ENCABEZADO DE LA PÁGINA ===== */
     .pagina-servicios { 
         padding: 40px 0 56px; 
     }
@@ -36,7 +35,6 @@
         color: var(--texto-suave); 
     }
 
-    /* ===== MENSAJE DE ÉXITO ===== */
     .mensaje-exito {
         display: flex;
         align-items: center;
@@ -51,7 +49,6 @@
         color: #2e7d32;
     }
 
-    /* ===== BOTÓN AGREGAR ===== */
     .btn-agregar { 
         display: inline-flex; 
         align-items: center; 
@@ -70,7 +67,6 @@
         background: var(--primario-oscuro); 
     }
 
-    /* ===== BUSCADOR Y FILTRO DE ORDEN ===== */
     .barra-herramientas { 
         display: flex; 
         gap: 16px; 
@@ -167,7 +163,6 @@
         background: var(--primario-suave); color: var(--primario); 
     }
 
-    /* ===== BOTÓN LIMPIAR BÚSQUEDA ===== */
     .btn-limpiar { 
         display: none; 
         position: absolute; 
@@ -189,7 +184,6 @@
         color: var(--primario); 
         background: var(--primario-suave); 
     }
-    /* Anula el estilo de la lupa (.buscador i) para el icono de la X */
     .buscador .btn-limpiar i { 
         position: static; 
         transform: none; 
@@ -197,7 +191,6 @@
         color: inherit; 
     }
 
-    /* ===== TARJETA DE SERVICIO ===== */
     .servicios-grid { 
         display: grid; 
         grid-template-columns: repeat(3, 1fr); 
@@ -302,7 +295,6 @@
         background: var(--primario-suave); 
     }
 
-    /* ===== SIN RESULTADOS ===== */
     .sin-resultados { 
         grid-column: 1 / -1; 
         padding: 48px 20px; 
@@ -326,7 +318,6 @@
         margin: 0; font-size: 14px; 
     }
 
-    /* ===== PIE DE LA LISTA ===== */
     .pie-lista { 
         display: flex; 
         justify-content: space-between; 
@@ -340,7 +331,6 @@
         color: var(--texto-suave); 
     }
 
-    /* ===== PAGINACIÓN ===== */
     .paginacion { 
         display: flex; 
         align-items: center; 
@@ -367,7 +357,6 @@
         border-radius: 0;
     }
 
-    /* ===== MODAL ELIMINAR (se usará en la edición) ===== */
     .modal { 
         display: none; 
         position: fixed; 
@@ -441,9 +430,29 @@
     .boton-confirmar:hover { 
         background: #b91c1c; 
     }
+    .filtro-categoria select {
+        height: 44px;
+        min-width: 200px;
+        padding: 0 14px;
+        background: #fff;
+        border: 1px solid var(--borde);
+        border-radius: 0;
+        font-family: inherit;
+        font-size: 14px;
+        color: var(--texto);
+        cursor: pointer;
+    }
+
+    .filtro-categoria select:focus { outline: none; border-color: var(--primario); }
+
+    .servicio-meta {
+        margin: 0 0 6px;
+        font-size: 12px;
+        color: var(--texto-suave);
+    }
+
     @keyframes aparecerModal { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 
-    /* ===== RESPONSIVO ===== */
     @media (max-width: 950px) {
         .servicios-grid { grid-template-columns: repeat(2, 1fr); }
     }
@@ -462,10 +471,6 @@
 @endpush
 
 <div class="pagina-servicios">
-
-    <!-- =========================
-         ENCABEZADO Y BOTÓN AGREGAR
-    ========================= -->
     <div class="pagina-encabezado">
         <div>
             <h1>Inventario de Servicios</h1>
@@ -476,20 +481,12 @@
             Agregar Servicio
         </a>
     </div>
-
-    <!-- =========================
-         MENSAJE DE ÉXITO
-    ========================= -->
     @if(session('success'))
         <div class="mensaje-exito">
             <i class="fa-solid fa-circle-check"></i>
             {{ session('success') }}
         </div>
     @endif
-
-    <!-- =========================
-         BUSCADOR Y FILTRO DE ORDEN
-    ========================= -->
     <div class="barra-herramientas">
         <div class="buscador">
             <i class="fa-solid fa-magnifying-glass"></i>
@@ -497,6 +494,14 @@
             <button type="button" class="btn-limpiar" id="btnLimpiar" aria-label="Limpiar búsqueda">
                 <i class="fa-solid fa-xmark"></i>
             </button>
+        </div>
+        <div class="filtro-categoria">
+            <select id="filtroCategoria" aria-label="Filtrar por categoría">
+                <option value="">Todas las categorías</option>
+                @foreach($categorias as $categoria)
+                    <option value="{{ $categoria->id }}">{{ $categoria->nombre }}</option>
+                @endforeach
+            </select>
         </div>
         <div class="filtro">
             <button type="button" class="boton-filtro" id="botonFiltro">
@@ -515,16 +520,9 @@
             </div>
         </div>
     </div>
-
-    <!-- =========================
-         LISTA DE SERVICIOS
-    ========================= -->
     <div class="servicios-grid" id="listaServicios">
         @forelse($servicios as $servicio)
-            <!-- TARJETA DE SERVICIO (abre la edición) -->
-            <a href="{{ route('admin.inventario.editar', $servicio->id) }}" class="servicio-card" data-nombre="{{ $servicio->nombre }}">
-
-                <!-- Foto -->
+            <a href="{{ route('admin.inventario.editar', $servicio->id) }}" class="servicio-card" data-nombre="{{ $servicio->nombre }}" data-categoria="{{ $servicio->categoria_id }}">
                 <div class="servicio-imagen">
                     @if($servicio->foto)
                         <img src="{{ asset('storage/' . $servicio->foto) }}" alt="{{ $servicio->nombre }}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
@@ -539,8 +537,6 @@
                         </div>
                     @endif
                 </div>
-
-                <!-- Información -->
                 <div class="servicio-contenido">
                     <div class="servicio-fila">
                         <h2 class="servicio-nombre">{{ $servicio->nombre }}</h2>
@@ -550,36 +546,31 @@
                         {{ $servicio->descripcion ?: 'Sin descripción disponible.' }}
                     </p>
                     <p class="servicio-cantidad">Cantidad: {{ $servicio->cantidad }}</p>
+                    <p class="servicio-meta">
+                        {{ $servicio->categoria?->nombre ?? 'Sin categoría' }}
+                        @if($servicio->referencia) · Ref. {{ $servicio->referencia }} @endif
+                    </p>
+                    @unless($servicio->disponible_punto_venta)
+                        <p class="servicio-meta">No disponible en punto de venta</p>
+                    @endunless
                     <div class="servicio-pie">
                         <span class="btn-editar">Editar</span>
                     </div>
                 </div>
-
             </a>
-
         @empty
-
-            <!-- SIN SERVICIOS REGISTRADOS -->
             <div class="sin-resultados" id="sinServicios">
                 <i class="fa-solid fa-screwdriver-wrench"></i>
                 <h3>No existen servicios registrados</h3>
                 <p>Agrega un servicio para comenzar a llenar el inventario.</p>
             </div>
-
         @endforelse
-
-        <!-- SIN RESULTADOS DE BÚSQUEDA -->
         <div class="sin-resultados" id="sinResultados" style="display: none;">
             <i class="fa-solid fa-magnifying-glass"></i>
             <h3>No se encontraron servicios</h3>
             <p>Intenta buscar utilizando otro nombre.</p>
         </div>
-
     </div>
-
-    <!-- =========================
-         PIE DE LA LISTA (TOTAL)
-    ========================= -->
     @if($servicios->count() > 0)
         <div class="pie-lista">
             <span id="contadorServicios">{{ $servicios->count() }} {{ $servicios->count() == 1 ? 'servicio' : 'servicios' }} en total</span>
@@ -591,12 +582,7 @@
             </div>
         </div>
     @endif
-
 </div>
-
-<!-- =========================
-     MODAL ELIMINAR SERVICIO
-========================= -->
 <div id="modalEliminar" class="modal">
     <div class="modal-contenido">
         <div class="modal-icono">
@@ -608,9 +594,7 @@
             @csrf
             @method('DELETE')
             <div class="modal-botones">
-                <!-- CANCELAR -->
                 <button type="button" class="boton-cancelar" onclick="cerrarModalEliminar()">Cancelar</button>
-                <!-- CONFIRMAR -->
                 <button type="submit" class="boton-confirmar">
                     <i class="fa-solid fa-trash"></i>
                     Sí, eliminar
@@ -630,9 +614,8 @@
     const contador = document.getElementById('contadorServicios');
     const totalServicios = listaServicios.querySelectorAll('.servicio-card').length;
     const btnLimpiar = document.getElementById('btnLimpiar');
+    const filtroCategoria = document.getElementById('filtroCategoria');
 
-    /* ===== UTILIDADES ===== */
-    // Minúsculas y sin acentos: "Poda" coincide con "poda", "Instalación" con "instalacion"
     function normalizar(texto) {
         return texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
     }
@@ -644,13 +627,13 @@
             : visibles + ' de ' + totalServicios + ' servicios';
     }
 
-    /* ===== BUSCADOR ===== */
     function filtrarServicios() {
         btnLimpiar.style.display = buscador.value ? 'flex' : 'none';
         const texto = normalizar(buscador.value);
+        const categoria = filtroCategoria ? filtroCategoria.value : '';
         let encontrados = 0;
         listaServicios.querySelectorAll('.servicio-card').forEach(function (servicio) {
-            const coincide = normalizar(servicio.dataset.nombre).includes(texto);
+            const coincide = normalizar(servicio.dataset.nombre).includes(texto) && (!categoria || servicio.dataset.categoria === categoria);
             servicio.style.display = coincide ? '' : 'none';
             if (coincide) encontrados++;
         });
@@ -659,6 +642,7 @@
     }
 
     if (buscador) buscador.addEventListener('input', filtrarServicios);
+    if (filtroCategoria) filtroCategoria.addEventListener('change', filtrarServicios);
 
     btnLimpiar.addEventListener('click', function () {
         buscador.value = '';
@@ -666,7 +650,6 @@
         buscador.focus();
     });
 
-    /* ===== ORDENAR ===== */
     function ordenarServicios(tipo) {
         const servicios = Array.from(listaServicios.querySelectorAll('.servicio-card'));
         servicios.sort(function (a, b) {
@@ -687,7 +670,6 @@
         menuFiltro.classList.remove('activo');
     });
 
-    /* ===== MENÚ DEL FILTRO ===== */
     botonFiltro.addEventListener('click', function (event) {
         event.stopPropagation();
         menuFiltro.classList.toggle('activo');
@@ -697,7 +679,6 @@
         if (!event.target.closest('.filtro')) menuFiltro.classList.remove('activo');
     });
 
-    /* ===== MODAL ELIMINAR ===== */
     function abrirModalEliminar(id, nombre) {
         document.getElementById('mensajeEliminar').innerHTML =
             '¿Estás seguro de que deseas eliminar el servicio <strong>' + escapeHtml(nombre) + '</strong>?';
@@ -717,7 +698,6 @@
         if (event.key === 'Escape') cerrarModalEliminar();
     });
 
-    // Evita inyección de HTML en el nombre del servicio
     function escapeHtml(texto) {
         const div = document.createElement('div');
         div.textContent = texto;

@@ -14,8 +14,6 @@
     .pagina-editar {
         padding: 48px 0 56px;
     }
-
-    /* ===== ENCABEZADO ===== */
     .editar-encabezado {
         display: flex;
         justify-content: space-between;
@@ -84,7 +82,6 @@
         border-color: var(--primario-oscuro);
     }
 
-    /* ===== ERRORES ===== */
     .errores {
         margin-bottom: 24px;
         padding: 16px 20px;
@@ -98,7 +95,6 @@
         padding-left: 20px;
     }
 
-    /* ===== LAYOUT DE DOS COLUMNAS ===== */
     .editar-grid {
         display: grid;
         grid-template-columns: 4fr 5fr;
@@ -111,7 +107,6 @@
         border-radius: 0;
     }
 
-    /* ===== FOTOGRAFÍA ===== */
     .tarjeta-foto {
         padding: 32px;
     }
@@ -200,8 +195,6 @@
         background: #fcfbff;
     }
     .input-oculto { display: none; }
-
-    /* ===== FORMULARIO ===== */
     .tarjeta-form {
         padding: 44px;
     }
@@ -264,7 +257,6 @@
         pointer-events: none;
     }
 
-    /* ===== RESPONSIVO ===== */
     @media (max-width: 950px) {
         .editar-grid { grid-template-columns: 1fr; gap: 32px; }
         .foto-vista { height: 340px; }
@@ -285,10 +277,6 @@
 @endpush
 
 <div class="pagina-editar">
-
-    <!-- =========================
-         ENCABEZADO
-    ========================= -->
     <div class="editar-encabezado">
         <div>
             <div class="editar-titulo">
@@ -305,10 +293,6 @@
             </button>
         </div>
     </div>
-
-    <!-- =========================
-         ERRORES
-    ========================= -->
     @if ($errors->any())
         <div class="errores">
             <strong>Hay algunos errores:</strong>
@@ -319,10 +303,6 @@
             </ul>
         </div>
     @endif
-
-    <!-- =========================
-         FORMULARIO
-    ========================= -->
     <form
         id="formAgregar"
         action="{{ route('admin.servicios.guardar') }}"
@@ -369,58 +349,65 @@
             </div>
 
             <div class="tarjeta tarjeta-form">
-
-                <!-- Nombre -->
-                <div class="campo">
-                    <label for="nombre">Nombre del servicio *</label>
-                    <div class="campo-control">
-                        <input
-                            type="text"
-                            id="nombre"
-                            name="nombre"
-                            value="{{ old('nombre') }}"
-                            placeholder="Ej. Decoración para evento"
-                            required
-                        >
-                    </div>
-                </div>
-
-                <!-- Cantidad y precio -->
                 <div class="campo-fila">
                     <div class="campo">
-                        <label for="cantidad">Cantidad disponible *</label>
+                        <label for="categoria_texto">Categoría *</label>
+                        <x-selector-categoria :categorias="$categorias" />
+                    </div>
+                    <div class="campo">
+                        <label for="referencia">Referencia</label>
                         <div class="campo-control">
                             <input
-                                type="number"
-                                id="cantidad"
-                                name="cantidad"
-                                min="0"
-                                value="{{ old('cantidad') }}"
-                                placeholder="Ej. 10"
-                                required
+                                type="text"
+                                id="referencia"
+                                name="referencia"
+                                maxlength="100"
+                                value="{{ old('referencia') }}"
+                                placeholder="Ej. SRV-001"
                             >
                         </div>
                     </div>
+                </div>
 
+                <div class="campo-fila">
                     <div class="campo">
-                        <label for="precio">Precio (MXN) *</label>
+                        <label for="costo">Costo (MXN)</label>
                         <div class="campo-control con-prefijo">
                             <span class="prefijo">$</span>
                             <input
                                 type="number"
-                                id="precio"
-                                name="precio"
+                                id="costo"
+                                name="costo"
                                 min="0"
                                 step="0.01"
-                                value="{{ old('precio') }}"
-                                placeholder="Ej. 1500.00"
-                                required
+                                value="{{ old('costo') }}"
+                                placeholder="Ej. 800.00"
                             >
                         </div>
                     </div>
-                </div>
 
-                <!-- Descripción -->
+                    <div class="campo">
+                        <label>Punto de venta</label>
+
+                        <style>
+                            .campo .check-pv { display: flex; align-items: center; gap: 10px; min-height: 44px; }
+                            .campo .check-pv input { width: 18px; height: 18px; margin: 0; accent-color: var(--primario); cursor: pointer; }
+                            .campo .check-pv label { display: inline; margin: 0; font-size: 14px; font-weight: 400; color: var(--texto); cursor: pointer; }
+                        </style>
+
+                        <div class="check-pv">
+                            <input type="hidden" name="disponible_punto_venta" value="0">
+                            <input
+                                type="checkbox"
+                                id="disponible_punto_venta"
+                                name="disponible_punto_venta"
+                                value="1"
+                                {{ old('disponible_punto_venta', '1') == '1' ? 'checked' : '' }}
+                            >
+                            <label for="disponible_punto_venta">Disponible en el punto de venta</label>
+                        </div>
+                    </div>
+                </div>
                 <div class="campo">
                     <label for="descripcion">Descripción</label>
                     <div class="campo-control">
@@ -446,14 +433,12 @@
     const nombreArchivo = document.getElementById('nombreArchivo');
     const fotoDimensiones = document.getElementById('fotoDimensiones');
 
-    // Muestra las dimensiones reales de la imagen (ancho × alto)
     imagenPrevia.addEventListener('load', function () {
         if (imagenPrevia.naturalWidth) {
             fotoDimensiones.textContent = imagenPrevia.naturalWidth + ' × ' + imagenPrevia.naturalHeight + ' px';
         }
     });
 
-    // Vista previa al elegir una imagen
     inputFoto.addEventListener('change', function () {
         const archivo = this.files[0];
 

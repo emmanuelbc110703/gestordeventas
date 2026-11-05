@@ -350,6 +350,7 @@ public function caja($id)
 
     // Obtener únicamente los servicios disponibles
     $servicios = Inventario::where('tipo', 'servicio')
+        ->where('disponible_punto_venta', true)
         ->where('cantidad', '>', 0)
         ->orderBy('nombre', 'asc')
         ->get();
