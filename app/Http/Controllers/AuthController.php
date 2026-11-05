@@ -66,6 +66,13 @@ class AuthController extends Controller
         'password' => 'required',
     ]);
 
+    $dadaDeBaja = User::onlyTrashed()->where('email', $credenciales['email'])->exists();
+    if ($dadaDeBaja) {
+        return back()
+            ->withInput($request->only('email'))
+            ->with('error', 'Esta cuenta fue dada de baja. Contacta al administrador.');
+    }
+
     // Buscar primero si existe el usuario
     $usuario = User::where('email', $credenciales['email'])->first();
 
@@ -232,11 +239,40 @@ class AuthController extends Controller
     // CLIENTES - ADMIN
     // ========================================
 
-    public function clientes()
+    public function clientes(Request $request)
     {
-        $clientes = User::where('rol', 'cliente')->get();
+        $verBajas = $request->query('estado') === 'baja';
 
-        return view('admin.clientes', compact('clientes'));
+        $consulta = User::where('rol', 'cliente')
+            ->withCount(['ventas', 'cotizaciones']);
+
+        $clientes = $verBajas
+            ? $consulta->onlyTrashed()->get()
+            : $consulta->get();
+
+        $totalActivos = User::where('rol', 'cliente')->count();
+        $totalBajas = User::where('rol', 'cliente')->onlyTrashed()->count();
+
+        return view('admin.clientes', compact('clientes', 'verBajas', 'totalActivos', 'totalBajas'));
+    }
+
+    public function verCliente($id)
+    {
+        $cliente = User::withTrashed()
+            ->where('rol', 'cliente')
+            ->findOrFail($id);
+
+        $ventas = $cliente->ventas()
+            ->withSum('detalles as articulos', 'cantidad')
+            ->latest()
+            ->get();
+
+        $cotizaciones = $cliente->cotizaciones()
+            ->withSum('detalles as servicios', 'cantidad')
+            ->latest()
+            ->get();
+
+        return view('admin.clientes.ver', compact('cliente', 'ventas', 'cotizaciones'));
     }
 
 
@@ -251,6 +287,7 @@ class AuthController extends Controller
 
     public function registerAdmin(Request $request)
     {
+        $this->rechazarCorreoDeBaja($request->input('email'));
         $datos = $request->validate([
             'name' => 'required|string|max:255',
             'apellido' => 'required|string|max:255',
@@ -282,7 +319,7 @@ class AuthController extends Controller
 
     // ========================================
     // ELIMINAR CLIENTE
-    // ========================================
+    // ========================================\
 
     public function destroyCliente($id)
     {
@@ -292,9 +329,39 @@ class AuthController extends Controller
 
         return redirect()
             ->route('admin.clientes')
-            ->with('success', 'Cliente eliminado correctamente.');
+            ->with('success', 'Cliente dado de baja correctamente.');
     }
 
+    public function restaurarCliente($id)
+    {
+        $cliente = User::onlyTrashed()
+            ->where('rol', 'cliente')
+            ->findOrFail($id);
+
+        $cliente->restore();
+
+        return redirect()
+            ->route('admin.clientes')
+            ->with('success', 'Cliente reactivado correctamente.');
+    }
+
+    private function rechazarCorreoDeBaja(?string $email, ?int $ignorarId = null): void
+    {
+        if (!$email) {
+            return;
+        }
+
+        $existe = User::onlyTrashed()
+            ->where('email', $email)
+            ->when($ignorarId, fn ($q) => $q->where('id', '!=', $ignorarId))
+            ->exists();
+
+        if ($existe) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'email' => 'Este correo pertenece a un cliente dado de baja. Reactívalo desde la lista de clientes (filtro "Dados de baja").',
+            ]);
+        }
+    }
 
     // ========================================
     // EDITAR CLIENTE
@@ -318,7 +385,7 @@ class AuthController extends Controller
     public function actualizarCliente(Request $request, $id)
     {
         $cliente = User::where('rol', 'cliente')->findOrFail($id);
-
+        $this->rechazarCorreoDeBaja($request->input('email'), $cliente->id);
         $datos = $request->validate([
             'name' => 'required|string|max:255',
             'apellido' => 'required|string|max:255',
@@ -682,6 +749,13 @@ public function googleLogin(Request $request)
                 'success' => false,
                 'message' => 'Google no proporcionó un correo electrónico.'
             ], 422);
+        }
+
+        if (User::onlyTrashed()->where('email', $email)->exists()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Esta cuenta fue dada de baja. Contacta al administrador.'
+            ], 403);
         }
 
         // Buscar usuario por correo

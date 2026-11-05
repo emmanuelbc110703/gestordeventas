@@ -47,6 +47,56 @@
     .cli-compras {
         font-variant-numeric: tabular-nums;
     }
+    .lst-tabs a.lst-tab {
+        display: inline-flex;
+        align-items: center;
+        text-decoration: none;
+    }
+    .ped-tab-n {
+        margin-left: 6px;
+        font-size: 12px;
+        font-weight: 500;
+        color: #9ca3af;
+    }
+    .lst-tab.activo .ped-tab-n {
+        color: var(--primario);
+    }
+    .cli-baja-etiqueta {
+        display: inline-block;
+        margin-left: 8px;
+        padding: 2px 8px;
+        background: var(--lst-rojo-suave);
+        border: 1px solid #fecaca;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--lst-rojo-oscuro);
+    }
+    .lst-btn-ver,
+    .lst-btn-reactivar {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 34px;
+        padding: 0 14px;
+        background: #fff;
+        border: 1px solid var(--borde);
+        border-radius: 0;
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--texto);
+        text-decoration: none;
+        cursor: pointer;
+        transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    }
+    .lst-btn-ver { width: 34px; padding: 0; color: var(--texto-suave); }
+    .lst-btn-ver:hover,
+    .lst-btn-reactivar:hover {
+        background: var(--primario);
+        border-color: var(--primario);
+        color: #fff;
+    }
+    .cli-form-reactivar { margin: 0; display: inline-flex; }
 
     @media (max-width: 800px) {
         .cli-persona { justify-content: flex-end; }
@@ -80,6 +130,17 @@
         <div class="lst-mensaje error">{{ session('error') }}</div>
     @endif
 
+    <div class="lst-herramientas">
+        <div class="lst-tabs">
+            <a href="{{ route('admin.clientes') }}" class="lst-tab {{ $verBajas ? '' : 'activo' }}">
+                Activos<span class="ped-tab-n">{{ $totalActivos }}</span>
+            </a>
+            <a href="{{ route('admin.clientes', ['estado' => 'baja']) }}" class="lst-tab {{ $verBajas ? 'activo' : '' }}">
+                Dados de baja<span class="ped-tab-n">{{ $totalBajas }}</span>
+            </a>
+        </div>
+    </div>
+
     @if($clientes->count() > 0)
         <div class="lst-herramientas">
             <div class="lst-buscador">
@@ -96,6 +157,7 @@
                         <option value="za">Orden: Nombre (Z – A)</option>
                         <option value="correo">Orden: Correo (A – Z)</option>
                         <option value="compras">Orden: Compras (mayor a menor)</option>
+                        <option value="cotizaciones">Orden: Cotizaciones (mayor a menor)</option>
                     </select>
                     <i class="fa-solid fa-chevron-down"></i>
                 </div>
@@ -115,8 +177,8 @@
                         <th>Correo</th>
                         <th>Teléfono</th>
                         <th>Dirección</th>
-                        <th>Nacimiento</th>
                         <th>Compras</th>
+                        <th>Cotizaciones</th>
                         <th class="lst-col-acciones">Acciones</th>
                     </tr>
                 </thead>
@@ -130,17 +192,19 @@
                             $nacimiento = $cliente->fecha_nacimiento
                                 ? \Illuminate\Support\Carbon::parse($cliente->fecha_nacimiento)->format('d/m/Y')
                                 : null;
-                            $compras = (int) ($cliente->compras_count ?? 0);
+                            $compras = (int) ($cliente->ventas_count ?? 0);
+                            $cotizaciones = (int) ($cliente->cotizaciones_count ?? 0);
                         @endphp
 
                         <tr
                             class="lst-fila"
-                            data-url="{{ route('admin.clientes.editar', $cliente->id) }}"
+                            data-url="{{ route('admin.clientes.ver', $cliente->id) }}"
                             data-nombre="{{ $nombreCompleto }}"
                             data-correo="{{ $cliente->email }}"
                             data-telefono="{{ $cliente->telefono }}"
                             data-direccion="{{ $cliente->direccion }}"
                             data-compras="{{ $compras }}"
+                            data-cotizaciones="{{ $cotizaciones }}"
                         >
                             <td data-label="Cliente">
                                 <div class="cli-persona">
@@ -152,6 +216,9 @@
                                         @endif
                                     </span>
                                     <span class="cli-nombre">{{ $nombreCompleto }}</span>
+                                    @if($verBajas)
+                                        <span class="cli-baja-etiqueta">Baja</span>
+                                    @endif
                                 </div>
                             </td>
                             <td data-label="Correo">
@@ -175,35 +242,46 @@
                                     <span class="lst-sin-dato">No registrada</span>
                                 @endif
                             </td>
-                            <td data-label="Nacimiento">
-                                @if($nacimiento)
-                                    {{ $nacimiento }}
-                                @else
-                                    <span class="lst-sin-dato">No registrada</span>
-                                @endif
-                            </td>
                             <td data-label="Compras" class="cli-compras">{{ $compras }}</td>
+                            <td data-label="Cotizaciones" class="cli-compras">{{ $cotizaciones }}</td>
                             <td class="lst-col-acciones">
                                 <div class="lst-acciones">
                                     <a
-                                        href="{{ route('admin.clientes.editar', $cliente->id) }}"
-                                        class="lst-btn-editar"
-                                        title="Editar"
-                                        aria-label="Editar cliente"
+                                        href="{{ route('admin.clientes.ver', $cliente->id) }}"
+                                        class="lst-btn-ver"
+                                        title="Consultar"
+                                        aria-label="Consultar cliente"
                                     >
-                                        <i class="fa-solid fa-pen"></i>
+                                        <i class="fa-solid fa-eye"></i>
                                     </a>
-                                    <button
-                                        type="button"
-                                        class="lst-btn-eliminar"
-                                        title="Eliminar"
-                                        aria-label="Eliminar cliente"
-                                        data-eliminar
-                                        data-id="{{ $cliente->id }}"
-                                        data-nombre="{{ $nombreCompleto }}"
-                                    >
-                                        <i class="fa-solid fa-trash"></i>
-                                    </button>
+                                    @if($verBajas)
+                                        <form method="POST" action="{{ route('admin.clientes.restaurar', $cliente->id) }}" class="cli-form-reactivar">
+                                            @csrf
+                                            <button type="submit" class="lst-btn-reactivar">Reactivar</button>
+                                        </form>
+                                    @else
+                                        <a
+                                            href="{{ route('admin.clientes.editar', $cliente->id) }}"
+                                            class="lst-btn-editar"
+                                            title="Editar"
+                                            aria-label="Editar cliente"
+                                        >
+                                            <i class="fa-solid fa-pen"></i>
+                                        </a>
+                                        <button
+                                            type="button"
+                                            class="lst-btn-eliminar"
+                                            title="Dar de baja"
+                                            aria-label="Dar de baja cliente"
+                                            data-eliminar
+                                            data-id="{{ $cliente->id }}"
+                                            data-nombre="{{ $nombreCompleto }}"
+                                            data-compras="{{ $compras }}"
+                                            data-cotizaciones="{{ $cotizaciones }}"
+                                        >
+                                            <i class="fa-solid fa-user-slash"></i>
+                                        </button>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -218,8 +296,13 @@
 
     @else
         <div class="lst-vacio visible">
-            <h3>No hay clientes registrados</h3>
-            <p>Aún no existen clientes registrados en el sistema.</p>
+            @if($verBajas)
+                <h3>No hay clientes dados de baja</h3>
+                <p>Los clientes que des de baja aparecerán aquí y podrás reactivarlos.</p>
+            @else
+                <h3>No hay clientes registrados</h3>
+                <p>Aún no existen clientes registrados en el sistema.</p>
+            @endif
         </div>
 
     @endif
@@ -228,7 +311,7 @@
 <div class="lst-modal" id="modalEliminar" role="dialog" aria-modal="true" aria-labelledby="tituloModalEliminar">
     <div class="lst-modal-caja">
 
-        <h2 id="tituloModalEliminar">Eliminar cliente</h2>
+        <h2 id="tituloModalEliminar">Dar de baja cliente</h2>
         <p id="mensajeEliminar"></p>
 
         <form id="formEliminar" method="POST">
@@ -240,7 +323,7 @@
                     Cancelar
                 </button>
                 <button type="submit" class="lst-btn-confirmar">
-                    Sí, eliminar
+                    Sí, dar de baja
                 </button>
             </div>
         </form>
@@ -256,15 +339,18 @@
         const mensaje = document.getElementById('mensajeEliminar');
         const urlEliminar = @js(route('admin.clientes.eliminar', '__ID__'));
 
-        function abrirModal(id, nombre) {
+        function abrirModal(id, nombre, compras, cotizaciones) {
             const fuerte = document.createElement('strong');
             fuerte.textContent = nombre;
 
             mensaje.textContent = '';
             mensaje.append(
-                '¿Seguro que deseas eliminar a ',
+                '¿Seguro que deseas dar de baja a ',
                 fuerte,
-                '? Esta acción no se puede deshacer.'
+                '? Ya no podrá iniciar sesión, pero su historial (' +
+                compras + (compras === '1' ? ' compra' : ' compras') + ' y ' +
+                cotizaciones + (cotizaciones === '1' ? ' cotización' : ' cotizaciones') +
+                ') se conserva y podrás reactivarlo cuando quieras.'
             );
 
             formulario.action = urlEliminar.replace('__ID__', id);
@@ -277,7 +363,7 @@
 
         document.querySelectorAll('[data-eliminar]').forEach(function (boton) {
             boton.addEventListener('click', function () {
-                abrirModal(this.dataset.id, this.dataset.nombre);
+                abrirModal(this.dataset.id, this.dataset.nombre, this.dataset.compras, this.dataset.cotizaciones);
             });
         });
 
@@ -328,6 +414,7 @@
                     case 'za':      return comparar(b.dataset.nombre, a.dataset.nombre);
                     case 'correo':  return comparar(a.dataset.correo, b.dataset.correo);
                     case 'compras': return Number(b.dataset.compras) - Number(a.dataset.compras);
+                    case 'cotizaciones': return Number(b.dataset.cotizaciones) - Number(a.dataset.cotizaciones);
                     default:        return comparar(a.dataset.nombre, b.dataset.nombre);
                 }
             });

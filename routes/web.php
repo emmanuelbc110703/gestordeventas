@@ -582,42 +582,32 @@ Route::post(
 // ========================================
 // ADMIN - CLIENTES
 // ========================================
+Route::get('/admin/clientes', [AuthController::class, 'clientes'])
+    ->middleware(['auth', 'rol:admin'])
+    ->name('admin.clientes');
 
-// Editar cliente
-Route::get(
-    '/admin/clientes/{id}/editar',
-    [AuthController::class, 'editarCliente']
-)->name('admin.clientes.editar');
+Route::middleware(['auth', 'rol:admin'])
+    ->prefix('admin/clientes')
+    ->name('admin.clientes')
+    ->group(function () {
+        Route::get('/agregar', [AuthController::class, 'showRegisterAdmin'])->name('.agregar');
+        Route::post('/guardar', [AuthController::class, 'registerAdmin'])->name('.guardar');
 
-// Actualizar cliente
-Route::put(
-    '/admin/clientes/{id}',
-    [AuthController::class, 'actualizarCliente']
-)->name('admin.clientes.actualizar');
+        Route::get('/{id}', [AuthController::class, 'verCliente'])
+            ->whereNumber('id')->name('.ver');
 
-// Eliminar cliente
-Route::delete(
-    '/admin/clientes/{id}',
-    [AuthController::class, 'destroyCliente']
-)->name('admin.clientes.eliminar');
+        Route::get('/{id}/editar', [AuthController::class, 'editarCliente'])
+            ->whereNumber('id')->name('.editar');
 
-// Mostrar formulario para agregar cliente
-Route::get(
-    '/admin/clientes/agregar',
-    [AuthController::class, 'showRegisterAdmin']
-)->name('admin.clientes.agregar');
+        Route::put('/{id}', [AuthController::class, 'actualizarCliente'])
+            ->whereNumber('id')->name('.actualizar');
 
-// Guardar cliente
-Route::post(
-    '/admin/clientes/guardar',
-    [AuthController::class, 'registerAdmin']
-)->name('admin.clientes.guardar');
+        Route::delete('/{id}', [AuthController::class, 'destroyCliente'])
+            ->whereNumber('id')->name('.eliminar');
 
-// Lista de clientes
-Route::get(
-    '/admin/clientes',
-    [AuthController::class, 'clientes']
-)->name('admin.clientes');
+        Route::post('/{id}/restaurar', [AuthController::class, 'restaurarCliente'])
+            ->whereNumber('id')->name('.restaurar');
+    });
 
 
 // ========================================

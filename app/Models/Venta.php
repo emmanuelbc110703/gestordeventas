@@ -63,10 +63,7 @@ class Venta extends Model
 
     public function empleado()
     {
-        return $this->belongsTo(
-            User::class,
-            'empleado_id'
-        );
+        return $this->belongsTo(User::class, 'empleado_id')->withTrashed();
     }
 
     // ========================================
@@ -75,10 +72,7 @@ class Venta extends Model
 
     public function cliente()
     {
-        return $this->belongsTo(
-            User::class,
-            'cliente_id'
-        );
+        return $this->belongsTo(User::class, 'cliente_id')->withTrashed();
     }
 
     // ========================================
