@@ -182,6 +182,8 @@
             <p>Controla los servicios y pagos recurrentes del negocio.</p>
         </div>
         <a href="{{ route('admin.pago_servicios.create') }}" class="lst-btn-principal">Agregar servicio</a>
+        <a href="{{ route('admin.pago_servicios.registrar') }}">Registrar pago</a>
+        <a href="{{ route('admin.pago_servicios.historial') }}">Pagos realizados</a>
     </div>
 
     @if(session('success'))

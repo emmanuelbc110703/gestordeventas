@@ -56,6 +56,10 @@ Route::prefix('admin/pago-servicios')
     ->name('admin.pago_servicios.')
     ->group(function () {
 
+        Route::get('/registrar-pago', [RegistroPagoServicioController::class, 'create'])->name('registrar');
+        Route::post('/registrar-pago', [RegistroPagoServicioController::class, 'store'])->name('registrar.store');
+        Route::get('/historial-pagos', [RegistroPagoServicioController::class, 'historial'])->name('historial');
+        
         Route::get(
             '/',
             [PagoServicioController::class, 'index']
