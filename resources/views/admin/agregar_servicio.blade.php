@@ -351,6 +351,22 @@
             <div class="tarjeta tarjeta-form">
                 <div class="campo-fila">
                     <div class="campo">
+                        <label for="nombre">Nombre del servicio *</label>
+                        <div class="campo-control">
+                            <input type="text" id="nombre" name="nombre" value="{{ old('nombre') }}"
+                                placeholder="Ej. Mantenimiento de jardín" required>
+                        </div>
+                    </div>
+                    <div class="campo-fila">
+                        <div class="campo">
+                            <label for="cantidad">Cantidad *</label>
+                            <div class="campo-control">
+                                <input type="number" id="cantidad" name="cantidad" min="0"
+                                    value="{{ old('cantidad', 1) }}" placeholder="Ej. 5" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="campo">
                         <label for="categoria_texto">Categoría *</label>
                         <x-selector-categoria :categorias="$categorias" />
                     </div>
@@ -372,17 +388,13 @@
                 <div class="campo-fila">
                     <div class="campo">
                         <label for="costo">Costo (MXN)</label>
-                        <div class="campo-control con-prefijo">
-                            <span class="prefijo">$</span>
-                            <input
-                                type="number"
-                                id="costo"
-                                name="costo"
-                                min="0"
-                                step="0.01"
-                                value="{{ old('costo') }}"
-                                placeholder="Ej. 800.00"
-                            >
+                        <div class="campo">
+                            <label for="precio">Precio del servicio (MXN) *</label>
+                            <div class="campo-control con-prefijo">
+                                <span class="prefijo">$</span>
+                                <input type="number" id="precio" name="precio" min="0" step="0.01"
+                                    value="{{ old('precio') }}" placeholder="Ej. 2500.00" required>
+                            </div>
                         </div>
                     </div>
 

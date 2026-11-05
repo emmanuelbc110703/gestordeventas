@@ -698,9 +698,7 @@ Route::get(
 // Mostrar formulario para agregar servicio
 Route::get(
     '/admin/servicios/agregar',
-    function () {
-        return view('admin.agregar_servicio');
-    }
+    [InventarioController::class, 'createServicio']
 )->name('admin.agregar_servicio');
 
 // Guardar servicio

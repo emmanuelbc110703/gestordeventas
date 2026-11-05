@@ -366,6 +366,24 @@
             <div class="tarjeta tarjeta-form">
                 <div class="campo-fila">
                     <div class="campo">
+                        <label for="nombre">Nombre del servicio *</label>
+                        <div class="campo-control">
+                            <input type="text" id="nombre" name="nombre"
+                                value="{{ old('nombre', $inventario->nombre) }}"
+                                placeholder="Ej. Mantenimiento de jardín" required>
+                        </div>
+                    </div>
+                    <div class="campo-fila">
+                        <div class="campo">
+                            <label for="cantidad">Cantidad *</label>
+                            <div class="campo-control">
+                                <input type="number" id="cantidad" name="cantidad" min="0"
+                                    value="{{ old('cantidad', $inventario->cantidad) }}"
+                                    placeholder="Ej. 5" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="campo">
                         <label for="categoria_texto">Categoría *</label>
                         <x-selector-categoria :categorias="$categorias" :seleccionada="$inventario->categoria_id" />
                     </div>
@@ -385,18 +403,12 @@
                 </div>
                 <div class="campo-fila">
                     <div class="campo">
-                        <label for="costo">Costo (MXN)</label>
+                        <label for="precio">Precio del servicio (MXN) *</label>
                         <div class="campo-control con-prefijo">
                             <span class="prefijo">$</span>
-                            <input
-                                type="number"
-                                id="costo"
-                                name="costo"
-                                min="0"
-                                step="0.01"
-                                value="{{ old('costo', $inventario->costo) }}"
-                                placeholder="Ej. 800.00"
-                            >
+                            <input type="number" id="precio" name="precio" min="0" step="0.01"
+                                value="{{ old('precio', $inventario->precio) }}"
+                                placeholder="Ej. 2500.00" required>
                         </div>
                     </div>
                     <div class="campo">
