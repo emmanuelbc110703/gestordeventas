@@ -12,6 +12,7 @@ use App\Http\Controllers\VentaController;
 use App\Http\Controllers\CotizacionController;
 use App\Http\Controllers\Admin\GastoComercialController;
 use App\Http\Controllers\Admin\PagoServicioController;
+use App\Http\Controllers\RestablecerContrasenaController;
 
 // ========================================
 // DASHBOARD ADMINISTRADOR
@@ -384,6 +385,21 @@ Route::post(
     '/login',
     [AuthController::class, 'login']
 )->name('login.store');
+
+// Restablecer contraseña
+Route::get('/restablecer-contrasena', [RestablecerContrasenaController::class, 'solicitar'])
+    ->name('contrasena.solicitar');
+
+Route::post('/restablecer-contrasena', [RestablecerContrasenaController::class, 'enviarEnlace'])
+    ->middleware('throttle:5,1')
+    ->name('contrasena.enviar');
+
+Route::get('/restablecer-contrasena/{token}', [RestablecerContrasenaController::class, 'formulario'])
+    ->name('contrasena.formulario');
+
+Route::post('/restablecer-contrasena/guardar', [RestablecerContrasenaController::class, 'actualizar'])
+    ->middleware('throttle:5,1')
+    ->name('contrasena.actualizar');
 
 // Google
 Route::post(

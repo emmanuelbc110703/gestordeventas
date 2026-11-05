@@ -12,15 +12,15 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-public function cotizaciones(): HasMany
-{
-    return $this->hasMany(Cotizacion::class, 'user_id');
-}
+    public function cotizaciones(): HasMany
+    {
+        return $this->hasMany(Cotizacion::class, 'user_id');
+    }
 
     public function puntoVenta(): HasOne
-{
-    return $this->hasOne(PuntoVenta::class, 'empleado_id');
-}
+    {
+        return $this->hasOne(PuntoVenta::class, 'empleado_id');
+    }
 
     /**
      * Campos que se pueden guardar masivamente.
@@ -63,5 +63,10 @@ public function cotizaciones(): HasMany
             'password' => 'hashed',
 
         ];
+    }
+    
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new \App\Notifications\RestablecerContrasena($token));
     }
 }

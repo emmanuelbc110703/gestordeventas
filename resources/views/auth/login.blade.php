@@ -271,6 +271,26 @@
     color: #4285f4;
     margin-right: 8px;
 }
+.enlace-olvide {
+    display: block;
+    text-align: right;
+    margin: -4px 0 16px;
+    font-size: 13px;
+    color: #6a1b9a;
+    text-decoration: none;
+}
+.enlace-olvide:hover { text-decoration: underline; }
+
+.exito {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #c8e6c9;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    margin-bottom: 15px;
+    text-align: center;
+}
 
     </style>
 </head>
@@ -375,6 +395,10 @@
             </div>
         @enderror
 
+        <a href="{{ route('contrasena.solicitar') }}" class="enlace-olvide">¿Olvidaste tu contraseña?</a>
+        @if(session('status'))
+            <div class="exito">{{ session('status') }}</div>
+        @endif
 
         <!-- BOTÓN -->
         <button type="submit" class="boton-login">
