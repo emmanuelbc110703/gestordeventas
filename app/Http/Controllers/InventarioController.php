@@ -54,7 +54,7 @@ class InventarioController extends Controller
         ] + $this->reglasCategoria('servicio');
     }
 
-    private function resolverCategoriaId(Request $request, string $tipo): int
+    private function resolverCategoriaId(Request $request, string $tipo): ?int
     {
         if ($request->filled('categoria_nueva')) {
             $nombre = trim(preg_replace('/\s+/', ' ', $request->input('categoria_nueva')));
@@ -65,7 +65,7 @@ class InventarioController extends Controller
             return ($existente ?? Categoria::create(['nombre' => $nombre, 'tipo' => $tipo]))->id;
         }
 
-        return (int) $request->input('categoria_id');
+        return $request->filled('categoria_id') ? (int) $request->input('categoria_id') : null;
     }
 
     public function index()
@@ -205,11 +205,18 @@ class InventarioController extends Controller
             'cantidad' => 'required|integer|min:0',
         ];
 
+        $esAntiguo = $inventario->categoria_id === null;
+
         if ($inventario->tipo === 'bien') {
-            $reglas['fecha_adquisicion'] = ['required', 'date', 'before_or_equal:today'];
+            $reglas['fecha_adquisicion'] = [$inventario->fecha_adquisicion ? 'required' : 'nullable', 'date', 'before_or_equal:today'];
             $reglas += $this->reglasCategoria('bien');
         } else {
             $reglas += $this->reglasServicio();
+        }
+
+        if ($esAntiguo) {
+            $reglas['categoria_id']    = ['nullable', Rule::exists('categorias', 'id')->where('tipo', $inventario->tipo)];
+            $reglas['categoria_nueva'] = ['nullable', 'string', 'min:2', 'max:255'];
         }
 
         $datos = $request->validate($reglas, $this->mensajes());
