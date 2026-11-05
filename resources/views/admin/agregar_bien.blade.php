@@ -13,7 +13,6 @@
         padding: 48px 0 56px;
     }
 
-    /* ===== ENCABEZADO ===== */
     .editar-encabezado {
         display: flex;
         justify-content: space-between;
@@ -82,7 +81,6 @@
         border-color: var(--primario-oscuro);
     }
 
-    /* ===== ERRORES ===== */
     .errores {
         margin-bottom: 24px;
         padding: 16px 20px;
@@ -96,7 +94,6 @@
         padding-left: 20px;
     }
 
-    /* ===== LAYOUT DE DOS COLUMNAS ===== */
     .editar-grid {
         display: grid;
         grid-template-columns: 4fr 5fr;
@@ -109,7 +106,6 @@
         border-radius: 0;
     }
 
-    /* ===== FOTOGRAFÍA ===== */
     .tarjeta-foto {
         padding: 32px;
     }
@@ -199,7 +195,6 @@
     }
     .input-oculto { display: none; }
 
-    /* ===== FORMULARIO ===== */
     .tarjeta-form {
         padding: 44px;
     }
@@ -289,7 +284,6 @@
         pointer-events: none;
     }
 
-    /* ===== RESPONSIVO ===== */
     @media (max-width: 950px) {
         .editar-grid { grid-template-columns: 1fr; gap: 32px; }
         .foto-vista { height: 340px; }
@@ -310,10 +304,6 @@
 @endpush
 
 <div class="pagina-editar">
-
-    <!-- =========================
-         ENCABEZADO
-    ========================= -->
     <div class="editar-encabezado">
         <div>
             <div class="editar-titulo">
@@ -321,7 +311,6 @@
             </div>
             <p class="editar-subtitulo">Ingresa los datos esenciales y la fotografía del nuevo producto en catálogo.</p>
         </div>
-
         <div class="editar-acciones">
             <a href="{{ route('admin.inventario', ['tipo' => 'bien']) }}" class="btn-cancelar">Cancelar</a>
             <button type="submit" form="formAgregar" class="btn-guardar">
@@ -330,10 +319,6 @@
             </button>
         </div>
     </div>
-
-    <!-- =========================
-         ERRORES
-    ========================= -->
     @if ($errors->any())
         <div class="errores">
             <strong>Hay algunos errores:</strong>
@@ -344,10 +329,6 @@
             </ul>
         </div>
     @endif
-
-    <!-- =========================
-         FORMULARIO
-    ========================= -->
     <form
         id="formAgregar"
         action="{{ route('admin.bienes.guardar') }}"
@@ -394,8 +375,6 @@
             </div>
 
             <div class="tarjeta tarjeta-form">
-
-                <!-- Nombre -->
                 <div class="campo">
                     <label for="nombre">Nombre del bien *</label>
                     <div class="campo-control">
@@ -409,23 +388,11 @@
                         >
                     </div>
                 </div>
-
-                <!-- Categoría y precio -->
                 <div class="campo-fila">
                     <div class="campo">
-                        <label for="categoria">Categoría *</label>
-                        <div class="campo-control">
-                            <select id="categoria" name="categoria">
-                                @php $categoriaActual = old('categoria', ''); @endphp
-                                <option value="" disabled {{ $categoriaActual === '' ? 'selected' : '' }}>Selecciona una categoría</option>
-                                <option value="Accesorios de Baño" {{ $categoriaActual === 'Accesorios de Baño' ? 'selected' : '' }}>Accesorios de Baño</option>
-                                <option value="Muebles" {{ $categoriaActual === 'Muebles' ? 'selected' : '' }}>Muebles</option>
-                                <option value="Decoración" {{ $categoriaActual === 'Decoración' ? 'selected' : '' }}>Decoración</option>
-                            </select>
-                            <i class="fa-solid fa-chevron-down icono-select"></i>
-                        </div>
+                        <label for="categoria_texto">Categoría *</label>
+                        <x-selector-categoria :categorias="$categorias" />
                     </div>
-
                     <div class="campo">
                         <label for="precio">Precio Unitario (MXN) *</label>
                         <div class="campo-control con-prefijo">
@@ -443,25 +410,36 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Cantidad -->
-                <div class="campo">
-                    <label for="cantidad">Cantidad disponible *</label>
-                    <div class="campo-control con-sufijo">
-                        <input
-                            type="number"
-                            id="cantidad"
-                            name="cantidad"
-                            min="0"
-                            value="{{ old('cantidad') }}"
-                            placeholder="0"
-                            required
-                        >
-                        <span class="sufijo">unid.</span>
+                <div class="campo-fila">
+                    <div class="campo">
+                        <label for="cantidad">Cantidad disponible *</label>
+                        <div class="campo-control con-sufijo">
+                            <input
+                                type="number"
+                                id="cantidad"
+                                name="cantidad"
+                                min="0"
+                                value="{{ old('cantidad') }}"
+                                placeholder="0"
+                                required
+                            >
+                            <span class="sufijo">unid.</span>
+                        </div>
+                    </div>
+                    <div class="campo">
+                        <label for="fecha_adquisicion">Fecha de adquisición *</label>
+                        <div class="campo-control">
+                            <input
+                                type="date"
+                                id="fecha_adquisicion"
+                                name="fecha_adquisicion"
+                                max="{{ now()->toDateString() }}"
+                                value="{{ old('fecha_adquisicion', now()->toDateString()) }}"
+                                required
+                            >
+                        </div>
                     </div>
                 </div>
-
-                <!-- Descripción -->
                 <div class="campo">
                     <label for="descripcion">Descripción</label>
                     <div class="campo-control">
@@ -472,11 +450,9 @@
                         >{{ old('descripcion') }}</textarea>
                     </div>
                 </div>
-
             </div>
         </div>
     </form>
-
 </div>
 
 @push('scripts')
@@ -487,14 +463,12 @@
     const nombreArchivo = document.getElementById('nombreArchivo');
     const fotoDimensiones = document.getElementById('fotoDimensiones');
 
-    // Muestra las dimensiones reales de la imagen (ancho × alto)
     imagenPrevia.addEventListener('load', function () {
         if (imagenPrevia.naturalWidth) {
             fotoDimensiones.textContent = imagenPrevia.naturalWidth + ' × ' + imagenPrevia.naturalHeight + ' px';
         }
     });
 
-    // Vista previa al elegir una imagen
     inputFoto.addEventListener('change', function () {
         const archivo = this.files[0];
 

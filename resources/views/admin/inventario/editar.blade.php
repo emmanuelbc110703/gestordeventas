@@ -15,7 +15,6 @@
         padding: 40px 0 56px;
     }
 
-    /* ===== ENCABEZADO ===== */
     .editar-encabezado {
         display: flex;
         justify-content: space-between;
@@ -320,10 +319,6 @@
 @endpush
 
 <div class="pagina-editar">
-
-    <!-- =========================
-         ENCABEZADO
-    ========================= -->
     <div class="editar-encabezado">
         <div>
             <div class="editar-titulo">
@@ -332,20 +327,14 @@
             </div>
             <p class="editar-subtitulo">Actualiza los datos esenciales y la fotografía del producto en catálogo.</p>
         </div>
-
         <div class="editar-acciones">
             <a href="{{ route('admin.bienes') }}" class="btn-cancelar">Cancelar</a>
-            <!-- El botón está fuera del form, por eso usa el atributo form -->
             <button type="submit" form="formEditar" class="btn-guardar">
                 <i class="fa-solid fa-check"></i>
                 Guardar Cambios
             </button>
         </div>
     </div>
-
-    <!-- =========================
-         ERRORES
-    ========================= -->
     @if ($errors->any())
         <div class="errores">
             <strong>Hay algunos errores:</strong>
@@ -356,10 +345,6 @@
             </ul>
         </div>
     @endif
-
-    <!-- =========================
-         FORMULARIO
-    ========================= -->
     <form
         id="formEditar"
         action="{{ route('admin.inventario.actualizar', $inventario->id) }}"
@@ -370,14 +355,11 @@
         @method('PUT')
 
         <div class="editar-grid">
-
-            <!-- ===== COLUMNA IZQUIERDA: FOTOGRAFÍA ===== -->
             <div class="tarjeta tarjeta-foto">
                 <div class="foto-cabecera">
                     <h2>Fotografía del producto</h2>
                     <span class="foto-dimensiones" id="fotoDimensiones"></span>
                 </div>
-
                 <div class="foto-vista">
                     <img
                         id="imagenPrevia"
@@ -390,7 +372,6 @@
                         <span>Sin imagen</span>
                     </div>
                 </div>
-
                 <div class="foto-pie">
                     <span class="foto-archivo" id="nombreArchivo">{{ $inventario->foto ? basename($inventario->foto) : 'Ningún archivo' }}</span>
 
@@ -407,11 +388,7 @@
                     >
                 </div>
             </div>
-
-            <!-- ===== COLUMNA DERECHA: DATOS ===== -->
             <div class="tarjeta tarjeta-form">
-
-                <!-- Nombre -->
                 <div class="campo">
                     <label for="nombre">Nombre del bien *</label>
                     <div class="campo-control">
@@ -425,24 +402,11 @@
                         >
                     </div>
                 </div>
-
-                <!-- Categoría y precio -->
                 <div class="campo-fila">
                     <div class="campo">
-                        <label for="categoria_id">Categoría *</label>
-                        <div class="campo-control">
-                            <select id="categoria_id" name="categoria_id" required>
-                                <option value="" disabled {{ old('categoria_id', $inventario->categoria_id) ? '' : 'selected' }}>Selecciona una categoría</option>
-                                @foreach($categorias as $categoria)
-                                    <option value="{{ $categoria->id }}" {{ (string) old('categoria_id', $inventario->categoria_id) === (string) $categoria->id ? 'selected' : '' }}>
-                                        {{ $categoria->nombre }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <i class="fa-solid fa-chevron-down icono-select"></i>
-                        </div>
+                        <label for="categoria_texto">Categoría *</label>
+                        <x-selector-categoria :categorias="$categorias" :seleccionada="$inventario->categoria_id" />
                     </div>
-
                     <div class="campo">
                         <label for="precio">Precio Unitario (MXN) *</label>
                         <div class="campo-control con-prefijo">
@@ -460,8 +424,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Cantidad y fecha de adquisición -->
                 <div class="campo-fila">
                     <div class="campo">
                         <label for="cantidad">Cantidad disponible *</label>
@@ -478,7 +440,6 @@
                             <span class="sufijo">unid.</span>
                         </div>
                     </div>
-
                     <div class="campo">
                         <label for="fecha_adquisicion">Fecha de adquisición *</label>
                         <div class="campo-control">
@@ -493,8 +454,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Descripción -->
                 <div class="campo">
                     <label for="descripcion">Descripción</label>
                     <div class="campo-control">
@@ -505,7 +464,6 @@
                         >{{ old('descripcion', $inventario->descripcion) }}</textarea>
                     </div>
                 </div>
-
             </div>
         </div>
     </form>
@@ -520,7 +478,6 @@
     const nombreArchivo = document.getElementById('nombreArchivo');
     const fotoDimensiones = document.getElementById('fotoDimensiones');
 
-    // Muestra las dimensiones reales de la imagen (ancho × alto)
     function mostrarDimensiones() {
         if (imagenPrevia.naturalWidth) {
             fotoDimensiones.textContent = imagenPrevia.naturalWidth + ' × ' + imagenPrevia.naturalHeight + ' px';
@@ -529,7 +486,6 @@
         }
     }
 
-    // Si la imagen guardada no carga, muestra el marcador "Sin imagen"
     imagenPrevia.addEventListener('load', mostrarDimensiones);
     imagenPrevia.addEventListener('error', function () {
         imagenPrevia.style.display = 'none';
@@ -538,7 +494,6 @@
     });
     if (imagenPrevia.complete) mostrarDimensiones();
 
-    // Vista previa al elegir una nueva imagen
     inputFoto.addEventListener('change', function () {
         const archivo = this.files[0];
         if (!archivo) return;

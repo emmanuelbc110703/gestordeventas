@@ -18,12 +18,36 @@ class InventarioController extends Controller
     private function mensajesBien(): array
     {
         return [
-            'categoria_id.required'             => 'Selecciona una categoría.',
+            'categoria_id.required_without'     => 'Selecciona una categoría o crea una nueva.',
             'categoria_id.exists'               => 'La categoría seleccionada no es válida.',
+            'categoria_nueva.required_without'  => 'Selecciona una categoría o crea una nueva.',
+            'categoria_nueva.min'               => 'El nombre de la categoría debe tener al menos 2 caracteres.',
+            'categoria_nueva.max'               => 'El nombre de la categoría no puede superar los 255 caracteres.',
             'fecha_adquisicion.required'        => 'La fecha de adquisición es obligatoria.',
             'fecha_adquisicion.date'            => 'La fecha de adquisición no es válida.',
             'fecha_adquisicion.before_or_equal' => 'La fecha de adquisición no puede ser futura.',
         ];
+    }
+
+    private function reglasCategoria(string $tipo): array
+    {
+        return [
+            'categoria_id'    => ['nullable', 'required_without:categoria_nueva', Rule::exists('categorias', 'id')->where('tipo', $tipo)],
+            'categoria_nueva' => ['nullable', 'required_without:categoria_id', 'string', 'min:2', 'max:255'],
+        ];
+    }
+
+    private function resolverCategoriaId(Request $request, string $tipo): int
+    {
+        if ($request->filled('categoria_nueva')) {
+            $nombre = trim(preg_replace('/\s+/', ' ', $request->input('categoria_nueva')));
+            $existente = Categoria::where('tipo', $tipo)->get()
+                ->first(fn ($c) => mb_strtolower($c->nombre) === mb_strtolower($nombre));
+
+            return ($existente ?? Categoria::create(['nombre' => $nombre, 'tipo' => $tipo]))->id;
+        }
+
+        return (int) $request->input('categoria_id');
     }
 
     public function index()
@@ -59,10 +83,12 @@ class InventarioController extends Controller
             'descripcion' => 'nullable|string',
             'precio' => 'required|numeric|min:0',
             'cantidad' => 'required|integer|min:0',
-            'categoria_id' => ['required', Rule::exists('categorias', 'id')->where('tipo', 'bien')],
             'fecha_adquisicion' => ['required', 'date', 'before_or_equal:today'],
-        ], $this->mensajesBien());
+        ] + $this->reglasCategoria('bien'), $this->mensajesBien());
 
+        unset($datos['categoria_nueva']);
+
+        $datos['categoria_id'] = $this->resolverCategoriaId($request, 'bien');
         $datos['tipo'] = 'bien';
 
         if ($request->hasFile('foto')) {
@@ -184,11 +210,17 @@ class InventarioController extends Controller
         ];
 
         if ($inventario->tipo === 'bien') {
-            $reglas['categoria_id'] = ['required', Rule::exists('categorias', 'id')->where('tipo', 'bien')];
             $reglas['fecha_adquisicion'] = ['required', 'date', 'before_or_equal:today'];
+            $reglas += $this->reglasCategoria('bien');
         }
 
         $datos = $request->validate($reglas, $this->mensajesBien());
+
+        unset($datos['categoria_nueva']);
+
+        if ($inventario->tipo === 'bien') {
+            $datos['categoria_id'] = $this->resolverCategoriaId($request, 'bien');
+        }
 
         $datos['tipo'] = $inventario->tipo;
 
