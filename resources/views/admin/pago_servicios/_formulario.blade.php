@@ -1,14 +1,10 @@
 @php
     $esEdicion = isset($pago) && $pago;
-    $opcionesServicio = ['Luz', 'Agua', 'Internet', 'Permiso', 'Otro'];
-    $servicioActual = old('servicio', $esEdicion ? $pago->servicio : '');
+    $sugerencias = ['Luz', 'Agua', 'Internet', 'Teléfono', 'Renta', 'Permiso'];
 
-    // Si el valor guardado no está en la lista, se agrega para no perderlo al editar.
-    if ($servicioActual && !in_array($servicioActual, $opcionesServicio, true)) {
-        array_unshift($opcionesServicio, $servicioActual);
-    }
-
-    $estadoActual = old('estado', $esEdicion ? $pago->estado : 'Pendiente');
+    $tipoActual = old('tipo_movimiento', $esEdicion ? ($pago->tipo_movimiento ?: 'egreso') : 'egreso');
+    $cuentaActual = (string) old('cuenta_financiera_id', $esEdicion ? $pago->cuenta_financiera_id : '');
+    $periodicidadActual = old('periodicidad', $esEdicion ? $pago->periodicidad : '');
 @endphp
 
 <style>
@@ -31,6 +27,15 @@
         border-color: var(--primario);
         box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.1);
     }
+    .frm-aviso {
+        margin-bottom: 24px;
+        padding: 14px 18px;
+        background: #fff7ed;
+        border: 1px solid #fed7aa;
+        color: #9a3412;
+        font-size: 14px;
+    }
+    .frm-aviso a { color: inherit; font-weight: 600; }
 </style>
 
 <div class="frm-pagina">
@@ -58,21 +63,44 @@
             </div>
         @endif
 
+        @if($cuentas->isEmpty())
+            <div class="frm-aviso">
+                No hay cuentas activas del negocio. Primero
+                <a href="{{ route('admin.cuentas.create') }}">registra una cuenta de tipo Activo</a>
+                para poder programar pagos e ingresos.
+            </div>
+        @endif
+
         <div class="frm-grid">
 
             <div class="frm-card">
                 <div class="frm-card-titulo">Información del servicio</div>
 
                 <div class="frm-campo">
-                    <label for="servicio">Servicio</label>
+                    <label for="tipo_movimiento">Tipo <span class="frm-req">*</span></label>
                     <div class="frm-control">
-                        <select name="servicio" id="servicio" class="{{ $errors->has('servicio') ? 'invalido' : '' }}" required>
-                            <option value="">Selecciona un servicio</option>
-                            @foreach($opcionesServicio as $opcion)
-                                <option value="{{ $opcion }}" @selected($servicioActual === $opcion)>{{ $opcion }}</option>
+                        <select name="tipo_movimiento" id="tipo_movimiento" required class="{{ $errors->has('tipo_movimiento') ? 'invalido' : '' }}">
+                            @foreach($tiposMovimiento as $valor => $texto)
+                                <option value="{{ $valor }}" @selected($tipoActual === $valor)>{{ $texto }}</option>
                             @endforeach
                         </select>
                         <i class="fa-solid fa-chevron-down frm-icono-select"></i>
+                    </div>
+                    @error('tipo_movimiento') <span class="frm-error">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="frm-campo">
+                    <label for="servicio">Servicio <span class="frm-req">*</span></label>
+                    <div class="frm-control">
+                        <input type="text" name="servicio" id="servicio" maxlength="255" required list="listaServicios"
+                               class="{{ $errors->has('servicio') ? 'invalido' : '' }}"
+                               value="{{ old('servicio', $esEdicion ? $pago->servicio : '') }}"
+                               placeholder="Ej. Luz, Internet, Renta de local">
+                        <datalist id="listaServicios">
+                            @foreach($sugerencias as $sugerencia)
+                                <option value="{{ $sugerencia }}"></option>
+                            @endforeach
+                        </datalist>
                     </div>
                     @error('servicio') <span class="frm-error">{{ $message }}</span> @enderror
                 </div>
@@ -100,48 +128,68 @@
             </div>
 
             <div class="frm-card">
-                <div class="frm-card-titulo">Pago</div>
+                <div class="frm-card-titulo">Recurrencia y cuenta</div>
 
                 <div class="frm-campo">
-                    <label for="fecha_pago">Fecha de pago</label>
+                    <label for="cuenta_financiera_id" id="etiquetaCuenta">Cuenta <span class="frm-req">*</span></label>
                     <div class="frm-control">
-                        <input type="date" name="fecha_pago" id="fecha_pago" required
-                               class="{{ $errors->has('fecha_pago') ? 'invalido' : '' }}"
-                               value="{{ old('fecha_pago', $esEdicion ? $pago->fecha_pago?->format('Y-m-d') : '') }}">
-                    </div>
-                    @error('fecha_pago') <span class="frm-error">{{ $message }}</span> @enderror
-                </div>
-
-                <div class="frm-campo">
-                    <label for="fecha_vencimiento">Fecha de vencimiento</label>
-                    <div class="frm-control">
-                        <input type="date" name="fecha_vencimiento" id="fecha_vencimiento"
-                               class="{{ $errors->has('fecha_vencimiento') ? 'invalido' : '' }}"
-                               value="{{ old('fecha_vencimiento', $esEdicion ? $pago->fecha_vencimiento?->format('Y-m-d') : '') }}">
-                    </div>
-                    @error('fecha_vencimiento') <span class="frm-error">{{ $message }}</span> @enderror
-                </div>
-
-                <div class="frm-campo">
-                    <label for="monto">Monto</label>
-                    <div class="frm-control">
-                        <input type="number" name="monto" id="monto" min="0" step="0.01" placeholder="0.00"
-                               class="{{ $errors->has('monto') ? 'invalido' : '' }}"
-                               value="{{ old('monto', $esEdicion ? $pago->monto : '') }}">
-                    </div>
-                    @error('monto') <span class="frm-error">{{ $message }}</span> @enderror
-                </div>
-
-                <div class="frm-campo">
-                    <label for="estado">Estado</label>
-                    <div class="frm-control">
-                        <select name="estado" id="estado" required class="{{ $errors->has('estado') ? 'invalido' : '' }}">
-                            <option value="Pendiente" @selected($estadoActual === 'Pendiente')>Pendiente</option>
-                            <option value="Pagado" @selected($estadoActual === 'Pagado')>Pagado</option>
+                        <select name="cuenta_financiera_id" id="cuenta_financiera_id" required class="{{ $errors->has('cuenta_financiera_id') ? 'invalido' : '' }}">
+                            <option value="">Selecciona una cuenta</option>
+                            @foreach($cuentas as $cuenta)
+                                <option value="{{ $cuenta->id }}" @selected($cuentaActual === (string) $cuenta->id)>{{ $cuenta->nombre }} · {{ $cuenta->moneda }}</option>
+                            @endforeach
                         </select>
                         <i class="fa-solid fa-chevron-down frm-icono-select"></i>
                     </div>
-                    @error('estado') <span class="frm-error">{{ $message }}</span> @enderror
+                    <span class="frm-ayuda" id="ayudaCuenta"></span>
+                    @error('cuenta_financiera_id') <span class="frm-error">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="frm-campo">
+                    <label for="periodicidad">Periodicidad <span class="frm-req">*</span></label>
+                    <div class="frm-control">
+                        <select name="periodicidad" id="periodicidad" required class="{{ $errors->has('periodicidad') ? 'invalido' : '' }}">
+                            <option value="">Selecciona la periodicidad</option>
+                            @foreach($periodicidades as $valor => $texto)
+                                <option value="{{ $valor }}" @selected($periodicidadActual === $valor)>{{ $texto }}</option>
+                            @endforeach
+                        </select>
+                        <i class="fa-solid fa-chevron-down frm-icono-select"></i>
+                    </div>
+                    @error('periodicidad') <span class="frm-error">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="frm-fila">
+                    <div class="frm-campo">
+                        <label for="fecha_pago">Próxima fecha <span class="frm-req">*</span></label>
+                        <div class="frm-control">
+                            <input type="date" name="fecha_pago" id="fecha_pago" required
+                                   class="{{ $errors->has('fecha_pago') ? 'invalido' : '' }}"
+                                   value="{{ old('fecha_pago', $esEdicion ? $pago->fecha_pago?->format('Y-m-d') : '') }}">
+                        </div>
+                        @error('fecha_pago') <span class="frm-error">{{ $message }}</span> @enderror
+                    </div>
+
+                    <div class="frm-campo">
+                        <label for="fecha_vencimiento">Vencimiento</label>
+                        <div class="frm-control">
+                            <input type="date" name="fecha_vencimiento" id="fecha_vencimiento"
+                                   class="{{ $errors->has('fecha_vencimiento') ? 'invalido' : '' }}"
+                                   value="{{ old('fecha_vencimiento', $esEdicion ? $pago->fecha_vencimiento?->format('Y-m-d') : '') }}">
+                        </div>
+                        @error('fecha_vencimiento') <span class="frm-error">{{ $message }}</span> @enderror
+                    </div>
+                </div>
+
+                <div class="frm-campo">
+                    <label for="monto">Monto esperado <span class="frm-req">*</span></label>
+                    <div class="frm-control">
+                        <input type="number" name="monto" id="monto" min="0.01" step="0.01" placeholder="0.00" required
+                               class="{{ $errors->has('monto') ? 'invalido' : '' }}"
+                               value="{{ old('monto', $esEdicion ? $pago->monto : '') }}">
+                    </div>
+                    <span class="frm-ayuda">Al registrar el recibo se captura el monto real y se programa el siguiente periodo automáticamente.</span>
+                    @error('monto') <span class="frm-error">{{ $message }}</span> @enderror
                 </div>
             </div>
 
@@ -157,6 +205,19 @@
     const texto = btn.textContent;
     form.addEventListener('submit', () => { btn.disabled = true; btn.textContent = 'Guardando...'; });
     window.addEventListener('pageshow', () => { btn.disabled = false; btn.textContent = texto; });
+
+    const tipo = document.getElementById('tipo_movimiento');
+    const etiqueta = document.getElementById('etiquetaCuenta');
+    const ayuda = document.getElementById('ayudaCuenta');
+    function actualizarTipo() {
+        const ingreso = tipo.value === 'ingreso';
+        etiqueta.innerHTML = (ingreso ? 'Cuenta de destino' : 'Cuenta de origen') + ' <span class="frm-req">*</span>';
+        ayuda.textContent = ingreso
+            ? 'El dinero se depositará en esta cuenta al registrar el cobro.'
+            : 'El dinero se descontará de esta cuenta al registrar el pago.';
+    }
+    tipo.addEventListener('change', actualizarTipo);
+    actualizarTipo();
 })();
 </script>
 @endpush

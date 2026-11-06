@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\CuentaFinanciera;
+use App\Models\MovimientoCuenta;
 use App\Models\PagoServicio;
 use App\Models\ReciboPagoServicio;
 use Illuminate\Support\Carbon;
@@ -40,6 +42,19 @@ class RegistrarReciboPagoServicio
                 ]);
             }
 
+            $cuentaId = (int) ($datos['cuenta_financiera_id'] ?? $pago->cuenta_financiera_id);
+            $cuenta = $cuentaId
+                ? CuentaFinanciera::paraMovimientos()->whereKey($cuentaId)->first()
+                : null;
+
+            if (! $cuenta) {
+                throw ValidationException::withMessages([
+                    'cuenta_financiera_id' => 'Selecciona una cuenta activa del negocio.',
+                ]);
+            }
+
+            $tipo = $pago->tipo_movimiento ?: 'egreso';
+
             $programada = $pago->fecha_pago->copy()->startOfDay();
             $siguiente = $periodicidad === 'unico'
                 ? null
@@ -64,11 +79,24 @@ class RegistrarReciboPagoServicio
                 'informacion_recibo' => $datos['informacion_recibo'] ?? null,
                 'estado' => 'Pagado',
                 'fecha_siguiente_pago' => $siguiente?->toDateString(),
+                'tipo_movimiento' => $tipo,
+                'cuenta_financiera_id' => $cuenta->id,
+            ]);
+
+            MovimientoCuenta::create([
+                'cuenta_financiera_id' => $cuenta->id,
+                'tipo' => $tipo,
+                'monto' => $montoPagado,
+                'fecha' => $datos['fecha_pago'],
+                'concepto' => ($tipo === 'ingreso' ? 'Ingreso: ' : 'Pago: ').$pago->servicio,
+                'recibo_pago_servicio_id' => $recibo->id,
+                'user_id' => $userId,
             ]);
 
             $pago->monto = $montoPagado;
             $pago->estado = 'Pagado';
             $pago->periodicidad = $periodicidad;
+            $pago->cuenta_financiera_id ??= $cuenta->id;
             $pago->save();
 
             if ($siguiente) {
@@ -89,6 +117,8 @@ class RegistrarReciboPagoServicio
                         'monto' => $montoPagado,
                         'estado' => 'Pendiente',
                         'periodicidad' => $periodicidad,
+                        'tipo_movimiento' => $tipo,
+                        'cuenta_financiera_id' => $pago->cuenta_financiera_id,
                         'fecha_vencimiento' => $vencimiento?->toDateString(),
                     ])->save();
                 }

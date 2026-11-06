@@ -23,6 +23,8 @@ class ReciboPagoServicio extends Model
         'informacion_recibo',
         'estado',
         'fecha_siguiente_pago',
+        'tipo_movimiento',
+        'cuenta_financiera_id',
     ];
 
     protected $casts = [
@@ -38,6 +40,11 @@ class ReciboPagoServicio extends Model
     public function pagoServicio(): BelongsTo
     {
         return $this->belongsTo(PagoServicio::class, 'pago_servicio_id');
+    }
+
+    public function cuenta(): BelongsTo
+    {
+        return $this->belongsTo(CuentaFinanciera::class, 'cuenta_financiera_id');
     }
 
     public function usuario(): BelongsTo

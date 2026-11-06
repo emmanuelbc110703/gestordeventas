@@ -19,8 +19,9 @@
 
     $vistaInicial = (request('vista') === 'calendario' || request('mes')) ? 'calendario' : 'lista';
 
-    $totalPendiente = $servicios->where('estado', 'Pendiente')->sum('monto');
-    $totalPagado    = $servicios->where('estado', 'Pagado')->sum('monto');
+    $pendientes     = $servicios->where('estado', 'Pendiente');
+    $totalPendiente = $pendientes->where('tipo_movimiento', '!=', 'ingreso')->sum('monto');
+    $totalPorCobrar = $pendientes->where('tipo_movimiento', 'ingreso')->sum('monto');
     $vencidos = $servicios->filter(fn ($s) =>
         $s->estado === 'Pendiente' && $s->fecha_vencimiento && $s->fecha_vencimiento->lt($hoy)
     );
@@ -40,7 +41,7 @@
     <style>
         .pg-resumen {
             display: grid; 
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             background: #fff; 
             border: 1px solid var(--borde); 
             margin-bottom: 20px;
@@ -97,6 +98,20 @@
         }
         .pg-badge.pagado    { background: #ecfdf3; color: #067647; border-color: #abefc6; }
         .pg-badge.pendiente { background: #fffaeb; color: #b54708; border-color: #fedf89; }
+        .pg-tipo { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; margin-top: 4px; }
+        .pg-tipo.egreso  { color: #b54708; }
+        .pg-tipo.ingreso { color: #067647; }
+        .pg-monto.ingreso { color: #067647; font-weight: 600; }
+        .pg-cuenta { font-size: 14px; }
+        .pg-sin-cuenta { color: #b54708; font-size: 13px; }
+        .pg-enc-acciones { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+        .pg-btn-sec { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 44px; padding: 0 18px;
+            background: #fff; border: 1px solid var(--borde); color: var(--texto); font-size: 14px; font-weight: 600;
+            text-decoration: none; white-space: nowrap; transition: border-color .2s, background .2s; }
+        .pg-btn-sec:hover { border-color: #c4b5fd; background: #fcfbff; }
+        .lst-btn-registrar { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px;
+            background: #ecfdf3; border: 1px solid #abefc6; color: #067647; text-decoration: none; font-size: 13px; }
+        .lst-btn-registrar:hover { background: #067647; border-color: #067647; color: #fff; }
         .pg-vencido { color: #b91c1c; font-weight: 600; }
         .pg-monto { white-space: nowrap; font-variant-numeric: tabular-nums; }
         .pg-acciones { display: flex; gap: 6px; justify-content: flex-end; }
@@ -181,13 +196,23 @@
             </div>
             <p>Controla los servicios y pagos recurrentes del negocio.</p>
         </div>
-        <a href="{{ route('admin.pago_servicios.create') }}" class="lst-btn-principal">Agregar servicio</a>
-        <a href="{{ route('admin.pago_servicios.registrar') }}">Registrar pago</a>
-        <a href="{{ route('admin.pago_servicios.historial') }}">Pagos realizados</a>
+        <div class="pg-enc-acciones">
+            <a href="{{ route('admin.pago_servicios.historial') }}" class="pg-btn-sec">
+                <i class="fa-solid fa-clock-rotate-left"></i> Pagos realizados
+            </a>
+            <a href="{{ route('admin.pago_servicios.registrar') }}" class="pg-btn-sec">
+                <i class="fa-solid fa-receipt"></i> Registrar pago
+            </a>
+            <a href="{{ route('admin.pago_servicios.create') }}" class="lst-btn-principal">Agregar servicio</a>
+        </div>
     </div>
 
     @if(session('success'))
         <div class="pg-alerta">{{ session('success') }}</div>
+    @endif
+
+    @if($errors->any())
+        <div class="lst-mensaje error">{{ $errors->first() }}</div>
     @endif
 
     <div class="pg-resumen">
@@ -196,8 +221,8 @@
             <strong>${{ number_format($totalPendiente, 2) }}</strong>
         </div>
         <div>
-            <small>Pagado</small>
-            <strong>${{ number_format($totalPagado, 2) }}</strong>
+            <small>Pendiente por cobrar</small>
+            <strong>${{ number_format($totalPorCobrar, 2) }}</strong>
         </div>
         <div class="{{ $vencidos->count() ? 'rojo' : '' }}">
             <small>Pagos vencidos</small>
@@ -240,8 +265,10 @@
                     <thead>
                         <tr>
                             <th>Servicio</th>
-                            <th>Fecha de pago</th>
+                            <th>Próxima fecha</th>
                             <th>Vencimiento</th>
+                            <th>Periodicidad</th>
+                            <th>Cuenta</th>
                             <th>Monto</th>
                             <th>Estado</th>
                             <th style="text-align:right;">Acciones</th>
@@ -253,7 +280,7 @@
                                 $vencido = $s->estado === 'Pendiente' && $s->fecha_vencimiento && $s->fecha_vencimiento->lt($hoy);
                             @endphp
                             <tr class="fila-pago"
-                                data-url="{{ route('admin.pago_servicios.edit', $s->id) }}"
+                                data-url="{{ $s->estado === 'Pendiente' ? route('admin.pago_servicios.edit', $s->id) : '' }}"
                                 data-estado="{{ $s->estado }}"
                                 data-fecha="{{ $s->fecha_pago?->format('Y-m-d') }}"
                                 data-monto="{{ $s->monto ?? 0 }}"
@@ -263,6 +290,10 @@
                                     @if($s->descripcion)
                                         <div class="pg-desc">{{ $s->descripcion }}</div>
                                     @endif
+                                    <div class="pg-tipo {{ $s->tipo_movimiento === 'ingreso' ? 'ingreso' : 'egreso' }}">
+                                        <i class="fa-solid {{ $s->tipo_movimiento === 'ingreso' ? 'fa-arrow-down' : 'fa-arrow-up' }}"></i>
+                                        {{ $s->tipo_movimiento === 'ingreso' ? 'Ingreso' : 'Pago' }}
+                                    </div>
                                 </td>
                                 <td data-label="Fecha de pago">{{ $s->fecha_pago?->format('d/m/Y') ?? '—' }}</td>
                                 <td data-label="Vencimiento">
@@ -274,18 +305,32 @@
                                         —
                                     @endif
                                 </td>
-                                <td data-label="Monto" class="pg-monto">
-                                    {{ $s->monto !== null ? '$' . number_format($s->monto, 2) : '—' }}
+                                <td data-label="Periodicidad">{{ $periodicidades[$s->periodicidad] ?? '—' }}</td>
+                                <td data-label="Cuenta" class="pg-cuenta">
+                                    @if($s->cuenta)
+                                        {{ $s->cuenta->nombre }}
+                                    @else
+                                        <span class="pg-sin-cuenta">Sin cuenta</span>
+                                    @endif
                                 </td>
+                                <td data-label="Monto" class="pg-monto {{ $s->tipo_movimiento === 'ingreso' ? 'ingreso' : '' }}">
                                 <td data-label="Estado">
                                     <span class="pg-badge {{ $s->estado === 'Pagado' ? 'pagado' : 'pendiente' }}">{{ $s->estado }}</span>
                                 </td>
                                 <td data-label="Acciones">
                                     <div class="pg-acciones">
-                                        <a href="{{ route('admin.pago_servicios.edit', $s->id) }}"
-                                           class="lst-btn-editar" title="Editar" aria-label="Editar {{ $s->servicio }}">
-                                            <i class="fa-solid fa-pen"></i>
-                                        </a>
+                                        @if($s->estado === 'Pendiente')
+                                            <a href="{{ route('admin.pago_servicios.registrar', ['servicio' => $s->id]) }}"
+                                               class="lst-btn-registrar"
+                                               title="{{ $s->tipo_movimiento === 'ingreso' ? 'Registrar cobro' : 'Registrar pago' }}"
+                                               aria-label="Registrar {{ $s->servicio }}">
+                                                <i class="fa-solid fa-receipt"></i>
+                                            </a>
+                                            <a href="{{ $s->estado === 'Pendiente' ? route('admin.pago_servicios.edit', $s->id) : route('admin.pago_servicios.historial', ['servicio' => $s->servicio]) }}"
+                                                class="pg-chip {{ $s->estado === 'Pagado' ? 'pagado' : 'pendiente' }}"
+                                                title="{{ $s->servicio }} · {{ $s->estado }}">{{ $s->servicio }}
+                                            </a>
+                                        @endif
                                         <form action="{{ route('admin.pago_servicios.destroy', $s->id) }}" method="POST"
                                               onsubmit="return confirm('¿Deseas eliminar este servicio?');">
                                             @csrf
@@ -409,7 +454,7 @@
         if (e.target.closest('a, button, form')) return;
         if (window.getSelection().toString()) return;
         const fila = e.target.closest('tr.fila-pago');
-        if (fila) window.location.href = fila.dataset.url;
+        if (fila && fila.dataset.url) window.location.href = fila.dataset.url;
     });
 
     aplicar();

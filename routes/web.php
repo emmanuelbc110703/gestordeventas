@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\PagoServicioController;
 use App\Http\Controllers\RestablecerContrasenaController;
 use App\Http\Controllers\Admin\CuentaFinancieraController;
 use Livewire\Volt\Volt;
+use App\Http\Controllers\Admin\RegistroPagoServicioController;
 
 // ========================================
 // DASHBOARD ADMINISTRADOR
@@ -54,12 +55,11 @@ Route::get(
 
 Route::prefix('admin/pago-servicios')
     ->name('admin.pago_servicios.')
+    ->middleware(['auth', 'rol:admin'])
     ->group(function () {
-
         Route::get('/registrar-pago', [RegistroPagoServicioController::class, 'create'])->name('registrar');
         Route::post('/registrar-pago', [RegistroPagoServicioController::class, 'store'])->name('registrar.store');
         Route::get('/historial-pagos', [RegistroPagoServicioController::class, 'historial'])->name('historial');
-        
         Route::get(
             '/',
             [PagoServicioController::class, 'index']
@@ -790,10 +790,4 @@ Route::prefix('admin/cuentas'
         )->whereNumber('cuenta')->name('estado');
         Route::delete('/{cuenta}', [CuentaFinancieraController::class, 'destroy']
         )->whereNumber('cuenta')->name('destroy');
-    });
-
-Route::middleware(['auth', 'can:administrar-pagos-servicios']
-)->prefix('pagos-servicios')->name('pagos-servicios.')->group(function () {
-        Volt::route('/registrar', 'pagos-servicios.registrar')->name('registrar');
-        Volt::route('/historial', 'pagos-servicios.historial')->name('historial');
     });

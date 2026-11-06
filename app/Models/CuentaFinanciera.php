@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CuentaFinanciera extends Model
 {
@@ -69,8 +71,32 @@ class CuentaFinanciera extends Model
         return $this->tipo === 'pasivo';
     }
 
+    public function movimientos(): HasMany
+    {
+        return $this->hasMany(MovimientoCuenta::class, 'cuenta_financiera_id');
+    }
+
+    public function scopeParaMovimientos(Builder $query): Builder
+    {
+        return $query->where('tipo', 'activo')->where('activa', true)->orderBy('nombre');
+    }
+
     public function getSaldoActualAttribute(): string
     {
-        return $this->saldo_inicial;
+        $ingresos = array_key_exists('ingresos_total', $this->attributes)
+            ? (float) $this->attributes['ingresos_total']
+            : (float) $this->movimientos()->where('tipo', 'ingreso')->sum('monto');
+
+        $egresos = array_key_exists('egresos_total', $this->attributes)
+            ? (float) $this->attributes['egresos_total']
+            : (float) $this->movimientos()->where('tipo', 'egreso')->sum('monto');
+
+        return number_format((float) $this->saldo_inicial + $ingresos - $egresos, 2, '.', '');
+    }
+
+    public function scopeConSaldos(Builder $query): Builder
+    {
+        return $query->withSum(['movimientos as ingresos_total' => fn ($q) => $q->where('tipo', 'ingreso')], 'monto')
+            ->withSum(['movimientos as egresos_total' => fn ($q) => $q->where('tipo', 'egreso')], 'monto');
     }
 }

@@ -11,7 +11,7 @@ class CuentaFinancieraController extends Controller
 {
     public function index()
     {
-        $cuentas = CuentaFinanciera::orderBy('nombre')->get();
+        $cuentas = CuentaFinanciera::conSaldos()->orderBy('nombre')->get();
 
         return view('admin.cuentanegocio.cuenta_de_negocio', compact('cuentas'));
     }
@@ -57,6 +57,12 @@ class CuentaFinancieraController extends Controller
 
     public function destroy(CuentaFinanciera $cuenta)
     {
+        if ($cuenta->movimientos()->exists()) {
+            return redirect()
+                ->route('admin.cuentas.index')
+                ->with('error', 'No se puede eliminar: la cuenta tiene movimientos registrados. Desactívala en su lugar.');
+        }
+        
         $cuenta->delete();
 
         return redirect()
