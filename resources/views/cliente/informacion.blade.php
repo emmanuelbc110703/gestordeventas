@@ -1,1140 +1,422 @@
-<!DOCTYPE html>
-<html lang="es">
-
-<head>
-
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Mi información - Orquídeas y más Los Amates</title>
-
-    <!-- FONT AWESOME -->
-    <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-    >
-
-    <style>
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-        }
-
-
-        /* =========================
-           ENCABEZADO
-        ========================= */
-
-        .encabezado {
-            background-color: #6a1b9a;
-            color: white;
-            padding: 25px;
-            text-align: center;
-            position: relative;
-        }
-
-        .encabezado h1 {
-            margin: 5px 0;
-        }
-
-
-        /* =========================
-           BOTÓN REGRESAR
-        ========================= */
-
-        .boton-regresar {
-            position: absolute;
-            top: 20px;
-            left: 25px;
-
-            background-color: white;
-            color: #6a1b9a;
-
-            text-decoration: none;
-
-            padding: 10px 15px;
-
-            border-radius: 8px;
-
-            font-weight: bold;
-
-            transition: 0.3s;
-        }
-
-        .boton-regresar:hover {
-            background-color: #4a126d;
-            color: white;
-        }
-
-
-        /* =========================
-           CONTENEDOR
-        ========================= */
-
-        .contenedor {
-            width: 90%;
-            max-width: 750px;
-
-            margin: 40px auto;
-        }
-
-        .tarjeta {
-            background-color: white;
-
-            border-radius: 15px;
-
-            padding: 35px;
-
-            box-shadow:
-                0 5px 20px rgba(0, 0, 0, 0.15);
-        }
-
-
-        /* =========================
-           PERFIL
-        ========================= */
-
-        .perfil {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .perfil-avatar {
-            position: relative;
-
-            width: 100px;
-            height: 115px;
-
-            margin: auto;
-            margin-bottom: 15px;
-        }
-
-
-        /* =========================
-           AVATAR
-        ========================= */
-
-        .avatar {
-            width: 100px;
-            height: 100px;
-
-            border-radius: 50%;
-
-            color: white;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            font-size: 42px;
-            font-weight: bold;
-
-            overflow: hidden;
-        }
-
-        .avatar img {
-            width: 100%;
-            height: 100%;
-
-            object-fit: cover;
-        }
-
-
-        /* =========================
-           BOTÓN EDITAR FOTO
-        ========================= */
-
-        .boton-editar-foto {
-            position: absolute;
-
-            bottom: 0;
-            right: -5px;
-
-            width: 36px;
-            height: 36px;
-
-            border: none;
-            border-radius: 50%;
-
-            background-color: white;
-            color: #6a1b9a;
-
-            box-shadow:
-                0 3px 10px rgba(0, 0, 0, 0.25);
-
-            cursor: pointer;
-
-            font-size: 15px;
-
-            transition: 0.3s;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .boton-editar-foto:hover {
-            background-color: #4a126d;
-            color: white;
-
-            transform: scale(1.1);
-        }
-
-
-        /* =========================
-           MENÚ DE FOTO
-        ========================= */
-
-        .menu-foto {
-            display: none;
-
-            position: absolute;
-
-            top: 105px;
-            left: 50%;
-
-            transform: translateX(-50%);
-
-            width: 190px;
-
-            background-color: white;
-
-            border-radius: 10px;
-
-            box-shadow:
-                0 5px 20px rgba(0, 0, 0, 0.2);
-
-            overflow: hidden;
-
-            z-index: 100;
-        }
-
-        .menu-foto.mostrar {
-            display: block;
-        }
-
-        .menu-foto button {
-            width: 100%;
-
-            padding: 12px 15px;
-
-            border: none;
-
-            background-color: white;
-
-            color: #444;
-
-            text-align: left;
-
-            cursor: pointer;
-
-            font-size: 14px;
-
-            transition: 0.3s;
-        }
-
-        .menu-foto button:hover {
-            background-color: #f0e4f5;
-            color: #6a1b9a;
-        }
-
-        .menu-foto button i {
-            width: 25px;
-            color: #6a1b9a;
-        }
-
-
-        /* =========================
-           BOTÓN ELIMINAR FOTO
-        ========================= */
-
-        .boton-eliminar-foto {
-            color: #d32f2f !important;
-        }
-
-        .boton-eliminar-foto i {
-            color: #d32f2f !important;
-        }
-
-        .boton-eliminar-foto:hover {
-            background-color: #ffebee !important;
-            color: #b71c1c !important;
-        }
-
-        .boton-eliminar-foto:hover i {
-            color: #b71c1c !important;
-        }
-
-
-        /* =========================
-           PANEL DE COLORES
-        ========================= */
-
-        .panel-colores {
-            display: none;
-
-            position: absolute;
-
-            top: 105px;
-            left: 50%;
-
-            transform: translateX(-50%);
-
-            width: 220px;
-
-            background-color: white;
-
-            border-radius: 10px;
-
-            padding: 15px;
-
-            box-shadow:
-                0 5px 20px rgba(0, 0, 0, 0.2);
-
-            z-index: 101;
-        }
-
-        .panel-colores.mostrar {
-            display: block;
-        }
-
-        .panel-colores p {
-            margin: 0 0 12px;
-
-            color: #444;
-
-            font-size: 14px;
-            font-weight: bold;
-        }
-
-        .colores {
-            display: grid;
-
-            grid-template-columns: repeat(3, 1fr);
-
-            gap: 12px;
-        }
-
-        .color-opcion {
-            width: 45px;
-            height: 45px;
-
-            border: 3px solid transparent;
-
-            border-radius: 50%;
-
-            cursor: pointer;
-
-            transition: 0.3s;
-        }
-
-        .color-opcion:hover {
-            transform: scale(1.12);
-
-            border-color: #333;
-        }
-
-
-        /* =========================
-           TEXTO PERFIL
-        ========================= */
-
-        .perfil h2 {
-            color: #333;
-            margin-bottom: 5px;
-        }
-
-        .perfil p {
-            color: #777;
-            margin: 0;
-        }
-
-
-        /* =========================
-           INFORMACIÓN
-        ========================= */
-
-        .informacion {
-            display: grid;
-
-            grid-template-columns: 1fr 1fr;
-
-            gap: 18px;
-
-            margin-top: 30px;
-        }
-
-        .dato {
-            background-color: #f8f8f8;
-
-            padding: 18px;
-
-            border-radius: 10px;
-
-            border-left: 5px solid #6a1b9a;
-        }
-
-        .dato i {
-            color: #6a1b9a;
-
-            margin-right: 8px;
-        }
-
-        .dato strong {
-            display: block;
-
-            color: #555;
-
-            margin-bottom: 7px;
-        }
-
-        .dato span {
-            color: #222;
-
-            word-break: break-word;
-        }
-
-
-        /* =========================
-           BOTÓN EDITAR INFORMACIÓN
-        ========================= */
-
-        .contenedor-boton {
-            text-align: center;
-
-            margin-top: 30px;
-        }
-
-        .boton-editar {
-            display: inline-block;
-
-            background-color: #6a1b9a;
-
-            color: white;
-
-            padding: 13px 25px;
-
-            border-radius: 8px;
-
-            text-decoration: none;
-
-            font-weight: bold;
-
-            transition: 0.3s;
-        }
-
-        .boton-editar:hover {
-            background-color: #4a126d;
-
-            transform: translateY(-2px);
-        }
-
-        .boton-editar i {
-            margin-right: 8px;
-        }
-
-
-        /* =========================
-           RESPONSIVO
-        ========================= */
-
-        @media (max-width: 600px) {
-
-            .informacion {
-                grid-template-columns: 1fr;
-            }
-
-            .boton-regresar {
-                position: static;
-
-                display: inline-block;
-
-                margin-bottom: 15px;
-            }
-
-            .encabezado {
-                padding: 20px;
-            }
-
-            .tarjeta {
-                padding: 25px 20px;
-            }
-        }
-
-    </style>
-
-</head>
-
-
-<body>
-
-
-    <!-- =========================
-         ENCABEZADO
-    ========================== -->
-
-    <div class="encabezado">
-
-        <a
-            href="{{ route('cliente.dashboard') }}"
-            class="boton-regresar"
-        >
-
-            <i class="fa-solid fa-arrow-left"></i>
-
-            Regresar
-
-        </a>
-
-
-        <h1>
-            Mi información
-        </h1>
-
-
-        <p>
-            Datos de tu cuenta
-        </p>
-
-    </div>
-
-
-
-    <!-- =========================
-         CONTENIDO
-    ========================== -->
-
-    <div class="contenedor">
-
-        <div class="tarjeta">
-
-
-            <!-- =========================
-                 PERFIL
-            ========================== -->
-
-            <div class="perfil">
-
-
-                <!-- AVATAR -->
-
-                <div class="perfil-avatar">
-
-                    <div
-                        class="avatar"
-                        style="
-                            background-color:
-                            {{ auth()->user()->color_perfil ?? '#6a1b9a' }};
-                        "
-                    >
-
-                        @if(auth()->user()->foto_perfil)
-
-                            <img
-                                src="{{ asset('storage/' . auth()->user()->foto_perfil) }}"
-                                alt="Foto de perfil"
-                            >
-
-                        @else
-
-                            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
-
-                        @endif
-
-                    </div>
-
-
-                    <!-- BOTÓN EDITAR FOTO -->
-
-                    <button
-                        type="button"
-                        class="boton-editar-foto"
-                        id="botonEditarFoto"
-                        title="Editar foto de perfil"
-                    >
-
-                        <i class="fa-solid fa-pen"></i>
-
-                    </button>
-
-
-
-                    <!-- =========================
-                         MENÚ DE FOTO
-                    ========================== -->
-
-                    <div
-                        class="menu-foto"
-                        id="menuFoto"
-                    >
-
-
-                        <!-- SUBIR FOTO -->
-
-                        <button
-                            type="button"
-                            id="subirFoto"
-                        >
-
-                            <i class="fa-solid fa-camera"></i>
-
-                            Subir foto
-
-                        </button>
-
-
-
-                        <!-- CAMBIAR COLOR -->
-
-                        <button
-                            type="button"
-                            id="cambiarColor"
-                        >
-
-                            <i class="fa-solid fa-palette"></i>
-
-                            Cambiar color
-
-                        </button>
-
-
-
-                        <!-- ELIMINAR FOTO -->
-
-                        @if(auth()->user()->foto_perfil)
-
-                            <form
-                                action="{{ route('cliente.foto.eliminar') }}"
-                                method="POST"
-                                id="formEliminarFoto"
-                            >
-
-                                @csrf
-
-                                <button
-                                    type="submit"
-                                    class="boton-eliminar-foto"
-                                    onclick="
-                                        return confirm(
-                                            '¿Seguro que quieres eliminar tu foto de perfil?'
-                                        );
-                                    "
-                                >
-
-                                    <i class="fa-solid fa-trash"></i>
-
-                                    Eliminar foto
-
-                                </button>
-
-                            </form>
-
-                        @endif
-
-
-                    </div>
-
-
-
-                    <!-- =========================
-                         PANEL DE COLORES
-                    ========================== -->
-
-                    <div
-                        class="panel-colores"
-                        id="panelColores"
-                    >
-
-                        <form
-                            id="formularioColor"
-                            action="{{ route('cliente.color.actualizar') }}"
-                            method="POST"
-                        >
-
-                            @csrf
-
-
-                            <input
-                                type="hidden"
-                                name="color_perfil"
-                                id="colorPerfilSeleccionado"
-                            >
-
-
-                            <p>
-                                Selecciona un color
-                            </p>
-
-
-                            <div class="colores">
-
-
-                                <!-- MORADO -->
-
-                                <button
-                                    type="button"
-                                    class="color-opcion"
-                                    data-color="#6a1b9a"
-                                    style="background-color: #6a1b9a;"
-                                    title="Morado"
-                                ></button>
-
-
-
-                                <!-- AZUL -->
-
-                                <button
-                                    type="button"
-                                    class="color-opcion"
-                                    data-color="#2196F3"
-                                    style="background-color: #2196F3;"
-                                    title="Azul"
-                                ></button>
-
-
-
-                                <!-- ROJO -->
-
-                                <button
-                                    type="button"
-                                    class="color-opcion"
-                                    data-color="#F44336"
-                                    style="background-color: #F44336;"
-                                    title="Rojo"
-                                ></button>
-
-
-
-                                <!-- VERDE -->
-
-                                <button
-                                    type="button"
-                                    class="color-opcion"
-                                    data-color="#4CAF50"
-                                    style="background-color: #4CAF50;"
-                                    title="Verde"
-                                ></button>
-
-
-
-                                <!-- NARANJA -->
-
-                                <button
-                                    type="button"
-                                    class="color-opcion"
-                                    data-color="#FF9800"
-                                    style="background-color: #FF9800;"
-                                    title="Naranja"
-                                ></button>
-
-
-
-                                <!-- OSCURO -->
-
-                                <button
-                                    type="button"
-                                    class="color-opcion"
-                                    data-color="#263238"
-                                    style="background-color: #263238;"
-                                    title="Oscuro"
-                                ></button>
-
-
-                            </div>
-
-                        </form>
-
-                    </div>
-
-
-
-                    <!-- =========================
-                         FORMULARIO OCULTO
-                         PARA SUBIR FOTO
-                    ========================== -->
-
-                    <form
-                        id="formularioFoto"
-                        action="{{ route('cliente.foto.actualizar') }}"
-                        method="POST"
-                        enctype="multipart/form-data"
-                        style="display: none;"
-                    >
-
-                        @csrf
-
-                        <input
-                            type="file"
-                            id="inputFotoPerfil"
-                            name="foto_perfil"
-                            accept="image/*"
-                        >
-
-                    </form>
-
-
-                </div>
-
-
-
-                <!-- NOMBRE -->
-
-                <h2>
-
-                    {{ auth()->user()->name }}
-
-                    {{ auth()->user()->apellido }}
-
-                </h2>
-
-
-                <p>
-                    Cliente de Orquídeas y más "Los Amates"
-                </p>
-
-
+@php
+    $usuario = auth()->user();
+    $colorPerfil = $usuario->color_perfil ?? '#6a1b9a';
+    $inicial = strtoupper(substr($usuario->name, 0, 1));
+
+    $nacimiento = $usuario->fecha_nacimiento;
+    $nacimientoTexto = $nacimiento
+        ? (method_exists($nacimiento, 'format') ? $nacimiento->format('d/m/Y') : $nacimiento)
+        : null;
+
+    $colores = [
+        '#6a1b9a' => 'Morado',
+        '#2196F3' => 'Azul',
+        '#F44336' => 'Rojo',
+        '#4CAF50' => 'Verde',
+        '#FF9800' => 'Naranja',
+        '#263238' => 'Oscuro',
+    ];
+
+    $datos = [
+        ['icono' => 'fa-user',          'etiqueta' => 'Nombre',               'valor' => $usuario->name],
+        ['icono' => 'fa-user',          'etiqueta' => 'Apellidos',            'valor' => $usuario->apellido],
+        ['icono' => 'fa-envelope',      'etiqueta' => 'Correo electrónico',   'valor' => $usuario->email],
+        ['icono' => 'fa-phone',         'etiqueta' => 'Teléfono',             'valor' => $usuario->telefono],
+        ['icono' => 'fa-location-dot',  'etiqueta' => 'Dirección',            'valor' => $usuario->direccion],
+        ['icono' => 'fa-calendar',      'etiqueta' => 'Fecha de nacimiento',  'valor' => $nacimientoTexto],
+    ];
+@endphp
+
+<x-layouts.panel
+    titulo="Mi información"
+    :migas="[['texto' => 'Mi información', 'url' => null]]"
+>
+
+<x-lista-estilos />
+
+@push('estilos')
+<style>
+    .mi-grid {
+        display: grid;
+        grid-template-columns: 300px minmax(0, 1fr);
+        gap: 20px;
+        align-items: start;
+    }
+
+    .mi-card {
+        background: #fff;
+        border: 1px solid var(--borde, #e5e7eb);
+        border-radius: 8px;
+    }
+    .mi-card-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 20px;
+        border-bottom: 1px solid var(--borde, #e5e7eb);
+    }
+    .mi-card-head h2 {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--texto, #1f2937);
+    }
+
+    /* ---------- Perfil ---------- */
+    .mi-perfil {
+        padding: 28px 20px 24px;
+        text-align: center;
+    }
+    .mi-avatar-wrap {
+        position: relative;
+        width: 104px;
+        margin: 0 auto 16px;
+    }
+    .mi-avatar {
+        width: 104px;
+        height: 104px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        color: #fff;
+        font-size: 40px;
+        font-weight: 600;
+        border: 1px solid var(--borde, #e5e7eb);
+    }
+    .mi-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+    .mi-btn-foto {
+        position: absolute;
+        right: -2px;
+        bottom: -2px;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        background: var(--texto, #1f2937);
+        color: #fff;
+        font-size: 12px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .mi-btn-foto:hover { background: #000; }
+
+    .mi-cerrar-sesion { padding: 0 20px 20px; }
+    .mi-btn-salir {
+        width: 100%;
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        padding: 10px 14px;
+        background: #fff; color: #b91c1c;
+        border: 1px solid #fecaca; border-radius: 8px;
+        font: inherit; font-weight: 600; cursor: pointer;
+        transition: background 0.2s ease;
+    }
+    .mi-btn-salir:hover { background: #fef2f2; }
+
+    .mi-pop {
+        display: none;
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 50%;
+        transform: translateX(-50%);
+        width: 220px;
+        background: #fff;
+        border: 1px solid var(--borde, #e5e7eb);
+        border-radius: 8px;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, .12);
+        text-align: left;
+        z-index: 30;
+    }
+    .mi-pop.mostrar { display: block; }
+    .mi-pop-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        padding: 10px 14px;
+        border: none;
+        background: none;
+        font: inherit;
+        font-size: 13px;
+        color: var(--texto, #1f2937);
+        cursor: pointer;
+    }
+    .mi-pop-item + .mi-pop-item { border-top: 1px solid var(--borde, #e5e7eb); }
+    .mi-pop-item:hover { background: #f9fafb; }
+    .mi-pop-item i { width: 16px; color: var(--texto-suave, #6b7280); }
+
+    .mi-pop-colores { padding: 14px; }
+    .mi-pop-colores p {
+        margin: 0 0 10px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--texto, #1f2937);
+    }
+    .mi-colores { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+    .mi-color {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        box-shadow: 0 0 0 1px var(--borde, #d1d5db);
+        cursor: pointer;
+        padding: 0;
+    }
+    .mi-color:hover { box-shadow: 0 0 0 2px var(--texto-suave, #6b7280); }
+    .mi-color.actual { box-shadow: 0 0 0 2px var(--texto, #1f2937); }
+
+    .mi-nombre {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--texto, #1f2937);
+    }
+    .mi-empresa {
+        margin: 4px 0 12px;
+        font-size: 13px;
+        color: var(--texto-suave, #6b7280);
+    }
+    .mi-rol {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 3px 10px;
+        font-size: 12px;
+        font-weight: 600;
+        border-radius: 999px;
+        background: var(--primario-suave, #f3e8f8);
+        color: var(--primario-oscuro, #4a126d);
+    }
+
+    .mi-contacto {
+        border-top: 1px solid var(--borde, #e5e7eb);
+        padding: 14px 20px;
+        font-size: 13px;
+    }
+    .mi-contacto div {
+        display: flex;
+        gap: 10px;
+        align-items: baseline;
+        color: var(--texto, #1f2937);
+        word-break: break-word;
+    }
+    .mi-contacto div + div { margin-top: 8px; }
+    .mi-contacto i { width: 14px; color: var(--texto-suave, #6b7280); }
+
+    /* ---------- Datos ---------- */
+    .mi-campos {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px 24px;
+        padding: 20px;
+    }
+    .mi-campo small {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 12px;
+        color: var(--texto-suave, #6b7280);
+    }
+    .mi-valor {
+        min-height: 36px;
+        padding: 8px 12px;
+        font-size: 14px;
+        color: var(--texto, #1f2937);
+        background: #f9fafb;
+        border: 1px solid var(--borde, #e5e7eb);
+        border-radius: 6px;
+        word-break: break-word;
+    }
+    .mi-valor.vacio { color: var(--texto-suave, #9ca3af); }
+
+    .gx-alerta {
+        padding: 12px 16px;
+        margin-bottom: 16px;
+        font-size: 14px;
+        background: #ecfdf3;
+        border: 1px solid #abefc6;
+        border-radius: 6px;
+        color: #067647;
+    }
+
+    .mi-oculto { display: none; }
+
+    @media (max-width: 900px) {
+        .mi-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 560px) {
+        .mi-campos { grid-template-columns: 1fr; }
+    }
+</style>
+@endpush
+
+<x-sidebar activo="informacion" />
+
+<div class="lst-pagina">
+
+    <div class="lst-encabezado">
+        <div>
+            <div class="lst-titulo-fila">
+                <button type="button" class="btn-menu-lateral" data-abrir-sidebar aria-label="Mostrar menú lateral">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <h1>Mi información</h1>
             </div>
-
-
-
-            <!-- =========================
-                 DATOS DEL USUARIO
-            ========================== -->
-
-            <div class="informacion">
-
-
-                <!-- NOMBRE -->
-
-                <div class="dato">
-
-                    <strong>
-
-                        <i class="fa-solid fa-user"></i>
-
-                        Nombre
-
-                    </strong>
-
-                    <span>
-
-                        {{ auth()->user()->name }}
-
-                    </span>
-
-                </div>
-
-
-
-                <!-- APELLIDOS -->
-
-                <div class="dato">
-
-                    <strong>
-
-                        <i class="fa-solid fa-user"></i>
-
-                        Apellidos
-
-                    </strong>
-
-                    <span>
-
-                        {{ auth()->user()->apellido }}
-
-                    </span>
-
-                </div>
-
-
-
-                <!-- CORREO -->
-
-                <div class="dato">
-
-                    <strong>
-
-                        <i class="fa-solid fa-envelope"></i>
-
-                        Correo electrónico
-
-                    </strong>
-
-                    <span>
-
-                        {{ auth()->user()->email }}
-
-                    </span>
-
-                </div>
-
-
-
-                <!-- TELÉFONO -->
-
-                <div class="dato">
-
-                    <strong>
-
-                        <i class="fa-solid fa-phone"></i>
-
-                        Teléfono
-
-                    </strong>
-
-                    <span>
-
-                        {{ auth()->user()->telefono ?? 'No registrado' }}
-
-                    </span>
-
-                </div>
-
-
-
-                <!-- DIRECCIÓN -->
-
-                <div class="dato">
-
-                    <strong>
-
-                        <i class="fa-solid fa-location-dot"></i>
-
-                        Dirección
-
-                    </strong>
-
-                    <span>
-
-                        {{ auth()->user()->direccion ?? 'No registrada' }}
-
-                    </span>
-
-                </div>
-
-
-
-                <!-- FECHA DE NACIMIENTO -->
-
-                <div class="dato">
-
-                    <strong>
-
-                        <i class="fa-solid fa-calendar"></i>
-
-                        Fecha de nacimiento
-
-                    </strong>
-
-                    <span>
-
-                        {{ auth()->user()->fecha_nacimiento ?? 'No registrada' }}
-
-                    </span>
-
-                </div>
-
-
-            </div>
-
-
-
-            <!-- =========================
-                 BOTÓN EDITAR INFORMACIÓN
-            ========================== -->
-
-            <div class="contenedor-boton">
-
-                <a
-                    href="{{ route('cliente.informacion.editar') }}"
-                    class="boton-editar"
-                >
-
-                    <i class="fa-solid fa-pen-to-square"></i>
-
-                    Editar información
-
-                </a>
-
-            </div>
-
-
+            <p>Consulta los datos de tu cuenta y personaliza tu perfil.</p>
         </div>
-
+        <a href="{{ route('admin.informacion.editar') }}" class="lst-btn-principal">Editar información</a>
     </div>
 
-
-
-    <!-- =========================
-         JAVASCRIPT
-    ========================== -->
-
-    <script>
-
-        const botonEditarFoto =
-            document.getElementById('botonEditarFoto');
-
-        const menuFoto =
-            document.getElementById('menuFoto');
-
-        const panelColores =
-            document.getElementById('panelColores');
-
-        const subirFoto =
-            document.getElementById('subirFoto');
-
-        const cambiarColor =
-            document.getElementById('cambiarColor');
-
-        const inputFotoPerfil =
-            document.getElementById('inputFotoPerfil');
-
-        const formularioFoto =
-            document.getElementById('formularioFoto');
-
-        const formularioColor =
-            document.getElementById('formularioColor');
-
-        const colorPerfilSeleccionado =
-            document.getElementById('colorPerfilSeleccionado');
-
-        const opcionesColor =
-            document.querySelectorAll('.color-opcion');
-
-
-
-        /* =========================
-           ABRIR MENÚ DE EDICIÓN
-        ========================== */
-
-        botonEditarFoto.addEventListener(
-            'click',
-            function(event) {
-
-                event.stopPropagation();
-
-                menuFoto.classList.toggle('mostrar');
-
-                panelColores.classList.remove('mostrar');
-
-            }
-        );
-
-
-
-        /* =========================
-           SUBIR FOTO
-        ========================== */
-
-        subirFoto.addEventListener(
-            'click',
-            function() {
-
-                inputFotoPerfil.click();
-
-            }
-        );
-
-
-
-        /* =========================
-           ENVIAR FOTO AUTOMÁTICAMENTE
-        ========================== */
-
-        inputFotoPerfil.addEventListener(
-            'change',
-            function() {
-
-                if (this.files.length > 0) {
-
-                    formularioFoto.submit();
-
-                }
-
-            }
-        );
-
-
-
-        /* =========================
-           MOSTRAR PANEL DE COLORES
-        ========================== */
-
-        cambiarColor.addEventListener(
-            'click',
-            function(event) {
-
-                event.stopPropagation();
-
-                menuFoto.classList.remove('mostrar');
-
-                panelColores.classList.toggle('mostrar');
-
-            }
-        );
-
-
-
-        /* =========================
-           SELECCIONAR Y GUARDAR COLOR
-        ========================== */
-
-        opcionesColor.forEach(
-            function(opcion) {
-
-                opcion.addEventListener(
-                    'click',
-                    function() {
-
-                        const color =
-                            this.getAttribute('data-color');
-
-                        colorPerfilSeleccionado.value =
-                            color;
-
-                        formularioColor.submit();
-
-                    }
-                );
-
-            }
-        );
-
-
-
-        /* =========================
-           CERRAR MENÚS AL HACER
-           CLIC FUERA
-        ========================== */
-
-        document.addEventListener(
-            'click',
-            function(event) {
-
-                if (
-                    !botonEditarFoto.contains(event.target) &&
-                    !menuFoto.contains(event.target) &&
-                    !panelColores.contains(event.target)
-                ) {
-
-                    menuFoto.classList.remove('mostrar');
-
-                    panelColores.classList.remove('mostrar');
-
-                }
-
-            }
-        );
-
-    </script>
-
-
-</body>
-
-</html>
+    @if(session('success'))
+        <div class="gx-alerta">{{ session('success') }}</div>
+    @endif
+
+    <div class="mi-grid">
+        <aside class="mi-card">
+            <div class="mi-perfil">
+
+                <div class="mi-avatar-wrap">
+                    <div class="mi-avatar" style="background-color: {{ $colorPerfil }};">
+                        @if($usuario->foto_perfil)
+                            <img src="{{ asset('storage/' . $usuario->foto_perfil) }}" alt="Foto de perfil">
+                        @else
+                            {{ $inicial }}
+                        @endif
+                    </div>
+
+                    <button type="button" class="mi-btn-foto" id="botonEditarFoto"
+                            title="Editar foto de perfil" aria-label="Editar foto de perfil"
+                            aria-haspopup="true" aria-expanded="false">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
+                    <div class="mi-pop" id="menuFoto">
+                        <button type="button" class="mi-pop-item" id="subirFoto">
+                            <i class="fa-solid fa-camera"></i> Subir foto
+                        </button>
+                        <button type="button" class="mi-pop-item" id="cambiarColor">
+                            <i class="fa-solid fa-palette"></i> Cambiar color
+                        </button>
+                    </div>
+
+                    {{-- Selector de color --}}
+                    <div class="mi-pop mi-pop-colores" id="panelColores">
+                        <form id="formularioColor" action="{{ route('admin.color.actualizar') }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="color_perfil" id="colorPerfilSeleccionado">
+                            <p>Color del perfil</p>
+                            <div class="mi-colores">
+                                @foreach($colores as $hex => $nombre)
+                                    <button type="button"
+                                            class="mi-color {{ strtolower($hex) === strtolower($colorPerfil) ? 'actual' : '' }}"
+                                            data-color="{{ $hex }}"
+                                            style="background-color: {{ $hex }};"
+                                            title="{{ $nombre }}" aria-label="{{ $nombre }}"></button>
+                                @endforeach
+                            </div>
+                        </form>
+                    </div>
+                    <form id="formularioFoto" class="mi-oculto" action="{{ route('admin.foto.actualizar') }}"
+                          method="POST" enctype="multipart/form-data">
+                        @csrf
+                        <input type="file" id="inputFotoPerfil" name="foto_perfil" accept="image/*">
+                    </form>
+                </div>
+
+                <h2 class="mi-nombre">{{ $usuario->name }} {{ $usuario->apellido }}</h2>
+                <p class="mi-empresa">Orquídeas y más "Los Amates"</p>
+                <span class="mi-rol"><i class="fa-solid fa-shield-halved"></i> Cliente</span>
+            </div>
+
+            <div class="mi-contacto">
+                <div><i class="fa-solid fa-envelope"></i> {{ $usuario->email }}</div>
+                <div><i class="fa-solid fa-phone"></i> {{ $usuario->telefono ?: 'Teléfono no registrado' }}</div>
+            </div>
+            <form action="{{ route('logout') }}" method="POST" class="mi-cerrar-sesion">
+                @csrf
+                <button type="submit" class="mi-btn-salir">
+                    <i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión
+                </button>
+            </form>
+        </aside>
+        <section class="mi-card">
+            <div class="mi-card-head">
+                <h2>Datos personales</h2>
+            </div>
+
+            <div class="mi-campos">
+                @foreach($datos as $dato)
+                    <div class="mi-campo">
+                        <small>{{ $dato['etiqueta'] }}</small>
+                        <div class="mi-valor {{ $dato['valor'] ? '' : 'vacio' }}">
+                            {{ $dato['valor'] ?: 'Sin registrar' }}
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </section>
+
+    </div>
+</div>
+
+@push('scripts')
+<script>
+(function () {
+    const botonEditar = document.getElementById('botonEditarFoto');
+    const menuFoto = document.getElementById('menuFoto');
+    const panelColores = document.getElementById('panelColores');
+    const inputFoto = document.getElementById('inputFotoPerfil');
+    const formFoto = document.getElementById('formularioFoto');
+    const formColor = document.getElementById('formularioColor');
+    const colorInput = document.getElementById('colorPerfilSeleccionado');
+
+    function cerrar() {
+        menuFoto.classList.remove('mostrar');
+        panelColores.classList.remove('mostrar');
+        botonEditar.setAttribute('aria-expanded', 'false');
+    }
+
+    botonEditar.addEventListener('click', e => {
+        e.stopPropagation();
+        const abierto = menuFoto.classList.toggle('mostrar');
+        panelColores.classList.remove('mostrar');
+        botonEditar.setAttribute('aria-expanded', abierto ? 'true' : 'false');
+    });
+
+    document.getElementById('subirFoto').addEventListener('click', e => {
+        e.stopPropagation();
+        inputFoto.click();
+    });
+
+    inputFoto.addEventListener('change', () => {
+        if (inputFoto.files.length > 0) formFoto.submit();
+    });
+
+    document.getElementById('cambiarColor').addEventListener('click', e => {
+        e.stopPropagation();
+        menuFoto.classList.remove('mostrar');
+        panelColores.classList.add('mostrar');
+    });
+
+    document.querySelectorAll('.mi-color').forEach(op => {
+        op.addEventListener('click', e => {
+            e.stopPropagation();
+            colorInput.value = op.dataset.color;
+            formColor.submit();
+        });
+    });
+
+    document.addEventListener('click', e => {
+        if (!menuFoto.contains(e.target) && !panelColores.contains(e.target) && !botonEditar.contains(e.target)) {
+            cerrar();
+        }
+    });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrar(); });
+})();
+</script>
+@endpush
+
+</x-layouts.panel>

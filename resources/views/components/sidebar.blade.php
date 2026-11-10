@@ -9,7 +9,7 @@
 
     // Los módulos vienen de config/modulos.php (misma lista que usa el buscador del header)
     $secciones = [];
-    foreach (config('modulos', []) as $titulo => $items) {
+    foreach (config('modulos.' . $usuario->rol, []) as $titulo => $items) {
         $secciones[$titulo] = array_map(function ($item) use ($totalInventario, $pedidosPendientes) {
             $item['url'] = !empty($item['ruta']) ? route($item['ruta']) : '#';
             $item['badge'] = match ($item['clave']) {
@@ -50,15 +50,9 @@
         --alto-header: 64px;
     }
 
-    /* ===== ESTADO ABIERTO / OCULTO ===== */
-    /* Solo el contenido de la página se corre a la derecha; el header nunca cambia */
     body.con-sidebar .cuerpo-app { padding-left: var(--ancho-sidebar); }
     body.sb-listo .cuerpo-app { transition: padding-left 0.25s ease; }
-
-    /* Con la barra abierta, el título grande vive en la barra: se oculta el de la página */
     body.con-sidebar .titulo-pagina { display: none; }
-
-    /* La barra queda DEBAJO del header, sin tapar su espacio */
     .sidebar-app {
         position: fixed;
         top: var(--alto-header);
@@ -84,7 +78,7 @@
         transition: transform 0.25s ease, visibility 0s;
     }
 
-    /* ===== CABECERA ===== */
+    
     .sb-cabecera {
         flex-shrink: 0;
         display: flex;
@@ -92,7 +86,7 @@
         gap: 10px;
         padding: 22px 16px 16px 14px;
     }
-    /* Mismo tamaño que el título grande de las páginas (h1) */
+    
     .sb-titulo-modulo {
         margin: 0;
         min-width: 0;
@@ -108,7 +102,6 @@
         word-break: break-word;
     }
 
-    /* Botón hamburguesa que al pasar el mouse se vuelve una flecha a la izquierda */
     .sb-cerrar {
         position: relative;
         width: 38px;
@@ -151,7 +144,6 @@
         transform: none;
     }
 
-    /* ===== NAVEGACIÓN ===== */
     .sb-nav {
         flex: 1;
         overflow-y: auto;
@@ -209,7 +201,6 @@
         color: var(--primario);
     }
 
-    /* ===== BOTÓN HAMBURGUESA (solo visible con el menú oculto) ===== */
     .btn-menu-lateral {
         display: none;
         align-items: center;
@@ -232,7 +223,6 @@
     }
     body:not(.con-sidebar) .btn-menu-lateral { display: inline-flex; }
 
-    /* ===== FONDO OSCURO (solo móvil) ===== */
     .sb-fondo {
         display: none;
         position: fixed;
@@ -253,7 +243,6 @@
 </style>
 @endpush
 
-<!-- Define el estado inicial antes de pintar, para evitar parpadeos -->
 <script>
     (function () {
         var oculta = false;
@@ -266,8 +255,6 @@
 </script>
 
 <aside class="sidebar-app" id="sidebarApp" aria-label="Menú lateral">
-
-    <!-- Cabecera -->
     <div class="sb-cabecera">
         <button type="button" class="sb-cerrar" id="sbCerrar" aria-label="Ocultar menú lateral" title="Ocultar menú">
             <i class="fa-solid fa-bars ic-barras"></i>
@@ -276,13 +263,10 @@
 
         <h2 class="sb-titulo-modulo" title="{{ $nombreModulo }}">{{ $nombreModulo }}</h2>
     </div>
-
-    <!-- Navegación -->
     <nav class="sb-nav">
         @foreach($secciones as $titulo => $items)
             <div class="sb-seccion">
                 <p class="sb-titulo">{{ $titulo }}</p>
-
                 @foreach($items as $item)
                     <a
                         href="{{ $item['url'] }}"
@@ -307,7 +291,6 @@
 <script>
     (function () {
         var cuerpo = document.body;
-
         function esMovil() { return window.innerWidth <= 900; }
 
         function guardar(valor) {
@@ -324,18 +307,12 @@
             if (!esMovil()) guardar('1');
         }
 
-        // Botón de la cabecera: ocultar
         document.getElementById('sbCerrar').addEventListener('click', ocultar);
-
-        // Fondo oscuro (móvil): ocultar
         document.getElementById('sbFondo').addEventListener('click', ocultar);
-
-        // Cualquier botón con data-abrir-sidebar (la hamburguesa) abre el menú
         document.querySelectorAll('[data-abrir-sidebar]').forEach(function (boton) {
             boton.addEventListener('click', abrir);
         });
 
-        // Al cambiar el tamaño de la ventana, ajusta el estado
         window.addEventListener('resize', function () {
             if (esMovil()) {
                 cuerpo.classList.remove('con-sidebar');
@@ -346,7 +323,6 @@
             }
         });
 
-        // Esc cierra el menú en móvil
         document.addEventListener('keydown', function (evento) {
             if (evento.key === 'Escape' && esMovil()) ocultar();
         });
