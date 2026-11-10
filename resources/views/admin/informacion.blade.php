@@ -106,6 +106,18 @@
     }
     .mi-btn-foto:hover { background: #000; }
 
+    .mi-cerrar-sesion { padding: 0 20px 20px; }
+    .mi-btn-salir {
+        width: 100%;
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        padding: 10px 14px;
+        background: #fff; color: #b91c1c;
+        border: 1px solid #fecaca; border-radius: 8px;
+        font: inherit; font-weight: 600; cursor: pointer;
+        transition: background 0.2s ease;
+    }
+    .mi-btn-salir:hover { background: #fef2f2; }
+
     .mi-pop {
         display: none;
         position: absolute;
@@ -323,6 +335,12 @@
                 <div><i class="fa-solid fa-envelope"></i> {{ $usuario->email }}</div>
                 <div><i class="fa-solid fa-phone"></i> {{ $usuario->telefono ?: 'Teléfono no registrado' }}</div>
             </div>
+            <form action="{{ route('logout') }}" method="POST" class="mi-cerrar-sesion">
+                @csrf
+                <button type="submit" class="mi-btn-salir">
+                    <i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión
+                </button>
+            </form>
         </aside>
         <section class="mi-card">
             <div class="mi-card-head">
