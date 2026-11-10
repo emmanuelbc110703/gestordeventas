@@ -106,10 +106,6 @@
                 <span class="ped-estado {{ $cotizacion->estado }}">{{ $estadoTexto }}</span>
             </p>
         </div>
-
-        <div class="frm-acciones">
-            <a href="{{ route('cliente.cotizaciones') }}" class="frm-btn-cancelar">Volver</a>
-        </div>
     </div>
 
     @if(session('success'))
