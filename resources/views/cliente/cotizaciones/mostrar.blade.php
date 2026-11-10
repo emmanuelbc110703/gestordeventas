@@ -1,791 +1,212 @@
-<!DOCTYPE html>
-<html lang="es">
-
-<head>
-
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>
-        Seguimiento de cotización - Los Amates
-    </title>
-
-    <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-    >
-
-    <style>
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f4f4f4;
-            color: #333;
-        }
-
-        /* ========================================
-           ENCABEZADO
-        ======================================== */
-
-        .encabezado {
-            background: #6a1b9a;
-            color: white;
-            padding: 25px;
-            text-align: center;
-        }
-
-        .encabezado h1 {
-            margin: 0;
-            font-size: 28px;
-        }
-
-        .encabezado p {
-            margin: 8px 0 0;
-            font-size: 15px;
-        }
-
-
-        /* ========================================
-           CONTENEDOR
-        ======================================== */
-
-        .contenedor {
-            width: 92%;
-            max-width: 1100px;
-            margin: 35px auto;
-        }
-
-
-        /* ========================================
-           CABECERA
-        ======================================== */
-
-        .cabecera {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-
-        .cabecera h2 {
-            margin: 0;
-            color: #333;
-        }
-
-        .folio {
-            color: #6a1b9a;
-            font-weight: bold;
-        }
-
-
-        /* ========================================
-           BOTÓN VOLVER
-        ======================================== */
-
-        .volver {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-
-            color: #6a1b9a;
-
-            text-decoration: none;
-
-            font-weight: bold;
-        }
-
-        .volver:hover {
-            text-decoration: underline;
-        }
-
-
-        /* ========================================
-           TARJETAS
-        ======================================== */
-
-        .tarjeta {
-            background: white;
-            border-radius: 12px;
-            padding: 22px;
-
-            box-shadow: 0 3px 10px rgba(0,0,0,.12);
-
-            margin-bottom: 20px;
-        }
-
-        .tarjeta h3 {
-            margin-top: 0;
-            color: #6a1b9a;
-        }
-
-
-        /* ========================================
-           ESTADO
-        ======================================== */
-
-        .estado-contenedor {
-            text-align: center;
-        }
-
-        .estado {
-            display: inline-block;
-
-            padding: 10px 20px;
-
-            border-radius: 25px;
-
-            font-size: 15px;
-            font-weight: bold;
-
-            text-transform: uppercase;
-        }
-
-        .estado-enviado {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .estado-procesando {
-            background: #cfe2ff;
-            color: #084298;
-        }
-
-        .estado-finalizado {
-            background: #d1e7dd;
-            color: #0f5132;
-        }
-
-        .estado-terminado {
-            background: #e2e3e5;
-            color: #41464b;
-        }
-
-
-        /* ========================================
-           PROGRESO
-        ======================================== */
-
-        .progreso {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-
-            margin-top: 25px;
-        }
-
-        .paso {
-            text-align: center;
-            color: #aaa;
-            font-size: 13px;
-        }
-
-        .paso .circulo {
-            width: 42px;
-            height: 42px;
-
-            margin: 0 auto 8px;
-
-            border-radius: 50%;
-
-            background: #ddd;
-            color: #777;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            font-weight: bold;
-        }
-
-        .paso.activo {
-            color: #6a1b9a;
-            font-weight: bold;
-        }
-
-        .paso.activo .circulo {
-            background: #6a1b9a;
-            color: white;
-        }
-
-
-        /* ========================================
-           INFORMACIÓN
-        ======================================== */
-
-        .informacion {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-        }
-
-        .dato {
-            background: #f8f8f8;
-            border-radius: 8px;
-            padding: 14px;
-        }
-
-        .dato strong {
-            display: block;
-            margin-bottom: 5px;
-            color: #6a1b9a;
-        }
-
-
-        /* ========================================
-           TABLA
-        ======================================== */
-
-        .tabla-contenedor {
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th {
-            background: #6a1b9a;
-            color: white;
-            padding: 12px;
-            text-align: left;
-        }
-
-        td {
-            padding: 12px;
-            border-bottom: 1px solid #eee;
-        }
-
-        tbody tr:hover {
-            background: #fafafa;
-        }
-
-
-        /* ========================================
-           TOTALES
-        ======================================== */
-
-        .totales {
-            max-width: 400px;
-            margin-left: auto;
-            margin-top: 20px;
-        }
-
-        .fila-total {
-            display: flex;
-            justify-content: space-between;
-
-            padding: 9px 0;
-
-            border-bottom: 1px solid #eee;
-        }
-
-        .fila-total.descuento {
-            color: #198754;
-        }
-
-        .fila-total.impuesto {
-            color: #555;
-        }
-
-        .total-final {
-            display: flex;
-            justify-content: space-between;
-
-            margin-top: 10px;
-            padding-top: 15px;
-
-            border-top: 2px solid #6a1b9a;
-
-            font-size: 22px;
-            font-weight: bold;
-
-            color: #6a1b9a;
-        }
-
-
-        /* ========================================
-           RESPONSIVO
-        ======================================== */
-
-        @media (max-width: 700px) {
-
-            .cabecera {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .informacion {
-                grid-template-columns: 1fr;
-            }
-
-            .progreso {
-                grid-template-columns: repeat(2, 1fr);
-                row-gap: 20px;
-            }
-
-            th,
-            td {
-                white-space: nowrap;
-            }
-
-        }
-
-    </style>
-
-</head>
-
-
-<body>
-
-
-    {{-- ========================================
-         ENCABEZADO
-    ======================================== --}}
-
-    <div class="encabezado">
-
-        <h1>
-            Seguimiento de cotización
-        </h1>
-
-        <p>
-            Orquídeas y más "Los Amates"
-        </p>
-
+@php
+    $estadosTexto = [
+        'enviado' => 'Enviado',
+        'procesando' => 'Procesando',
+        'finalizado' => 'Finalizado',
+        'terminado' => 'Terminado',
+    ];
+    $estadoTexto = $estadosTexto[$cotizacion->estado] ?? ucfirst($cotizacion->estado);
+
+    $pasos = [
+        'enviado'    => ['texto' => 'Enviado',    'icono' => 'fa-paper-plane'],
+        'procesando' => ['texto' => 'Procesando', 'icono' => 'fa-gears'],
+        'finalizado' => ['texto' => 'Finalizado', 'icono' => 'fa-check'],
+        'terminado'  => ['texto' => 'Terminado',  'icono' => 'fa-flag-checkered'],
+    ];
+    $posicionActual = array_search($cotizacion->estado, array_keys($pasos));
+    $posicionActual = $posicionActual === false ? 0 : $posicionActual;
+@endphp
+
+<x-layouts.panel
+    :titulo="'Pedido ' . $cotizacion->folio"
+    :regresar="route('cliente.cotizaciones')"
+    :migas="[
+        ['texto' => 'Mis pedidos', 'url' => route('cliente.cotizaciones')],
+        ['texto' => $cotizacion->folio],
+    ]"
+>
+
+<x-formulario-estilos />
+<x-pedido-estilos />
+
+@push('estilos')
+<style>
+    .seg-card { margin-bottom: 16px; }
+
+    .seg-pasos {
+        --seg-tam: 40px;
+        --seg-sep: 10px;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: var(--seg-sep);
+    }
+
+    .seg-paso {
+        position: relative;
+        text-align: center;
+        font-size: 13px;
+        color: #9ca3af;
+    }
+
+    .seg-paso:not(:first-child)::before {
+        content: '';
+        position: absolute;
+        top: calc(var(--seg-tam) / 2 - 1px);
+        right: 50%;
+        width: calc(100% + var(--seg-sep));
+        height: 2px;
+        background: #e5e7eb;
+        z-index: 0;
+    }
+    .seg-paso.hecho::before,
+    .seg-paso.actual::before { background: var(--primario); }
+
+    .seg-circulo {
+        position: relative;
+        z-index: 1;
+        width: var(--seg-tam);
+        height: var(--seg-tam);
+        margin: 0 auto 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #eef0f4;
+        color: #9ca3af;
+        font-size: 15px;
+        transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .seg-paso.hecho { color: var(--texto-suave); }
+    .seg-paso.hecho .seg-circulo {
+        background: var(--primario-suave);
+        color: var(--primario);
+        box-shadow: inset 0 0 0 1px var(--primario);
+    }
+
+    .seg-paso.actual { color: var(--primario); font-weight: 600; }
+    .seg-paso.actual .seg-circulo {
+        background: var(--primario);
+        color: #fff;
+    }
+
+    @media (max-width: 700px) {
+        .seg-pasos { --seg-tam: 32px; --seg-sep: 6px; }
+        .seg-circulo { font-size: 13px; }
+        .seg-paso { font-size: 11px; }
+    }
+</style>
+@endpush
+
+<div class="frm-pagina">
+    <div class="frm-encabezado">
+        <div>
+            <h1>Seguimiento del pedido</h1>
+            <p>
+                <span class="ped-folio">{{ $cotizacion->folio }}</span>
+                <span class="ped-estado {{ $cotizacion->estado }}">{{ $estadoTexto }}</span>
+            </p>
+        </div>
+
+        <div class="frm-acciones">
+            <a href="{{ route('cliente.cotizaciones') }}" class="frm-btn-cancelar">Volver</a>
+        </div>
     </div>
 
+    @if(session('success'))
+        <div class="ped-exito">{{ session('success') }}</div>
+    @endif
+    @if($errors->any())
+        <div class="frm-alerta">{{ $errors->first() }}</div>
+    @endif
 
-    <div class="contenedor">
-
-
-        {{-- ========================================
-             CABECERA
-        ======================================== --}}
-
-        <div class="cabecera">
-
-            <div>
-
-                <h2>
-                    Mi cotización
-                </h2>
-
-                <div class="folio">
-                    {{ $cotizacion->folio }}
+    {{-- Progreso del pedido --}}
+    <section class="frm-card seg-card">
+        <h2 class="frm-card-titulo">Estado del pedido</h2>
+        <div class="seg-pasos">
+            @foreach($pasos as $clave => $paso)
+                @php $posicion = $loop->index; @endphp
+                <div class="seg-paso {{ $posicion < $posicionActual ? 'hecho' : '' }} {{ $posicion === $posicionActual ? 'actual' : '' }}">
+                    <div class="seg-circulo"><i class="fa-solid {{ $paso['icono'] }}"></i></div>
+                    {{ $paso['texto'] }}
                 </div>
-
-            </div>
-
-
-            <a
-                href="{{ route('cliente.cotizaciones') }}"
-                class="volver"
-            >
-
-                <i class="fa-solid fa-arrow-left"></i>
-
-                Volver a cotizaciones
-
-            </a>
-
+            @endforeach
         </div>
+    </section>
 
+    <div class="frm-grid">
+        <section class="frm-card ped-card-plana">
+            <h2 class="frm-card-titulo">Servicios solicitados</h2>
 
-        {{-- ========================================
-             ESTADO
-        ======================================== --}}
-
-        <div class="tarjeta estado-contenedor">
-
-            <h3>
-                Estado del pedido
-            </h3>
-
-
-            <span
-                class="estado estado-{{ $cotizacion->estado }}"
-            >
-
-                @if($cotizacion->estado === 'enviado')
-
-                    Enviado
-
-                @elseif($cotizacion->estado === 'procesando')
-
-                    Procesando
-
-                @elseif($cotizacion->estado === 'finalizado')
-
-                    Finalizado
-
-                @elseif($cotizacion->estado === 'terminado')
-
-                    Terminado
-
-                @endif
-
-            </span>
-
-
-            {{-- ====================================
-                 PROGRESO
-            ==================================== --}}
-
-            @php
-
-                $estados = [
-                    'enviado' => 1,
-                    'procesando' => 2,
-                    'finalizado' => 3,
-                    'terminado' => 4
-                ];
-
-                $estadoActual =
-                    $estados[$cotizacion->estado] ?? 1;
-
-            @endphp
-
-
-            <div class="progreso">
-
-
-                {{-- ENVIADO --}}
-
-                <div
-                    class="paso
-                    {{ $estadoActual >= 1 ? 'activo' : '' }}"
-                >
-
-                    <div class="circulo">
-
-                        <i class="fa-solid fa-paper-plane"></i>
-
-                    </div>
-
-                    Enviado
-
-                </div>
-
-
-                {{-- PROCESANDO --}}
-
-                <div
-                    class="paso
-                    {{ $estadoActual >= 2 ? 'activo' : '' }}"
-                >
-
-                    <div class="circulo">
-
-                        <i class="fa-solid fa-gears"></i>
-
-                    </div>
-
-                    Procesando
-
-                </div>
-
-
-                {{-- FINALIZADO --}}
-
-                <div
-                    class="paso
-                    {{ $estadoActual >= 3 ? 'activo' : '' }}"
-                >
-
-                    <div class="circulo">
-
-                        <i class="fa-solid fa-check"></i>
-
-                    </div>
-
-                    Finalizado
-
-                </div>
-
-
-                {{-- TERMINADO --}}
-
-                <div
-                    class="paso
-                    {{ $estadoActual >= 4 ? 'activo' : '' }}"
-                >
-
-                    <div class="circulo">
-
-                        <i class="fa-solid fa-flag-checkered"></i>
-
-                    </div>
-
-                    Terminado
-
-                </div>
-
-
-            </div>
-
-        </div>
-
-
-        {{-- ========================================
-             INFORMACIÓN
-        ======================================== --}}
-
-        <div class="tarjeta">
-
-            <h3>
-                <i class="fa-solid fa-circle-info"></i>
-                Información de la cotización
-            </h3>
-
-
-            <div class="informacion">
-
-
-                <div class="dato">
-
-                    <strong>
-                        Folio
-                    </strong>
-
-                    {{ $cotizacion->folio }}
-
-                </div>
-
-
-                <div class="dato">
-
-                    <strong>
-                        Fecha
-                    </strong>
-
-                    {{ $cotizacion->created_at?->format('d/m/Y H:i') }}
-
-                </div>
-
-
-                <div class="dato">
-
-                    <strong>
-                        Forma de pago
-                    </strong>
-
-                    {{ ucfirst($cotizacion->forma_pago) }}
-
-                </div>
-
-
-                <div class="dato">
-
-                    <strong>
-                        Cliente
-                    </strong>
-
-                    {{ $cotizacion->usuario->name ?? 'Cliente' }}
-
-                </div>
-
-
-            </div>
-
-        </div>
-
-
-        {{-- ========================================
-             SERVICIOS
-        ======================================== --}}
-
-        <div class="tarjeta">
-
-            <h3>
-
-                <i class="fa-solid fa-list"></i>
-
-                Servicios solicitados
-
-            </h3>
-
-
-            <div class="tabla-contenedor">
-
-                <table>
-
+            <div class="ped-tabla-wrap">
+                <table class="ped-tabla">
                     <thead>
-
                         <tr>
-
-                            <th>
-                                Servicio
-                            </th>
-
-                            <th>
-                                Cantidad
-                            </th>
-
-                            <th>
-                                Precio
-                            </th>
-
-                            <th>
-                                Subtotal
-                            </th>
-
+                            <th>Servicio</th>
+                            <th class="num">Cantidad</th>
+                            <th class="num">Precio</th>
+                            <th class="num">Subtotal</th>
                         </tr>
-
                     </thead>
-
-
                     <tbody>
-
-                        @foreach($cotizacion->detalles as $detalle)
-
+                        @forelse($cotizacion->detalles as $detalle)
                             <tr>
-
-                                <td>
-                                    {{ $detalle->nombre }}
-                                </td>
-
-                                <td>
-                                    {{ $detalle->cantidad }}
-                                </td>
-
-                                <td>
-                                    ${{ number_format($detalle->precio, 2) }}
-                                </td>
-
-                                <td>
-                                    ${{ number_format($detalle->subtotal, 2) }}
-                                </td>
-
+                                <td class="ped-nombre">{{ $detalle->nombre }}</td>
+                                <td class="num">{{ $detalle->cantidad }}</td>
+                                <td class="num">${{ number_format($detalle->precio, 2) }}</td>
+                                <td class="num">${{ number_format($detalle->subtotal, 2) }}</td>
                             </tr>
-
-                        @endforeach
-
+                        @empty
+                            <tr>
+                                <td colspan="4" class="ped-vacio-fila">No hay servicios registrados.</td>
+                            </tr>
+                        @endforelse
                     </tbody>
-
                 </table>
-
             </div>
 
-
-            {{-- ====================================
-                 TOTALES
-            ==================================== --}}
-
-            <div class="totales">
-
-
-                <div class="fila-total">
-
-                    <span>
-                        Subtotal
-                    </span>
-
-                    <strong>
-                        ${{ number_format($cotizacion->subtotal, 2) }}
-                    </strong>
-
+            <div class="ped-totales">
+                <div class="ped-linea">
+                    <span>Subtotal</span>
+                    <span>${{ number_format($cotizacion->subtotal, 2) }}</span>
                 </div>
-
-
                 @if($cotizacion->descuento > 0)
-
-                    <div class="fila-total descuento">
-
-                        <span>
-                            Descuento
-                            ({{ number_format(
-                                $cotizacion->descuento_porcentaje,
-                                2
-                            ) }}%)
-                        </span>
-
-                        <strong>
-                            -${{ number_format(
-                                $cotizacion->descuento,
-                                2
-                            ) }}
-                        </strong>
-
+                    <div class="ped-linea">
+                        <span>Descuento ({{ number_format($cotizacion->descuento_porcentaje, 2) }}%)</span>
+                        <span>- ${{ number_format($cotizacion->descuento, 2) }}</span>
                     </div>
-
                 @endif
-
-
                 @if($cotizacion->impuesto > 0)
-
-                    <div class="fila-total impuesto">
-
-                        <span>
-                            Impuesto
-                            ({{ number_format(
-                                $cotizacion->impuesto_porcentaje,
-                                2
-                            ) }}%)
-                        </span>
-
-                        <strong>
-                            ${{ number_format(
-                                $cotizacion->impuesto,
-                                2
-                            ) }}
-                        </strong>
-
+                    <div class="ped-linea">
+                        <span>Impuesto ({{ number_format($cotizacion->impuesto_porcentaje, 2) }}%)</span>
+                        <span>${{ number_format($cotizacion->impuesto, 2) }}</span>
                     </div>
-
                 @endif
-
-
-                <div class="total-final">
-
-                    <span>
-                        Total
-                    </span>
-
-                    <span>
-                        ${{ number_format(
-                            $cotizacion->total,
-                            2
-                        ) }}
-                    </span>
-
+                <div class="ped-linea total">
+                    <span>Total</span>
+                    <span>${{ number_format($cotizacion->total, 2) }}</span>
                 </div>
-
-
             </div>
+        </section>
 
-        </div>
+        <section class="frm-card">
+            <h2 class="frm-card-titulo">Datos del pedido</h2>
 
-
-        {{-- ========================================
-             VOLVER
-        ======================================== --}}
-
-        <a
-            href="{{ route('cliente.cotizaciones') }}"
-            class="volver"
-        >
-
-            <i class="fa-solid fa-arrow-left"></i>
-
-            Volver a mis cotizaciones
-
-        </a>
-
-
+            <dl class="ped-info">
+                <div>
+                    <dt>Folio</dt>
+                    <dd>{{ $cotizacion->folio }}</dd>
+                </div>
+                <div>
+                    <dt>Fecha de solicitud</dt>
+                    <dd>{{ $cotizacion->created_at?->format('d/m/Y H:i') }}</dd>
+                </div>
+                <div>
+                    <dt>Forma de pago</dt>
+                    <dd>{{ ucfirst($cotizacion->forma_pago) }}</dd>
+                </div>
+            </dl>
+        </section>
     </div>
+</div>
 
-
-</body>
-
-</html>
+</x-layouts.panel>

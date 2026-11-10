@@ -21,7 +21,7 @@ return [
     'cliente' =>[
         'Navegacion' => [
             ['clave' => 'compras',       'texto' => 'Compras',            'icono' => 'fa-cart-shopping',     'ruta' => null],
-            ['clave' => 'pedidos',       'texto' => 'Pedidos',            'icono' => 'fa-file-lines',        'ruta' => 'cliente.cotizaciones'],
+            ['clave' => 'pedidos',       'texto' => 'Mis pedidos',            'icono' => 'fa-file-lines',        'ruta' => 'cliente.cotizaciones'],
         ],
         'Mi cuenta' => [
             ['clave' => 'informacion',   'texto' => 'Mi información',     'icono' => 'fa-circle-user',       'ruta' => 'cliente.informacion'],

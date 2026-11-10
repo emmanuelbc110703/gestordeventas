@@ -1,572 +1,239 @@
-<!DOCTYPE html>
-<html lang="es">
-
-<head>
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>Cotizaciones - Los Amates</title>
-
-    <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-    >
-
-    <style>
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f4f4f4;
-            color: #333;
-        }
-
-        /* ========================================
-           ENCABEZADO
-        ======================================== */
-
-        .encabezado {
-            background: #6a1b9a;
-            color: white;
-            padding: 25px;
-            text-align: center;
-        }
-
-        .encabezado h1 {
-            margin: 0;
-            font-size: 28px;
-        }
-
-        .encabezado p {
-            margin: 8px 0 0;
-            font-size: 15px;
-        }
-
-
-        /* ========================================
-           CONTENEDOR
-        ======================================== */
-
-        .contenedor {
-            width: 90%;
-            max-width: 1100px;
-            margin: 35px auto;
-        }
-
-
-        /* ========================================
-           CABECERA DE LA PÁGINA
-        ======================================== */
-
-        .cabecera-pagina {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-
-        .cabecera-pagina h2 {
-            margin: 0;
-            color: #333;
-        }
-
-
-        /* ========================================
-           BOTÓN CREAR
-        ======================================== */
-
-        .boton-crear {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-
-            background: #6a1b9a;
-            color: white;
-
-            padding: 12px 18px;
-
-            border-radius: 8px;
-
-            text-decoration: none;
-
-            font-weight: bold;
-
-            transition: 0.3s;
-        }
-
-        .boton-crear:hover {
-            background: #4a116d;
-            transform: translateY(-2px);
-        }
-
-
-        /* ========================================
-           MENSAJE VACÍO
-        ======================================== */
-
-        .vacio {
-            background: white;
-            border-radius: 12px;
-            padding: 50px 25px;
-            text-align: center;
-            box-shadow: 0 3px 10px rgba(0,0,0,.12);
-        }
-
-        .vacio i {
-            font-size: 55px;
-            color: #6a1b9a;
-            margin-bottom: 15px;
-        }
-
-        .vacio h3 {
-            margin: 5px 0 10px;
-        }
-
-        .vacio p {
-            color: #777;
-            margin-bottom: 20px;
-        }
-
-
-        /* ========================================
-           GRID DE COTIZACIONES
-        ======================================== */
-
-        .cotizaciones {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-        }
-
-
-        /* ========================================
-           TARJETA
-        ======================================== */
-
-        .tarjeta {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-
-            box-shadow: 0 3px 10px rgba(0,0,0,.12);
-
-            transition: 0.3s;
-        }
-
-        .tarjeta:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 15px rgba(0,0,0,.16);
-        }
-
-
-        /* ========================================
-           PARTE SUPERIOR
-        ======================================== */
-
-        .tarjeta-superior {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-
-            margin-bottom: 15px;
-        }
-
-        .folio {
-            font-weight: bold;
-            font-size: 17px;
-            color: #6a1b9a;
-        }
-
-
-        /* ========================================
-           ESTADOS
-        ======================================== */
-
-        .estado {
-            padding: 6px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-
-        .estado-enviado {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .estado-procesando {
-            background: #cfe2ff;
-            color: #084298;
-        }
-
-        .estado-finalizado {
-            background: #d1e7dd;
-            color: #0f5132;
-        }
-
-        .estado-terminado {
-            background: #e2e3e5;
-            color: #41464b;
-        }
-
-
-        /* ========================================
-           INFORMACIÓN
-        ======================================== */
-
-        .informacion {
-            font-size: 14px;
-            line-height: 1.7;
-        }
-
-        .informacion strong {
-            color: #333;
-        }
-
-
-        /* ========================================
-           TOTAL
-        ======================================== */
-
-        .total {
-            margin-top: 15px;
-            padding-top: 15px;
-
-            border-top: 1px solid #eee;
-
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .total span:first-child {
-            font-weight: bold;
-        }
-
-        .total-precio {
-            font-size: 20px;
-            font-weight: bold;
-            color: #6a1b9a;
-        }
-
-
-        /* ========================================
-           BOTÓN VER
-        ======================================== */
-
-        .boton-ver {
-            display: block;
-
-            margin-top: 15px;
-
-            text-align: center;
-
-            background: #6a1b9a;
-            color: white;
-
-            padding: 10px;
-
-            border-radius: 7px;
-
-            text-decoration: none;
-
-            font-weight: bold;
-
-            transition: 0.3s;
-        }
-
-        .boton-ver:hover {
-            background: #4a116d;
-        }
-
-
-        /* ========================================
-           BOTÓN VOLVER
-        ======================================== */
-
-        .volver {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-
-            margin-top: 25px;
-
-            color: #6a1b9a;
-
-            text-decoration: none;
-
-            font-weight: bold;
-        }
-
-        .volver:hover {
-            text-decoration: underline;
-        }
-
-
-        /* ========================================
-           RESPONSIVO
-        ======================================== */
-
-        @media (max-width: 700px) {
-
-            .cabecera-pagina {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .boton-crear {
-                justify-content: center;
-            }
-
-            .cotizaciones {
-                grid-template-columns: 1fr;
-            }
-
-            .tarjeta-superior {
-                align-items: flex-start;
-                flex-direction: column;
-            }
-
-        }
-
-    </style>
-
-</head>
-
-
-<body>
-
-
-    {{-- ========================================
-         ENCABEZADO
-    ======================================== --}}
-
-    <div class="encabezado">
-
-        <h1>
-            Cotizaciones
-        </h1>
-
-        <p>
-            Orquídeas y más "Los Amates"
-        </p>
-
+<x-layouts.panel
+    titulo="Mis pedidos"
+    :regresar="route('cliente.dashboard')"
+    :migas="[
+        ['texto' => 'Mis pedidos', 'url' => route('cliente.cotizaciones')],
+    ]"
+>
+
+<x-lista-estilos />
+<x-pedido-estilos />
+
+@php
+    $conteos = $cotizaciones->countBy('estado');
+    $estadosTexto = [
+        'enviado' => 'Enviado',
+        'procesando' => 'Procesando',
+        'finalizado' => 'Finalizado',
+        'terminado' => 'Terminado',
+    ];
+@endphp
+
+@push('estilos')
+<style>
+    .ped-tab-n { margin-left: 6px; font-size: 12px; font-weight: 500; color: #9ca3af; }
+    .lst-tab.activo .ped-tab-n { color: var(--primario); }
+    .ped-btn-ver {
+        display: inline-flex; align-items: center; justify-content: center;
+        height: 34px; padding: 0 18px;
+        background: var(--primario-suave); border: 1px solid #ddd6fe; border-radius: 0;
+        font-size: 13px; font-weight: 500; color: var(--primario); text-decoration: none;
+        transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    }
+    .ped-btn-ver:hover { background: var(--primario); border-color: var(--primario); color: #fff; }
+    .lst-tabla th.num, .lst-tabla td.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .ped-total { font-weight: 700; }
+</style>
+@endpush
+
+<x-sidebar activo="pedidos" :pedidos-pendientes="$conteos->get('enviado', 0)" />
+
+<div class="lst-pagina">
+    <div class="lst-encabezado">
+        <div>
+            <div class="lst-titulo-fila">
+                <button type="button" class="btn-menu-lateral" data-abrir-sidebar aria-label="Mostrar menú lateral">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <h1>Mis pedidos</h1>
+            </div>
+            <p>Consulta el seguimiento de tus cotizaciones y pedidos.</p>
+        </div>
+        <a href="{{ route('cliente.cotizaciones.crear') }}" class="lst-btn-principal">
+            <i class="fa-solid fa-plus"></i> Crear cotización
+        </a>
     </div>
 
+    @if(session('success'))
+        <div class="lst-mensaje exito">{{ session('success') }}</div>
+    @endif
+    @if($errors->any())
+        <div class="lst-mensaje error">{{ $errors->first() }}</div>
+    @endif
 
-    {{-- ========================================
-         CONTENIDO
-    ======================================== --}}
-
-    <div class="contenedor">
-
-
-        <div class="cabecera-pagina">
-
-            <h2>
-                Mis pedidos
-            </h2>
-
-
-            <a
-                href="{{ route('cliente.cotizaciones.crear') }}"
-                class="boton-crear"
-            >
-
-                <i class="fa-solid fa-plus"></i>
-
-                Crear cotización
-
-            </a>
-
+    @if($cotizaciones->isNotEmpty())
+        <div class="lst-herramientas">
+            <div class="lst-tabs">
+                <button type="button" class="lst-tab activo" data-estado="todos">
+                    Todos<span class="ped-tab-n">{{ $cotizaciones->count() }}</span>
+                </button>
+                @foreach($estadosTexto as $clave => $texto)
+                    <button type="button" class="lst-tab" data-estado="{{ $clave }}">
+                        {{ $texto }}s<span class="ped-tab-n">{{ $conteos->get($clave, 0) }}</span>
+                    </button>
+                @endforeach
+            </div>
+            <div class="lst-controles">
+                <div class="lst-buscador">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="buscadorPedidos" placeholder="Buscar por folio..." autocomplete="off">
+                    <button type="button" class="lst-btn-limpiar" id="btnLimpiar" aria-label="Limpiar búsqueda">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div class="lst-selector">
+                    <select id="ordenPedidos">
+                        <option value="recientes">Orden: Más recientes primero</option>
+                        <option value="antiguos">Orden: Más antiguos primero</option>
+                        <option value="total-desc">Orden: Total (mayor a menor)</option>
+                        <option value="total-asc">Orden: Total (menor a mayor)</option>
+                    </select>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </div>
+                <span class="lst-contador" id="contadorPedidos">
+                    <strong>{{ $cotizaciones->count() }}</strong>
+                    {{ $cotizaciones->count() === 1 ? 'registro' : 'registros' }}
+                </span>
+            </div>
         </div>
 
-
-        {{-- ========================================
-             SI NO HAY COTIZACIONES
-        ======================================== --}}
-
-        @if($cotizaciones->isEmpty())
-
-            <div class="vacio">
-
-                <i class="fa-solid fa-file-invoice"></i>
-
-                <h3>
-                    Todavía no tienes cotizaciones
-                </h3>
-
-                <p>
-                    Puedes crear una cotización seleccionando
-                    los servicios que necesitas.
-                </p>
-
-                <a
-                    href="{{ route('cliente.cotizaciones.crear') }}"
-                    class="boton-crear"
-                >
-
-                    <i class="fa-solid fa-cart-plus"></i>
-
-                    Crear mi primera cotización
-
-                </a>
-
-            </div>
-
-
-        @else
-
-
-            {{-- ========================================
-                 LISTA DE COTIZACIONES
-            ======================================== --}}
-
-            <div class="cotizaciones">
-
-                @foreach($cotizaciones as $cotizacion)
-
-                    <div class="tarjeta">
-
-
-                        {{-- FOLIO + ESTADO --}}
-
-                        <div class="tarjeta-superior">
-
-                            <div class="folio">
-
-                                {{ $cotizacion->folio }}
-
-                            </div>
-
-
-                            <span
-                                class="estado estado-{{ $cotizacion->estado }}"
-                            >
-
-                                @if($cotizacion->estado === 'enviado')
-
-                                    Enviado
-
-                                @elseif($cotizacion->estado === 'procesando')
-
-                                    Procesando
-
-                                @elseif($cotizacion->estado === 'finalizado')
-
-                                    Finalizado
-
-                                @elseif($cotizacion->estado === 'terminado')
-
-                                    Terminado
-
-                                @endif
-
-                            </span>
-
-                        </div>
-
-
-                        {{-- INFORMACIÓN --}}
-
-                        <div class="informacion">
-
-                            <strong>
-                                Fecha:
-                            </strong>
-
-                            {{ $cotizacion->created_at?->format('d/m/Y H:i') }}
-
-                            <br>
-
-
-                            <strong>
-                                Servicios:
-                            </strong>
-
-                            {{ $cotizacion->detalles->sum('cantidad') }}
-
-                            <br>
-
-
-                            <strong>
-                                Forma de pago:
-                            </strong>
-
-                            {{ ucfirst($cotizacion->forma_pago) }}
-
-                        </div>
-
-
-                        {{-- TOTAL --}}
-
-                        <div class="total">
-
-                            <span>
-                                Total actual:
-                            </span>
-
-                            <span class="total-precio">
-
-                                ${{ number_format($cotizacion->total, 2) }}
-
-                            </span>
-
-                        </div>
-
-
-                        {{-- VER PEDIDO --}}
-
-                        <a
-                            href="{{ route(
-                                'cliente.cotizaciones.mostrar',
-                                $cotizacion->id
-                            ) }}"
-                            class="boton-ver"
+        <div class="lst-tabla-wrap" id="tablaPedidos">
+            <table class="lst-tabla">
+                <thead>
+                    <tr>
+                        <th>Folio</th>
+                        <th>Fecha</th>
+                        <th class="num">Servicios</th>
+                        <th>Forma de pago</th>
+                        <th>Estado</th>
+                        <th class="num">Total</th>
+                        <th class="lst-col-acciones">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="listaPedidos">
+                    @foreach($cotizaciones as $cotizacion)
+                        @php
+                            $estadoTexto = $estadosTexto[$cotizacion->estado] ?? ucfirst($cotizacion->estado);
+                        @endphp
+                        <tr
+                            class="lst-fila"
+                            data-url="{{ route('cliente.cotizaciones.mostrar', $cotizacion->id) }}"
+                            data-folio="{{ $cotizacion->folio }}"
+                            data-pago="{{ $cotizacion->forma_pago }}"
+                            data-estado="{{ $cotizacion->estado }}"
+                            data-estado-texto="{{ $estadoTexto }}"
+                            data-fecha="{{ $cotizacion->created_at?->timestamp ?? 0 }}"
+                            data-total="{{ $cotizacion->total }}"
                         >
+                            <td data-label="Folio"><span class="ped-folio">{{ $cotizacion->folio }}</span></td>
+                            <td data-label="Fecha">{{ $cotizacion->created_at?->format('d/m/Y H:i') }}</td>
+                            <td data-label="Servicios" class="num">{{ $cotizacion->detalles->sum('cantidad') }}</td>
+                            <td data-label="Forma de pago">{{ ucfirst($cotizacion->forma_pago) }}</td>
+                            <td data-label="Estado">
+                                <span class="ped-estado {{ $cotizacion->estado }}">{{ $estadoTexto }}</span>
+                            </td>
+                            <td data-label="Total" class="num ped-total">${{ number_format($cotizacion->total, 2) }}</td>
+                            <td class="lst-col-acciones">
+                                <div class="lst-acciones">
+                                    <a href="{{ route('cliente.cotizaciones.mostrar', $cotizacion->id) }}" class="ped-btn-ver">Ver seguimiento</a>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
 
-                            <i class="fa-solid fa-eye"></i>
+        <div class="lst-vacio" id="sinResultados">
+            <h3>No se encontraron resultados</h3>
+            <p>Intenta cambiar el filtro o realizar otra búsqueda.</p>
+        </div>
+    @else
+        <div class="lst-vacio visible">
+            <h3>Todavía no tienes cotizaciones</h3>
+            <p>Puedes crear una cotización seleccionando los servicios que necesitas.</p>
+            <a href="{{ route('cliente.cotizaciones.crear') }}" class="lst-btn-principal">
+                <i class="fa-solid fa-cart-plus"></i> Crear mi primera cotización
+            </a>
+        </div>
+    @endif
+</div>
 
-                            Ver seguimiento
+@push('scripts')
+<script>
+    (function () {
+        const cuerpo = document.getElementById('listaPedidos');
+        if (!cuerpo) return;
 
-                        </a>
+        cuerpo.addEventListener('click', function (evento) {
+            if (evento.target.closest('a, button')) return;
+            if (window.getSelection().toString()) return;
+            const fila = evento.target.closest('.lst-fila');
+            if (fila) window.location.href = fila.dataset.url;
+        });
 
-                    </div>
+        const tabla = document.getElementById('tablaPedidos');
+        const buscador = document.getElementById('buscadorPedidos');
+        const btnLimpiar = document.getElementById('btnLimpiar');
+        const orden = document.getElementById('ordenPedidos');
+        const tabs = document.querySelectorAll('.lst-tab');
+        const sinResultados = document.getElementById('sinResultados');
+        const contador = document.getElementById('contadorPedidos');
+        let estadoActual = 'todos';
 
-                @endforeach
+        function normalizar(t) {
+            return (t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+        }
 
-            </div>
+        function aplicar() {
+            const texto = normalizar(buscador.value);
+            btnLimpiar.style.display = buscador.value ? 'flex' : 'none';
+            const filas = Array.from(cuerpo.querySelectorAll('.lst-fila'));
 
-        @endif
+            filas.sort(function (a, b) {
+                switch (orden.value) {
+                    case 'antiguos':   return Number(a.dataset.fecha) - Number(b.dataset.fecha);
+                    case 'total-desc': return Number(b.dataset.total) - Number(a.dataset.total);
+                    case 'total-asc':  return Number(a.dataset.total) - Number(b.dataset.total);
+                    default:           return Number(b.dataset.fecha) - Number(a.dataset.fecha);
+                }
+            });
 
+            let visibles = 0;
+            filas.forEach(function (fila) {
+                cuerpo.appendChild(fila);
+                const coincideEstado = estadoActual === 'todos' || fila.dataset.estado === estadoActual;
+                const contenido = normalizar(fila.dataset.folio + ' ' + fila.dataset.pago + ' ' + fila.dataset.estadoTexto);
+                const mostrar = coincideEstado && contenido.includes(texto);
+                fila.style.display = mostrar ? '' : 'none';
+                if (mostrar) visibles++;
+            });
 
-        {{-- VOLVER AL DASHBOARD --}}
+            tabla.style.display = visibles === 0 ? 'none' : '';
+            sinResultados.classList.toggle('visible', visibles === 0);
+            contador.innerHTML = '<strong>' + visibles + '</strong> ' + (visibles === 1 ? 'registro' : 'registros');
+        }
 
-        <a
-            href="{{ route('cliente.dashboard') }}"
-            class="volver"
-        >
+        tabs.forEach(function (tab) {
+            tab.addEventListener('click', function () {
+                tabs.forEach(function (t) { t.classList.remove('activo'); });
+                this.classList.add('activo');
+                estadoActual = this.dataset.estado;
+                aplicar();
+            });
+        });
 
-            <i class="fa-solid fa-arrow-left"></i>
+        buscador.addEventListener('input', aplicar);
+        orden.addEventListener('change', aplicar);
+        btnLimpiar.addEventListener('click', function () {
+            buscador.value = '';
+            aplicar();
+            buscador.focus();
+        });
 
-            Volver al panel
+        aplicar();
+    })();
+</script>
+@endpush
 
-        </a>
-
-
-    </div>
-
-</body>
-
-</html>
+</x-layouts.panel>
