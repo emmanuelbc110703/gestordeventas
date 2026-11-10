@@ -20,6 +20,7 @@ return [
     ],
     'cliente' =>[
         'Navegacion' => [
+             ['clave' => 'dashboard',     'texto' => 'Menú Principal',     'icono' => 'fa-table-cells-large', 'ruta' => 'cliente.dashboard'],
             ['clave' => 'compras',       'texto' => 'Compras',            'icono' => 'fa-cart-shopping',     'ruta' => null],
             ['clave' => 'pedidos',       'texto' => 'Mis pedidos',            'icono' => 'fa-file-lines',        'ruta' => 'cliente.cotizaciones'],
         ],

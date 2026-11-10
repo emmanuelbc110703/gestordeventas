@@ -183,6 +183,10 @@ class AuthController extends Controller
 
         $usuario = Auth::user();
 
+        if ($usuario->foto_perfil) {
+            Storage::disk('public')->delete($usuario->foto_perfil);
+        }
+
         $rutaFoto = $request
             ->file('foto_perfil')
             ->store('perfiles', 'public');

@@ -208,7 +208,6 @@
     .mi-contacto div + div { margin-top: 8px; }
     .mi-contacto i { width: 14px; color: var(--texto-suave, #6b7280); }
 
-    /* ---------- Datos ---------- */
     .mi-campos {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -268,11 +267,16 @@
             </div>
             <p>Consulta los datos de tu cuenta y personaliza tu perfil.</p>
         </div>
-        <a href="{{ route('admin.informacion.editar') }}" class="lst-btn-principal">Editar información</a>
+        <a href="{{ route('cliente.informacion.editar') }}" class="lst-btn-principal">Editar información</a>
     </div>
 
     @if(session('success'))
         <div class="gx-alerta">{{ session('success') }}</div>
+        @if($errors->any())
+            <div class="gx-alerta" style="background:#fef3f2;border-color:#fecdca;color:#b42318;">
+                {{ $errors->first() }}
+            </div>
+        @endif
     @endif
 
     <div class="mi-grid">
@@ -302,9 +306,8 @@
                         </button>
                     </div>
 
-                    {{-- Selector de color --}}
                     <div class="mi-pop mi-pop-colores" id="panelColores">
-                        <form id="formularioColor" action="{{ route('admin.color.actualizar') }}" method="POST">
+                        <form id="formularioColor" action="{{ route('cliente.color.actualizar') }}" method="POST">
                             @csrf
                             <input type="hidden" name="color_perfil" id="colorPerfilSeleccionado">
                             <p>Color del perfil</p>
@@ -319,7 +322,7 @@
                             </div>
                         </form>
                     </div>
-                    <form id="formularioFoto" class="mi-oculto" action="{{ route('admin.foto.actualizar') }}"
+                    <form id="formularioFoto" class="mi-oculto" action="{{ route('cliente.foto.actualizar') }}"
                           method="POST" enctype="multipart/form-data">
                         @csrf
                         <input type="file" id="inputFotoPerfil" name="foto_perfil" accept="image/*">

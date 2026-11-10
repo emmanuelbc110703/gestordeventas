@@ -1,342 +1,212 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Dashboard Cliente - Orquídeas y más Los Amates</title>
-
-    <!-- Font Awesome -->
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-        }
-
-        /* ENCABEZADO */
-        .encabezado {
-            position: relative;
-            background-color: #6a1b9a;
-            color: white;
-            padding: 25px;
-            text-align: center;
-        }
-
-        .logo {
-            width: 120px;
-            height: 120px;
-            object-fit: contain;
-            background-color: white;
-            border-radius: 15px;
-            padding: 10px;
-            margin-bottom: 10px;
-        }
-
-        .encabezado h1 {
-            margin: 5px 0;
-            font-size: 30px;
-        }
-
-        .encabezado p {
-            margin: 5px 0;
-            font-size: 16px;
-        }
-
-        /* =========================
-           PERFIL DEL USUARIO
-        ========================= */
-        .perfil {
-            position: absolute;
-            top: 20px;
-            right: 25px;
-        }
-
-        /* CÍRCULO CON LA INICIAL */
-        .avatar {
-    width: 48px;
-    height: 48px;
-    border: none;
-    border-radius: 50%;
-
-    background-color: {{ auth()->user()->color_perfil ?? '#6a1b9a' }};
-    color: white;
-
-    font-size: 22px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.3s;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    overflow: hidden;
-    padding: 0;
-}
-
-.avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-
-.avatar:hover {
-    transform: scale(1.08);
-}
-
-        /* MENÚ DESPLEGABLE */
-        .menu-perfil {
-            display: none;
-            position: absolute;
-            top: 58px;
-            right: 0;
-            width: 190px;
-            background-color: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.25);
-            z-index: 100;
-        }
-
-        .menu-perfil.activo {
-            display: block;
-        }
-
-        .nombre-usuario {
-            padding: 14px 15px;
-            color: #333;
-            font-weight: bold;
-            border-bottom: 1px solid #eee;
-            text-align: left;
-        }
-
-        .logout-form {
-            margin: 0;
-        }
-
-        .boton-logout {
-            width: 100%;
-            padding: 14px 15px;
-            background-color: white;
-            color: #6a1b9a;
-            border: none;
-            text-align: left;
-            font-size: 15px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .boton-logout i {
-            margin-right: 8px;
-        }
-
-        .boton-logout:hover {
-            background-color: #6a1b9a;
-            color: white;
-        }
-
-        /* CONTENEDOR */
-        .contenedor {
-            width: 90%;
-            max-width: 1000px;
-            margin: 40px auto;
-        }
-
-        .contenedor h2 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 30px;
-        }
-
-        /* BOTONES */
-        .botones {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-        }
-
-        .boton {
-            background-color: white;
-            color: #333;
-            border: none;
-            border-radius: 12px;
-            padding: 30px 20px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            text-decoration: none;
-            text-align: center;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
-            transition: 0.3s;
-        }
-
-        /* ICONOS */
-        .boton i {
-            display: block;
-            font-size: 40px;
-            color: #6a1b9a;
-            margin-bottom: 15px;
-            transition: 0.3s;
-        }
-
-        /* EFECTO HOVER */
-        .boton:hover {
-            background-color: #6a1b9a;
-            color: white;
-            transform: translateY(-5px);
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .boton:hover i {
-            color: white;
-        }
-
-        /* RESPONSIVO */
-        @media (max-width: 700px) {
-
-            .botones {
-                grid-template-columns: 1fr;
-            }
-
-            .encabezado h1 {
-                font-size: 24px;
-            }
-
-            .perfil {
-                top: 15px;
-                right: 15px;
-            }
-
-            .avatar {
-                width: 42px;
-                height: 42px;
-                font-size: 19px;
-            }
-
-            .menu-perfil {
-                top: 52px;
-                width: 180px;
-            }
-        }
-    </style>
-</head>
-
-<body>
-
-    <!-- ENCABEZADO -->
-    <div class="encabezado">
-
-        <!-- PERFIL -->
-        <div class="perfil">
-
-            <button
-    type="button"
-    class="avatar"
-    onclick="toggleMenuPerfil()"
+<x-layouts.panel
+    titulo="Inicio"
+    :inicio="route('cliente.dashboard')"
+    :migas="[
+        ['texto' => 'Inicio'],
+    ]"
 >
-    @if(auth()->user()->foto_perfil)
 
-        <img
-            src="{{ asset('storage/' . auth()->user()->foto_perfil) }}"
-            alt="Foto de perfil"
-        >
+<x-lista-estilos />
 
-    @else
+@php
+    $usuario = auth()->user();
+    $conteos = \App\Models\Cotizacion::where('user_id', $usuario->id)
+        ->get(['estado'])
+        ->countBy('estado');
 
-        {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+    $totalPedidos = $conteos->sum();
+    $enviados     = $conteos->get('enviado', 0);
+    $procesando   = $conteos->get('procesando', 0);
+    $terminados   = $conteos->get('finalizado', 0) + $conteos->get('terminado', 0);
+@endphp
 
-    @endif
-</button>
+@push('estilos')
+<style>
+    .cd-salir {
+        display: inline-flex;
+        align-items: center;
+        height: 44px;
+        padding: 0 20px;
+        background: #fff;
+        border: 1px solid var(--borde);
+        border-radius: 0;
+        font: inherit;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--texto-suave);
+        cursor: pointer;
+        transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+    }
+    .cd-salir:hover {
+        border-color: #fecaca;
+        background: #fef2f2;
+        color: #b91c1c;
+    }
 
-            <!-- MENÚ DESPLEGABLE -->
-            <div class="menu-perfil" id="menuPerfil">
+    /* Resumen */
+    .cd-resumen {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin: 8px 0 36px;
+    }
+    .cd-resumen-card {
+        padding: 18px 20px;
+        background: #fff;
+        border: 1px solid var(--borde);
+        border-left: 3px solid var(--primario);
+    }
+    .cd-resumen-card span {
+        display: block;
+        margin-bottom: 10px;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--texto-suave);
+    }
+    .cd-resumen-card strong {
+        display: block;
+        font-size: 28px;
+        font-weight: 700;
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
+        color: var(--texto);
+    }
 
-                <div class="nombre-usuario">
-                    {{ auth()->user()->name }}
-                </div>
+    /* Accesos rápidos */
+    .cd-modulos-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        padding-bottom: 12px;
+        margin-bottom: 18px;
+        border-bottom: 1px solid var(--borde);
+    }
+    .cd-modulos-header h3 { margin: 0; font-size: 17px; color: var(--texto); }
+    .cd-modulos-header span { font-size: 13px; color: var(--texto-suave); }
 
-                <form action="{{ route('logout') }}" method="POST" class="logout-form">
-                    @csrf
+    .cd-botones {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+    }
+    .cd-boton {
+        display: flex;
+        flex-direction: column;
+        min-height: 135px;
+        padding: 20px;
+        background: #fff;
+        border: 1px solid var(--borde);
+        color: var(--texto);
+        text-decoration: none;
+        transition: border-color 0.2s ease, background 0.2s ease;
+    }
+    .cd-boton:hover {
+        border-color: var(--primario);
+        background: #fcfbff;
+    }
+    .cd-boton strong {
+        margin-bottom: 6px;
+        font-size: 15px;
+    }
+    .cd-desc {
+        font-size: 13px;
+        line-height: 1.45;
+        color: var(--texto-suave);
+    }
+    .cd-ir {
+        margin-top: auto;
+        padding-top: 16px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--primario);
+    }
+    .cd-boton:hover .cd-ir { text-decoration: underline; }
 
-                    <button type="submit" class="boton-logout">
-                        <i class="fa-solid fa-right-from-bracket"></i>
-                        Cerrar sesión
-                    </button>
-                </form>
+    .cd-boton.cd-deshabilitado { cursor: default; background: #fafafa; }
+    .cd-boton.cd-deshabilitado:hover { border-color: var(--borde); background: #fafafa; }
+    .cd-boton.cd-deshabilitado strong { color: var(--texto-suave); }
+    .cd-etiqueta {
+        margin-top: auto;
+        padding-top: 16px;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #9ca3af;
+    }
 
+    @media (max-width: 1100px) {
+        .cd-resumen, .cd-botones { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+        .cd-resumen, .cd-botones { grid-template-columns: 1fr; }
+        .cd-resumen { gap: 12px; }
+    }
+</style>
+@endpush
+
+<x-sidebar activo="dashboard" />
+
+<div class="lst-pagina">
+    <div class="lst-encabezado">
+        <div>
+            <div class="lst-titulo-fila">
+                <h1>Bienvenido, {{ $usuario->name }}</h1>
             </div>
-
+            <p>Panel del cliente · Orquídeas y más "Los Amates"</p>
         </div>
-
-
-        <!-- LOGO -->
-        <img
-            src="{{ asset('images/logo-los-amates.png') }}"
-            alt="Logo Los Amates"
-            class="logo"
-        >
-
-        <h1>Bienvenido Cliente</h1>
-
-        <p>Orquídeas y más "Los Amates"</p>
-
+        <form action="{{ route('logout') }}" method="POST">
+            @csrf
+            <button type="submit" class="cd-salir">Cerrar sesión</button>
+        </form>
     </div>
 
-
-    <!-- CONTENIDO -->
-    <div class="contenedor">
-
-        <h2>Panel del Cliente</h2>
-
-        <div class="botones">
-
-            <!-- COMPRAS -->
-            <a href="#" class="boton">
-                <i class="fa-solid fa-cart-shopping"></i>
-                Compras
-            </a>
-
-
-            <!-- COTIZACIONES -->
-            <a
-    href="{{ route('cliente.cotizaciones') }}"
-    class="boton"
->
-    <i class="fa-solid fa-file-invoice"></i>
-    Cotizaciones
-</a>
-
-
-            <!-- MI INFORMACIÓN -->
-            <a href="{{ route('cliente.informacion') }}" class="boton">
-            <i class="fa-solid fa-user"></i>
-            Mi información
-            </a>
-
+    <div class="cd-resumen">
+        <div class="cd-resumen-card">
+            <span>Mis cotizaciones</span>
+            <strong>{{ $totalPedidos }}</strong>
         </div>
-
+        <div class="cd-resumen-card">
+            <span>Enviadas</span>
+            <strong>{{ $enviados }}</strong>
+        </div>
+        <div class="cd-resumen-card">
+            <span>En proceso</span>
+            <strong>{{ $procesando }}</strong>
+        </div>
+        <div class="cd-resumen-card">
+            <span>Finalizadas</span>
+            <strong>{{ $terminados }}</strong>
+        </div>
     </div>
 
-
-    <!-- JAVASCRIPT DEL MENÚ -->
-    <script>
-        function toggleMenuPerfil() {
-            document
-                .getElementById('menuPerfil')
-                .classList
-                .toggle('activo');
-        }
-    </script>
-
-</body>
-</html>
+    <div class="cd-modulos-header">
+        <h3>Accesos rápidos</h3>
+        <span>Todo lo que puedes hacer</span>
+    </div>
+    <div class="cd-botones">
+        <div class="cd-boton cd-deshabilitado" aria-disabled="true">
+            <strong>Compras</strong>
+            <span class="cd-desc">Consulta el historial de tus compras.</span>
+            <span class="cd-etiqueta">Próximamente</span>
+        </div>
+        <a href="{{ route('cliente.cotizaciones') }}" class="cd-boton">
+            <strong>Mis pedidos</strong>
+            <span class="cd-desc">Consulta el seguimiento de tus cotizaciones.</span>
+            <span class="cd-ir">Abrir</span>
+        </a>
+        <a href="{{ route('cliente.cotizaciones.crear') }}" class="cd-boton">
+            <strong>Nueva cotización</strong>
+            <span class="cd-desc">Selecciona servicios y solicita tu cotización.</span>
+            <span class="cd-ir">Abrir</span>
+        </a>
+        <a href="{{ route('cliente.informacion') }}" class="cd-boton">
+            <strong>Mi información</strong>
+            <span class="cd-desc">Revisa y actualiza los datos de tu cuenta.</span>
+            <span class="cd-ir">Abrir</span>
+        </a>
+    </div>
+</div>
+</x-layouts.panel>
