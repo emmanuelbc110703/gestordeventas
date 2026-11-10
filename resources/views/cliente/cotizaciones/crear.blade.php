@@ -1,1003 +1,481 @@
-<!DOCTYPE html>
-<html lang="es">
-
-<head>
-
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>Crear cotización - Los Amates</title>
-
-    <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-    >
-
-    <style>
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f4f4f4;
-            color: #333;
-        }
-
-        /* ========================================
-           ENCABEZADO
-        ======================================== */
-
-        .encabezado {
-            background: #6a1b9a;
-            color: white;
-            padding: 25px;
-            text-align: center;
-        }
-
-        .encabezado h1 {
-            margin: 0;
-            font-size: 28px;
-        }
-
-        .encabezado p {
-            margin: 8px 0 0;
-        }
-
-
-        /* ========================================
-           CONTENEDOR
-        ======================================== */
-
-        .contenedor {
-            width: 92%;
-            max-width: 1200px;
-            margin: 30px auto;
-        }
-
-
-        /* ========================================
-           TITULO
-        ======================================== */
-
-        .titulo-pagina {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-        }
-
-        .titulo-pagina h2 {
-            margin: 0;
-        }
-
-
-        /* ========================================
-           BOTÓN VOLVER
-        ======================================== */
-
-        .volver {
-            color: #6a1b9a;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .volver:hover {
-            text-decoration: underline;
-        }
-
-
-        /* ========================================
-           DISTRIBUCIÓN
-        ======================================== */
-
-        .contenido {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 25px;
-            align-items: start;
-        }
-
-
-        /* ========================================
-           CATÁLOGO
-        ======================================== */
-
-        .catalogo {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-        }
-
-
-        /* ========================================
-           TARJETA SERVICIO
-        ======================================== */
-
-        .servicio {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 3px 10px rgba(0,0,0,.12);
-        }
-
-        .servicio-imagen {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-            background: #eee;
-        }
-
-        .sin-imagen {
-            height: 180px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #eee;
-            color: #999;
-            font-size: 45px;
-        }
-
-        .servicio-contenido {
-            padding: 18px;
-        }
-
-        .servicio h3 {
-            margin: 0 0 8px;
-            color: #6a1b9a;
-        }
-
-        .descripcion {
-            color: #666;
-            font-size: 14px;
-            min-height: 42px;
-            margin-bottom: 12px;
-        }
-
-        .precio {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
-
-
-        /* ========================================
-           CANTIDAD
-        ======================================== */
-
-        .cantidad {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-
-        .cantidad label {
-            font-weight: bold;
-        }
-
-        .cantidad input {
-            width: 70px;
-            padding: 9px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            text-align: center;
-        }
-
-
-        /* ========================================
-           BOTÓN AGREGAR
-        ======================================== */
-
-        .agregar {
-            width: 100%;
-            border: none;
-            padding: 11px;
-            border-radius: 7px;
-            background: #6a1b9a;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .agregar:hover {
-            background: #4a116d;
-        }
-
-
-        /* ========================================
-           CARRITO
-        ======================================== */
-
-        .carrito {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 3px 10px rgba(0,0,0,.12);
-            position: sticky;
-            top: 20px;
-        }
-
-        .carrito h2 {
-            margin-top: 0;
-            color: #6a1b9a;
-        }
-
-
-        /* ========================================
-           ITEMS CARRITO
-        ======================================== */
-
-        .carrito-vacio {
-            color: #777;
-            text-align: center;
-            padding: 25px 10px;
-        }
-
-        .item-carrito {
-            border-bottom: 1px solid #eee;
-            padding: 12px 0;
-        }
-
-        .item-nombre {
-            font-weight: bold;
-        }
-
-        .item-info {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 6px;
-            font-size: 14px;
-        }
-
-
-        /* ========================================
-           BOTÓN QUITAR
-        ======================================== */
-
-        .quitar {
-            border: none;
-            background: #dc3545;
-            color: white;
-            border-radius: 5px;
-            padding: 5px 8px;
-            cursor: pointer;
-            margin-top: 8px;
-        }
-
-
-        /* ========================================
-           TOTAL
-        ======================================== */
-
-        .subtotal {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 18px;
-            padding-top: 15px;
-            border-top: 2px solid #eee;
-            font-size: 18px;
-            font-weight: bold;
-        }
-
-
-        /* ========================================
-           FORMA DE PAGO
-        ======================================== */
-
-        .pago {
-            margin-top: 20px;
-        }
-
-        .pago h3 {
-            margin-bottom: 12px;
-        }
-
-        .opcion-pago {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 7px;
-            margin-bottom: 8px;
-            cursor: pointer;
-        }
-
-        .opcion-pago:hover {
-            background: #f5eff8;
-        }
-
-
-        /* ========================================
-           SOLICITAR
-        ======================================== */
-
-        .solicitar {
-            width: 100%;
-            margin-top: 20px;
-            padding: 13px;
-            border: none;
-            border-radius: 8px;
-            background: #198754;
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .solicitar:hover {
-            background: #146c43;
-        }
-
-        .solicitar:disabled {
-            background: #aaa;
-            cursor: not-allowed;
-        }
-
-
-        /* ========================================
-           ERRORES
-        ======================================== */
-
-        .errores {
-            background: #f8d7da;
-            color: #842029;
-            padding: 12px 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-
-
-        /* ========================================
-           RESPONSIVO
-        ======================================== */
-
-        @media (max-width: 850px) {
-
-            .contenido {
-                grid-template-columns: 1fr;
-            }
-
-            .carrito {
-                position: static;
-            }
-
-        }
-
-        @media (max-width: 600px) {
-
-            .catalogo {
-                grid-template-columns: 1fr;
-            }
-
-            .titulo-pagina {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
-
-        }
-
-    </style>
-
-</head>
-
-
-<body>
-
-
-    {{-- ========================================
-         ENCABEZADO
-    ======================================== --}}
-
-    <div class="encabezado">
-
-        <h1>
-            Crear cotización
-        </h1>
-
-        <p>
-            Orquídeas y más "Los Amates"
-        </p>
-
+<x-layouts.panel
+    titulo="Crear cotización"
+    :regresar="route('cliente.cotizaciones')"
+    :migas="[
+        ['texto' => 'Mis pedidos', 'url' => route('cliente.cotizaciones')],
+        ['texto' => 'Crear cotización'],
+    ]"
+>
+
+<x-formulario-estilos />
+<x-lista-estilos />
+
+@push('estilos')
+<style>
+    .cat-layout { grid-template-columns: 2fr 1fr; gap: 24px; }
+    .cat-herramientas { margin-bottom: 16px; }
+
+    .cat-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 16px;
+    }
+    .cat-servicio {
+        display: flex;
+        flex-direction: column;
+        background: #fff;
+        border: 1px solid var(--borde);
+        transition: border-color 0.2s ease;
+    }
+    .cat-servicio:hover { border-color: #c4b5fd; }
+    .cat-img {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+        background: #f3f4f6;
+        display: block;
+    }
+    .cat-sin-img {
+        height: 150px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f3f4f6;
+        color: #c0c5ce;
+        font-size: 34px;
+    }
+    .cat-cuerpo {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        padding: 16px;
+    }
+    .cat-nombre {
+        margin: 0 0 6px;
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--texto);
+    }
+    .cat-desc {
+        margin: 0 0 12px;
+        font-size: 13px;
+        line-height: 1.45;
+        color: var(--texto-suave);
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .cat-precio {
+        margin-top: auto;
+        margin-bottom: 12px;
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--primario);
+    }
+    .cat-accion { display: flex; gap: 8px; }
+    .cat-cantidad {
+        width: 64px;
+        height: 38px;
+        padding: 0 6px;
+        border: 1px solid var(--borde);
+        border-radius: 0;
+        font: inherit;
+        font-size: 14px;
+        text-align: center;
+    }
+    .cat-cantidad:focus { outline: none; border-color: var(--primario); }
+    .cat-agregar {
+        flex: 1;
+        height: 38px;
+        background: var(--primario-suave);
+        border: 1px solid #ddd6fe;
+        border-radius: 0;
+        font: inherit;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--primario);
+        cursor: pointer;
+        transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    }
+    .cat-agregar:hover {
+        background: var(--primario);
+        border-color: var(--primario);
+        color: #fff;
+    }
+
+    /* Carrito */
+    .cat-carrito { position: sticky; top: 88px; }
+    .cat-vacio-carrito {
+        padding: 18px 0;
+        text-align: center;
+        font-size: 14px;
+        color: #9ca3af;
+    }
+    .cat-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--borde);
+    }
+    .cat-item-nombre { font-size: 14px; font-weight: 600; color: var(--texto); }
+    .cat-item-detalle { margin-top: 3px; font-size: 13px; color: var(--texto-suave); }
+    .cat-item-der { text-align: right; white-space: nowrap; }
+    .cat-item-importe { font-weight: 700; font-size: 14px; }
+    .cat-quitar {
+        margin-top: 4px;
+        padding: 0;
+        background: none;
+        border: none;
+        font: inherit;
+        font-size: 12px;
+        color: #b91c1c;
+        cursor: pointer;
+    }
+    .cat-quitar:hover { text-decoration: underline; }
+
+    .cat-subtotal {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 16px;
+        font-size: 17px;
+        font-weight: 700;
+    }
+    .cat-pago-titulo {
+        margin: 22px 0 10px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--texto-suave);
+    }
+    .cat-pago {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 11px 14px;
+        margin-bottom: 8px;
+        border: 1px solid var(--borde);
+        font-size: 14px;
+        cursor: pointer;
+        transition: border-color 0.2s ease, background 0.2s ease;
+    }
+    .cat-pago:hover { background: #fcfbff; }
+    .cat-pago:has(input:checked) {
+        border-color: var(--primario);
+        background: var(--primario-suave);
+        color: var(--primario);
+    }
+    .cat-pago input { accent-color: var(--primario); }
+    .cat-enviar { width: 100%; margin-top: 18px; }
+
+    .cat-sin-resultados {
+        display: none;
+        padding: 40px 20px;
+        text-align: center;
+        color: var(--texto-suave);
+        border: 1px solid var(--borde);
+        background: #fff;
+    }
+    .cat-sin-resultados.visible { display: block; }
+
+    @media (max-width: 950px) {
+        .cat-layout { grid-template-columns: 1fr; }
+        .cat-carrito { position: static; }
+    }
+</style>
+@endpush
+
+<div class="frm-pagina">
+    <div class="frm-encabezado">
+        <div>
+            <h1>Crear cotización</h1>
+            <p>Selecciona los servicios que necesitas y envía tu solicitud.</p>
+        </div>
+        <div class="frm-acciones">
+            <a href="{{ route('cliente.cotizaciones') }}" class="frm-btn-cancelar">Volver</a>
+        </div>
     </div>
 
-
-    <div class="contenedor">
-
-
-        <div class="titulo-pagina">
-
-            <h2>
-                Selecciona los servicios
-            </h2>
-
-            <a
-                href="{{ route('cliente.cotizaciones') }}"
-                class="volver"
-            >
-                <i class="fa-solid fa-arrow-left"></i>
-                Volver a cotizaciones
-            </a>
-
+    @if($errors->any())
+        <div class="frm-alerta">
+            <strong>No se pudo enviar la cotización:</strong>
+            <ul style="margin: 6px 0 0; padding-left: 18px;">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
         </div>
+    @endif
 
+    <div class="frm-alerta" id="errorCliente" style="display: none;"></div>
 
-        {{-- ========================================
-             ERRORES
-        ======================================== --}}
+    <form method="POST" action="{{ route('cliente.cotizaciones.store') }}" id="formCotizacion">
+        @csrf
 
-        @if($errors->any())
+        <div class="frm-grid cat-layout">
+            <div>
+                @if($servicios->isNotEmpty())
+                    <div class="cat-herramientas">
+                        <div class="lst-buscador">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" id="buscadorServicios" placeholder="Buscar servicio..." autocomplete="off">
+                            <button type="button" class="lst-btn-limpiar" id="btnLimpiar" aria-label="Limpiar búsqueda">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                    </div>
+                @endif
 
-            <div class="errores">
-
-                <strong>
-                    No se pudo enviar la cotización:
-                </strong>
-
-                <ul>
-
-                    @foreach($errors->all() as $error)
-
-                        <li>
-                            {{ $error }}
-                        </li>
-
-                    @endforeach
-
-                </ul>
-
-            </div>
-
-        @endif
-
-
-        {{-- ========================================
-             FORMULARIO
-        ======================================== --}}
-
-        <form
-            method="POST"
-            action="{{ route('cliente.cotizaciones.store') }}"
-            id="formCotizacion"
-        >
-
-            @csrf
-
-
-            <div class="contenido">
-
-
-                {{-- ====================================
-                     CATÁLOGO
-                ==================================== --}}
-
-                <div class="catalogo">
-
+                <div class="cat-grid" id="catalogo">
                     @forelse($servicios as $servicio)
-
-                        <div class="servicio">
-
+                        <div class="cat-servicio" data-nombre="{{ $servicio->nombre }}">
                             @if($servicio->foto)
-
-                                <img
-                                    src="{{ asset('storage/' . $servicio->foto) }}"
-                                    alt="{{ $servicio->nombre }}"
-                                    class="servicio-imagen"
-                                >
-
+                                <img src="{{ asset('storage/' . $servicio->foto) }}"
+                                     alt="{{ $servicio->nombre }}" class="cat-img">
                             @else
-
-                                <div class="sin-imagen">
-
-                                    <i class="fa-solid fa-image"></i>
-
-                                </div>
-
+                                <div class="cat-sin-img"><i class="fa-solid fa-image"></i></div>
                             @endif
 
+                            <div class="cat-cuerpo">
+                                <h3 class="cat-nombre">{{ $servicio->nombre }}</h3>
+                                <p class="cat-desc">{{ $servicio->descripcion ?: 'Sin descripción disponible.' }}</p>
+                                <div class="cat-precio">${{ number_format($servicio->precio, 2) }}</div>
 
-                            <div class="servicio-contenido">
-
-                                <h3>
-                                    {{ $servicio->nombre }}
-                                </h3>
-
-
-                                <div class="descripcion">
-
-                                    {{ $servicio->descripcion ?: 'Sin descripción disponible.' }}
-
+                                <div class="cat-accion">
+                                    <input type="number" min="1" value="1"
+                                           class="cat-cantidad"
+                                           id="cantidad-{{ $servicio->id }}"
+                                           aria-label="Cantidad">
+                                    <button type="button" class="cat-agregar"
+                                            data-id="{{ $servicio->id }}"
+                                            data-nombre="{{ $servicio->nombre }}"
+                                            data-precio="{{ $servicio->precio }}">
+                                        <i class="fa-solid fa-cart-plus"></i> Agregar
+                                    </button>
                                 </div>
-
-
-                                <div class="precio">
-
-                                    ${{ number_format($servicio->precio, 2) }}
-
-                                </div>
-
-
-                                <div class="cantidad">
-
-                                    <label>
-                                        Cantidad:
-                                    </label>
-
-                                    <input
-                                        type="number"
-                                        min="1"
-                                        value="1"
-                                        id="cantidad-{{ $servicio->id }}"
-                                    >
-
-                                </div>
-
-
-                                <button
-                                    type="button"
-                                    class="agregar"
-                                    onclick="agregarServicio(
-                                        {{ $servicio->id }},
-                                        @js($servicio->nombre),
-                                        {{ $servicio->precio }}
-                                    )"
-                                >
-
-                                    <i class="fa-solid fa-cart-plus"></i>
-
-                                    Agregar al pedido
-
-                                </button>
-
                             </div>
-
                         </div>
-
                     @empty
-
-                        <div class="carrito-vacio">
-
-                            <i class="fa-solid fa-box-open"></i>
-
-                            <p>
-                                Actualmente no hay servicios disponibles.
-                            </p>
-
+                        <div class="cat-sin-resultados visible" style="grid-column: 1 / -1;">
+                            Actualmente no hay servicios disponibles.
                         </div>
-
                     @endforelse
-
                 </div>
 
-
-                {{-- ====================================
-                     CARRITO
-                ==================================== --}}
-
-                <div class="carrito">
-
-                    <h2>
-
-                        <i class="fa-solid fa-cart-shopping"></i>
-
-                        Mi pedido
-
-                    </h2>
-
-
-                    <div id="listaCarrito">
-
-                        <div class="carrito-vacio">
-
-                            No has agregado servicios.
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="subtotal">
-
-                        <span>
-                            Subtotal:
-                        </span>
-
-                        <span id="subtotalTexto">
-                            $0.00
-                        </span>
-
-                    </div>
-
-
-                    {{-- ====================================
-                         FORMA DE PAGO
-                    ==================================== --}}
-
-                    <div class="pago">
-
-                        <h3>
-                            Forma de pago
-                        </h3>
-
-
-                        <label class="opcion-pago">
-
-                            <input
-                                type="radio"
-                                name="forma_pago"
-                                value="efectivo"
-                            >
-
-                            <i class="fa-solid fa-money-bill-wave"></i>
-
-                            Efectivo
-
-                        </label>
-
-
-                        <label class="opcion-pago">
-
-                            <input
-                                type="radio"
-                                name="forma_pago"
-                                value="transferencia"
-                            >
-
-                            <i class="fa-solid fa-building-columns"></i>
-
-                            Transferencia
-
-                        </label>
-
-                    </div>
-
-
-                    <button
-                        type="submit"
-                        class="solicitar"
-                        id="botonSolicitar"
-                        disabled
-                    >
-
-                        <i class="fa-solid fa-paper-plane"></i>
-
-                        Solicitar cotización
-
-                    </button>
-
+                <div class="cat-sin-resultados" id="sinResultados">
+                    No se encontraron servicios con esa búsqueda.
                 </div>
-
             </div>
 
+            <aside class="frm-card cat-carrito">
+                <h2 class="frm-card-titulo">Mi pedido</h2>
 
-        </form>
+                <div id="listaCarrito">
+                    <div class="cat-vacio-carrito">No has agregado servicios.</div>
+                </div>
 
-    </div>
+                <div class="cat-subtotal">
+                    <span>Subtotal</span>
+                    <span id="subtotalTexto">$0.00</span>
+                </div>
 
+                <p class="cat-pago-titulo">Forma de pago</p>
 
-    {{-- ========================================
-         JAVASCRIPT
-    ======================================== --}}
+                <label class="cat-pago">
+                    <input type="radio" name="forma_pago" value="efectivo">
+                    <i class="fa-solid fa-money-bill-wave"></i> Efectivo
+                </label>
+                <label class="cat-pago">
+                    <input type="radio" name="forma_pago" value="transferencia">
+                    <i class="fa-solid fa-building-columns"></i> Transferencia
+                </label>
 
-    <script>
+                <button type="submit" class="frm-btn-guardar cat-enviar" id="botonSolicitar" disabled>
+                    <i class="fa-solid fa-paper-plane" style="margin-right: 8px;"></i> Solicitar cotización
+                </button>
+            </aside>
 
+        </div>
+    </form>
+</div>
+
+@push('scripts')
+<script>
+    (function () {
         let carrito = [];
 
+        const formulario = document.getElementById('formCotizacion');
+        const catalogo = document.getElementById('catalogo');
+        const lista = document.getElementById('listaCarrito');
+        const subtotalTexto = document.getElementById('subtotalTexto');
+        const boton = document.getElementById('botonSolicitar');
+        const errorCliente = document.getElementById('errorCliente');
 
-        /*
-         * Agregar servicio
-         */
-        function agregarServicio(id, nombre, precio) {
+        function escapeHtml(texto) {
+            const div = document.createElement('div');
+            div.textContent = texto;
+            return div.innerHTML;
+        }
 
-            const input =
-                document.getElementById(
-                    'cantidad-' + id
-                );
+        function mostrarError(mensaje) {
+            errorCliente.textContent = mensaje;
+            errorCliente.style.display = 'block';
+        }
 
-            const cantidad =
-                parseInt(input.value);
+        function ocultarError() {
+            errorCliente.style.display = 'none';
+        }
 
+        function actualizarBoton() {
+            const pago = document.querySelector('input[name="forma_pago"]:checked');
+            boton.disabled = carrito.length === 0 || !pago;
+        }
 
-            if (!cantidad || cantidad < 1) {
+        function actualizarInputs() {
+            document.querySelectorAll('.input-carrito').forEach(function (i) { i.remove(); });
 
-                alert('La cantidad debe ser mayor a 0.');
+            carrito.forEach(function (item, indice) {
+                [['id', item.id], ['cantidad', item.cantidad]].forEach(function (par) {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'productos[' + indice + '][' + par[0] + ']';
+                    input.value = par[1];
+                    input.className = 'input-carrito';
+                    formulario.appendChild(input);
+                });
+            });
+        }
 
-                return;
-            }
-
-
-            const existente =
-                carrito.find(
-                    item => item.id === id
-                );
-
-
-            if (existente) {
-
-                existente.cantidad += cantidad;
-
+        function renderizar() {
+            if (carrito.length === 0) {
+                lista.innerHTML = '<div class="cat-vacio-carrito">No has agregado servicios.</div>';
+                subtotalTexto.textContent = '$0.00';
             } else {
+                let subtotal = 0;
+                let html = '';
 
-                carrito.push({
+                carrito.forEach(function (item) {
+                    const importe = item.precio * item.cantidad;
+                    subtotal += importe;
 
-                    id: id,
-
-                    nombre: nombre,
-
-                    precio: parseFloat(precio),
-
-                    cantidad: cantidad
-
+                    html +=
+                        '<div class="cat-item">' +
+                            '<div>' +
+                                '<div class="cat-item-nombre">' + escapeHtml(item.nombre) + '</div>' +
+                                '<div class="cat-item-detalle">' + item.cantidad + ' × $' + item.precio.toFixed(2) + '</div>' +
+                            '</div>' +
+                            '<div class="cat-item-der">' +
+                                '<div class="cat-item-importe">$' + importe.toFixed(2) + '</div>' +
+                                '<button type="button" class="cat-quitar" data-quitar="' + item.id + '">Quitar</button>' +
+                            '</div>' +
+                        '</div>';
                 });
 
+                lista.innerHTML = html;
+                subtotalTexto.textContent = '$' + subtotal.toFixed(2);
             }
-
-
-            renderizarCarrito();
-
-        }
-
-
-        /*
-         * Quitar servicio
-         */
-        function quitarServicio(id) {
-
-            carrito =
-                carrito.filter(
-                    item => item.id !== id
-                );
-
-            renderizarCarrito();
-
-        }
-
-
-        /*
-         * Renderizar carrito
-         */
-        function renderizarCarrito() {
-
-            const lista =
-                document.getElementById(
-                    'listaCarrito'
-                );
-
-            const subtotalTexto =
-                document.getElementById(
-                    'subtotalTexto'
-                );
-
-            const boton =
-                document.getElementById(
-                    'botonSolicitar'
-                );
-
-
-            if (carrito.length === 0) {
-
-                lista.innerHTML = `
-                    <div class="carrito-vacio">
-                        No has agregado servicios.
-                    </div>
-                `;
-
-                subtotalTexto.textContent =
-                    '$0.00';
-
-                boton.disabled = true;
-
-                actualizarInputs();
-
-                return;
-            }
-
-
-            let subtotal = 0;
-
-            let html = '';
-
-
-            carrito.forEach(item => {
-
-                const importe =
-                    item.precio *
-                    item.cantidad;
-
-                subtotal += importe;
-
-
-                html += `
-
-                    <div class="item-carrito">
-
-                        <div class="item-nombre">
-                            ${escapeHtml(item.nombre)}
-                        </div>
-
-                        <div class="item-info">
-
-                            <span>
-                                ${item.cantidad}
-                                x
-                                $${item.precio.toFixed(2)}
-                            </span>
-
-                            <strong>
-                                $${importe.toFixed(2)}
-                            </strong>
-
-                        </div>
-
-                        <button
-                            type="button"
-                            class="quitar"
-                            onclick="quitarServicio(${item.id})"
-                        >
-
-                            <i class="fa-solid fa-trash"></i>
-
-                            Quitar
-
-                        </button>
-
-                    </div>
-
-                `;
-
-            });
-
-
-            lista.innerHTML = html;
-
-
-            subtotalTexto.textContent =
-                '$' + subtotal.toFixed(2);
-
-
-            boton.disabled = false;
-
 
             actualizarInputs();
-
+            actualizarBoton();
         }
 
+        catalogo.addEventListener('click', function (evento) {
+            const btn = evento.target.closest('.cat-agregar');
+            if (!btn) return;
 
-        /*
-         * Crear inputs ocultos para enviar
-         * el carrito al controlador.
-         */
-        function actualizarInputs() {
+            const id = parseInt(btn.dataset.id, 10);
+            const input = document.getElementById('cantidad-' + id);
+            let cantidad = parseInt(input.value, 10);
 
-            const form =
-                document.getElementById(
-                    'formCotizacion'
-                );
+            if (!cantidad || cantidad < 1) {
+                cantidad = 1;
+                input.value = 1;
+            }
 
+            const existente = carrito.find(function (i) { return i.id === id; });
 
-            document
-                .querySelectorAll(
-                    '.input-carrito'
-                )
-                .forEach(
-                    input => input.remove()
-                );
+            if (existente) {
+                existente.cantidad += cantidad;
+            } else {
+                carrito.push({
+                    id: id,
+                    nombre: btn.dataset.nombre,
+                    precio: parseFloat(btn.dataset.precio),
+                    cantidad: cantidad
+                });
+            }
 
+            input.value = 1;
+            ocultarError();
+            renderizar();
+        });
 
-            carrito.forEach((item, index) => {
+        lista.addEventListener('click', function (evento) {
+            const btn = evento.target.closest('[data-quitar]');
+            if (!btn) return;
 
-                const inputId =
-                    document.createElement('input');
+            const id = parseInt(btn.dataset.quitar, 10);
+            carrito = carrito.filter(function (i) { return i.id !== id; });
+            renderizar();
+        });
 
-                inputId.type = 'hidden';
-
-                inputId.name =
-                    `productos[${index}][id]`;
-
-                inputId.value =
-                    item.id;
-
-                inputId.className =
-                    'input-carrito';
-
-
-                const inputCantidad =
-                    document.createElement('input');
-
-                inputCantidad.type =
-                    'hidden';
-
-                inputCantidad.name =
-                    `productos[${index}][cantidad]`;
-
-                inputCantidad.value =
-                    item.cantidad;
-
-                inputCantidad.className =
-                    'input-carrito';
-
-
-                form.appendChild(inputId);
-
-                form.appendChild(inputCantidad);
-
+        document.querySelectorAll('input[name="forma_pago"]').forEach(function (radio) {
+            radio.addEventListener('change', function () {
+                ocultarError();
+                actualizarBoton();
             });
+        });
 
+        formulario.addEventListener('submit', function (evento) {
+            if (carrito.length === 0) {
+                evento.preventDefault();
+                mostrarError('Agrega al menos un servicio.');
+                return;
+            }
+            if (!document.querySelector('input[name="forma_pago"]:checked')) {
+                evento.preventDefault();
+                mostrarError('Selecciona una forma de pago.');
+                return;
+            }
+            actualizarInputs();
+            boton.disabled = true;
+        });
+
+        const buscador = document.getElementById('buscadorServicios');
+        const btnLimpiar = document.getElementById('btnLimpiar');
+        const sinResultados = document.getElementById('sinResultados');
+
+        if (buscador) {
+            function normalizar(t) {
+                return (t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+            }
+
+            function filtrar() {
+                const texto = normalizar(buscador.value);
+                btnLimpiar.style.display = buscador.value ? 'flex' : 'none';
+                let visibles = 0;
+
+                catalogo.querySelectorAll('.cat-servicio').forEach(function (tarjeta) {
+                    const coincide = normalizar(tarjeta.dataset.nombre).includes(texto);
+                    tarjeta.style.display = coincide ? '' : 'none';
+                    if (coincide) visibles++;
+                });
+
+                sinResultados.classList.toggle('visible', visibles === 0);
+            }
+
+            buscador.addEventListener('input', filtrar);
+            btnLimpiar.addEventListener('click', function () {
+                buscador.value = '';
+                filtrar();
+                buscador.focus();
+            });
         }
 
+        actualizarBoton();
+    })();
+</script>
+@endpush
 
-        /*
-         * Evitar insertar HTML
-         * proveniente de nombres.
-         */
-        function escapeHtml(text) {
-
-            const div =
-                document.createElement('div');
-
-            div.textContent = text;
-
-            return div.innerHTML;
-
-        }
-
-
-        /*
-         * Validar antes de enviar.
-         */
-        document
-            .getElementById('formCotizacion')
-            .addEventListener(
-                'submit',
-                function(event) {
-
-                    if (carrito.length === 0) {
-
-                        event.preventDefault();
-
-                        alert(
-                            'Agrega al menos un servicio.'
-                        );
-
-                        return;
-                    }
-
-
-                    const pago =
-                        document.querySelector(
-                            'input[name="forma_pago"]:checked'
-                        );
-
-
-                    if (!pago) {
-
-                        event.preventDefault();
-
-                        alert(
-                            'Selecciona una forma de pago.'
-                        );
-
-                        return;
-                    }
-
-
-                    actualizarInputs();
-
-                }
-            );
-
-    </script>
-
-
-</body>
-
-</html>
+</x-layouts.panel>
