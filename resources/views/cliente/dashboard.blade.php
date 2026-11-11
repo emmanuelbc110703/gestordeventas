@@ -239,18 +239,11 @@
 <div class="lst-pagina cd-pagina">
     <div class="cd-encabezado">
         <div>
-            <span class="cd-eyebrow">Panel del cliente</span>
             <h1>Bienvenido, {{ $usuario->name }}</h1>
-            <p>Orquídeas y más "Los Amates"</p>
+            <p>Panel de cliente · Los Amates</p>
         </div>
         <form action="{{ route('logout') }}" method="POST">
             @csrf
-            <button type="submit" class="cd-salir">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true">
-                    <path d="M9 21H5V3h4M16 17l5-5-5-5M21 12H9"/>
-                </svg>
-                Cerrar sesión
-            </button>
         </form>
     </div>
 
@@ -306,7 +299,7 @@
         <span>Todo lo que puedes hacer</span>
     </div>
     <div class="cd-botones">
-        <div class="cd-boton cd-deshabilitado" aria-disabled="true">
+        <a href="{{ route('cliente.compras') }}" class="cd-boton">
             <div class="cd-icono">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true">
                     <path d="M3 4h2l2.5 11h11L21 7H6 M9 20h.01 M17 20h.01"/>
@@ -314,8 +307,11 @@
             </div>
             <strong>Compras</strong>
             <span class="cd-desc">Consulta el historial de tus compras.</span>
-            <span class="cd-etiqueta">Próximamente</span>
-        </div>
+            <span class="cd-ir">
+                Abrir
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="square" aria-hidden="true"><path d="M4 12h16M14 6l6 6-6 6"/></svg>
+            </span>
+        </a>
 
         <a href="{{ route('cliente.cotizaciones') }}" class="cd-boton">
             <div class="cd-icono">
