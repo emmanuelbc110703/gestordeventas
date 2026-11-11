@@ -1,1274 +1,534 @@
-<!DOCTYPE html>
-<html lang="es">
-
-<head>
-
-    <meta charset="UTF-8">
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-
-    <title>Caja registradora</title>
-
-    <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-    >
-
-    <style>
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            min-height: 100vh;
-            font-family: Arial, sans-serif;
-            background: #f4f2f7;
-            color: #333;
-        }
-
-        /* ==========================================================
-           ENCABEZADO
-        ========================================================== */
-
-        .encabezado {
-            height: 75px;
-            background: #6a1b9a;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 30px;
-            box-shadow: 0 3px 12px rgba(0,0,0,.15);
-        }
-
-        .titulo-caja {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .titulo-caja i {
-            font-size: 28px;
-        }
-
-        .titulo-caja h1 {
-            margin: 0;
-            font-size: 23px;
-        }
-
-        /* ==========================================================
-           PERFIL
-        ========================================================== */
-
-        .perfil-caja {
-            position: relative;
-        }
-
-        .perfil-boton {
-            border: none;
-            background: transparent;
-            color: white;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-            padding: 5px;
-        }
-
-        .perfil-foto,
-        .perfil-icono {
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            border: 2px solid white;
-        }
-
-        .perfil-foto {
-            object-fit: cover;
-        }
-
-        .perfil-icono {
-            background: #8e44ad;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-        }
-
-        .perfil-nombre {
-            font-weight: bold;
-            font-size: 14px;
-        }
-
-        .perfil-flecha {
-            font-size: 12px;
-        }
-
-        .menu-perfil {
-            display: none;
-            position: absolute;
-            right: 0;
-            top: 55px;
-            width: 210px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 8px 25px rgba(0,0,0,.18);
-            overflow: hidden;
-            z-index: 5000;
-        }
-
-        .menu-perfil.mostrar {
-            display: block;
-        }
-
-        .menu-perfil-info {
-            padding: 15px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .menu-perfil-info strong {
-            display: block;
-            color: #333;
-            margin-bottom: 4px;
-        }
-
-        .menu-perfil-info span {
-            color: #777;
-            font-size: 13px;
-        }
-
-        .menu-perfil button {
-            width: 100%;
-            border: none;
-            background: white;
-            text-align: left;
-            padding: 14px 16px;
-            color: #c62828;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .menu-perfil button:hover {
-            background: #fff4f4;
-        }
-
-        /* ==========================================================
-           MENSAJE CLIENTE REGISTRADO
-        ========================================================== */
-
-        .mensaje-cliente-registrado {
-            position: fixed;
-            top: 95px;
-            right: 25px;
-            z-index: 15000;
-            min-width: 320px;
-            max-width: 430px;
-            background: #e8f5e9;
-            border-left: 5px solid #2e7d32;
-            color: #2e7d32;
-            padding: 16px 18px;
-            border-radius: 10px;
-            box-shadow: 0 8px 25px rgba(0,0,0,.15);
-            display: none;
-            align-items: center;
-            gap: 12px;
-            animation: aparecerMensajeCliente .25s ease;
-        }
-
-        .mensaje-cliente-registrado i {
-            font-size: 25px;
-            flex-shrink: 0;
-        }
-
-        .mensaje-cliente-registrado strong {
-            display: block;
-            margin-bottom: 4px;
-        }
-
-        .mensaje-cliente-registrado span {
-            color: #555;
-            font-size: 13px;
-        }
-
-        @keyframes aparecerMensajeCliente {
-
-            from {
-                opacity: 0;
-                transform: translateX(30px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-
-        }
-
-        /* ==========================================================
-           CONTENEDOR
-        ========================================================== */
-
-        .contenedor {
-            width: 100%;
-            max-width: 1500px;
-            margin: auto;
-            padding: 25px;
-        }
-
-        .caja-grid {
-            display: grid;
-            grid-template-columns:
-                minmax(0, 1.7fr)
-                minmax(350px, .9fr);
-            gap: 25px;
-        }
-
-        .panel {
-            background: white;
-            border-radius: 16px;
-            padding: 22px;
-            box-shadow: 0 4px 18px rgba(0,0,0,.08);
-        }
-
-        .panel-titulo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .panel-titulo i {
-            color: #6a1b9a;
-            font-size: 22px;
-        }
-
-        .panel-titulo h2 {
-            margin: 0;
-            font-size: 21px;
-            color: #333;
-        }
-
-        /* ==========================================================
-           BUSCADOR SERVICIOS
-        ========================================================== */
-
-        .buscador {
-            position: relative;
-            margin-bottom: 20px;
-        }
-
-        .buscador i {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #777;
-        }
-
-        .buscador input {
-            width: 100%;
-            padding: 14px 15px 14px 45px;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            font-size: 15px;
-            outline: none;
-        }
-
-        .buscador input:focus {
-            border-color: #6a1b9a;
-            box-shadow: 0 0 0 3px rgba(106,27,154,.10);
-        }
-
-        /* ==========================================================
-           SERVICIOS
-        ========================================================== */
-
-        .servicios {
-            display: grid;
-            grid-template-columns: repeat(auto-fill,minmax(210px,1fr));
-            gap: 15px;
-            max-height: 620px;
-            overflow-y: auto;
-            padding-right: 5px;
-        }
-
-        .servicio {
-            border: 1px solid #e5e5e5;
-            border-radius: 14px;
-            padding: 15px;
-            background: #fff;
-            transition: .2s;
-        }
-
-        .servicio:hover {
-            border-color: #6a1b9a;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(106,27,154,.12);
-        }
-
-        .servicio-imagen {
-            width: 100%;
-            height: 145px;
-            border-radius: 11px;
-            overflow: hidden;
-            background: #f2eafa;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .servicio-imagen img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .servicio-imagen-vacia {
-            color: #6a1b9a;
-            font-size: 42px;
-        }
-
-        .servicio h3 {
-            margin: 0 0 7px;
-            font-size: 17px;
-        }
-
-        .servicio-precio {
-            color: #6a1b9a;
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-
-        .servicio-stock {
-            color: #777;
-            font-size: 13px;
-            margin-bottom: 13px;
-        }
-
-        .boton-agregar {
-            width: 100%;
-            border: none;
-            padding: 11px;
-            border-radius: 9px;
-            background: #6a1b9a;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .boton-agregar:hover {
-            background: #4a126b;
-        }
-
-        .sin-servicios {
-            grid-column: 1/-1;
-            text-align: center;
-            color: #777;
-            padding: 50px 20px;
-        }
-
-        .sin-servicios i {
-            font-size: 45px;
-            color: #b39ddb;
-            margin-bottom: 15px;
-        }
-
-        /* ==========================================================
-           CLIENTE
-        ========================================================== */
-
-        .cliente-panel {
-            margin-bottom: 20px;
-        }
-
-        .cliente-buscador {
-            display: flex;
-            gap: 8px;
-        }
-
-        .cliente-buscador input {
-            flex: 1;
-            min-width: 0;
-            padding: 13px;
-            border: 1px solid #ddd;
-            border-radius: 9px;
-            outline: none;
-        }
-
-        .boton-nuevo-cliente {
-            border: none;
-            border-radius: 9px;
-            background: #6a1b9a;
-            color: white;
-            padding: 0 15px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .clientes-lista {
-            margin-top: 8px;
-            max-height: 160px;
-            overflow-y: auto;
-        }
-
-        .cliente-opcion {
-            padding: 10px 12px;
-            border-bottom: 1px solid #eee;
-            cursor: pointer;
-        }
-
-        .cliente-opcion:hover {
-            background: #f5eff9;
-        }
-
-        .cliente-opcion strong {
-            display: block;
-        }
-
-        .cliente-opcion span {
-            color: #888;
-            font-size: 12px;
-        }
-
-        .cliente-seleccionado {
-            display: none;
-            margin-top: 12px;
-            padding: 12px;
-            background: #f3e5f5;
-            border-radius: 9px;
-            color: #6a1b9a;
-            font-weight: bold;
-        }
-
-        /* ==========================================================
-           CARRITO
-        ========================================================== */
-
-        .carrito {
-            min-height: 150px;
-            max-height: 360px;
-            overflow-y: auto;
-            margin-bottom: 20px;
-        }
-
-        .carrito-vacio {
-            text-align: center;
-            color: #999;
-            padding: 45px 10px;
-        }
-
-        .carrito-vacio i {
-            display: block;
-            font-size: 38px;
-            color: #c4a7d8;
-            margin-bottom: 10px;
-        }
-
-        .producto-carrito {
-            display: grid;
-            grid-template-columns: 1fr auto;
-            gap: 12px;
-            padding: 13px 0;
-            border-bottom: 1px solid #eee;
-        }
-
-        .producto-info {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            min-width: 0;
-        }
-
-        .producto-imagen {
-            width: 52px;
-            height: 52px;
-            flex-shrink: 0;
-            border-radius: 9px;
-            overflow: hidden;
-            background: #f2eafa;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #6a1b9a;
-        }
-
-        .producto-imagen img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .producto-nombre {
-            font-weight: bold;
-        }
-
-        .producto-precio {
-            color: #6a1b9a;
-            font-weight: bold;
-            margin-top: 4px;
-        }
-
-        .producto-controles {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .cantidad-btn {
-            width: 30px;
-            height: 30px;
-            border: none;
-            border-radius: 7px;
-            background: #eee;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .cantidad {
-            min-width: 25px;
-            text-align: center;
-            font-weight: bold;
-        }
-
-        .eliminar {
-            color: #c62828;
-            border: none;
-            background: transparent;
-            cursor: pointer;
-            margin-left: 5px;
-        }
-
-        /* ==========================================================
-           TOTALES
-        ========================================================== */
-
-        .totales {
-            border-top: 2px solid #eee;
-            padding-top: 15px;
-        }
-
-        .fila-total {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-
-        .campo-porcentaje {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .campo-porcentaje input {
-            width: 95px;
-            padding: 9px;
-            text-align: right;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            outline: none;
-        }
-
-        .simbolo-porcentaje {
-            color: #6a1b9a;
-            font-weight: bold;
-        }
-
-        .fila-total-final {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 17px;
-            padding-top: 17px;
-            border-top: 1px solid #ddd;
-        }
-
-        .fila-total-final span {
-            font-size: 19px;
-            font-weight: bold;
-        }
-
-        #total {
-            color: #6a1b9a;
-            font-size: 29px;
-        }
-
-        .boton-cobrar {
-            width: 100%;
-            margin-top: 20px;
-            padding: 16px;
-            border: none;
-            border-radius: 11px;
-            background: #6a1b9a;
-            color: white;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .boton-cobrar:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-
-        .cerrar-punto {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 20px;
-            color: #666;
-            text-decoration: none;
-            font-size: 14px;
-        }
-
-        /* ==========================================================
-           MODALES GENERALES
-        ========================================================== */
-
-        .modal-cliente,
-        .modal-cerrar-caja,
-        .modal-cobro,
-        .modal-venta-exitosa {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,.55);
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            padding: 20px;
-        }
-
-        .modal-contenido,
-        .modal-cobro-contenido {
-            width: 100%;
-            max-width: 520px;
-            background: white;
-            border-radius: 18px;
-            overflow: hidden;
-            box-shadow: 0 15px 50px rgba(0,0,0,.28);
-        }
-
-        .modal-encabezado,
-        .cobro-encabezado {
-            background: #6a1b9a;
-            color: white;
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 20px;
-            font-weight: bold;
-        }
-
-        .modal-cerrar,
-        .cobro-cerrar {
-            border: none;
-            background: transparent;
-            color: white;
-            font-size: 22px;
-            cursor: pointer;
-        }
-
-        .modal-contenido form {
-            padding: 25px;
-        }
-
-        .campo {
-            margin-bottom: 18px;
-        }
-
-        .campo label {
-            display: block;
-            margin-bottom: 7px;
-            font-weight: bold;
-        }
-
-        .campo input {
-            width: 100%;
-            padding: 13px;
-            border: 1px solid #ddd;
-            border-radius: 9px;
-            outline: none;
-        }
-
-        .modal-botones,
-        .cerrar-caja-botones,
-        .botones-cobro {
-            display: flex;
-            gap: 10px;
-        }
-
-        .boton-cancelar,
-        .boton-guardar,
-        .boton-no,
-        .boton-si,
-        .boton-cobro-cancelar,
-        .boton-confirmar-pago {
-            flex: 1;
-            padding: 13px;
-            border: none;
-            border-radius: 9px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .boton-cancelar,
-        .boton-no,
-        .boton-cobro-cancelar {
-            background: #eee;
-            color: #555;
-        }
-
-        .boton-guardar {
-            background: #6a1b9a;
-            color: white;
-        }
-
-        .boton-guardar:disabled {
-            opacity: .7;
-            cursor: not-allowed;
-        }
-
-        .boton-si {
-            background: #c62828;
-            color: white;
-        }
-
-        /* ==========================================================
-           CERRAR CAJA
-        ========================================================== */
-
-        .cerrar-caja-contenido {
-            width: 100%;
-            max-width: 470px;
-            background: white;
-            border-radius: 18px;
-            padding: 28px;
-            text-align: center;
-        }
-
-        .cerrar-caja-icono {
-            width: 65px;
-            height: 65px;
-            margin: 0 auto 15px;
-            border-radius: 50%;
-            background: #f3e5f5;
-            color: #6a1b9a;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 27px;
-        }
-
-        /* ==========================================================
-           COBRO
-        ========================================================== */
-
-        .cobro-cuerpo {
-            padding: 25px;
-        }
-
-        .total-cobro {
-            text-align: center;
-            background: #f3e5f5;
-            border-radius: 13px;
-            padding: 18px;
-            margin-bottom: 23px;
-        }
-
-        .total-cobro small {
-            display: block;
-            color: #777;
-            margin-bottom: 5px;
-        }
-
-        .total-cobro strong {
-            color: #6a1b9a;
-            font-size: 34px;
-        }
-
-        .titulo-metodo {
-            font-weight: bold;
-            margin-bottom: 12px;
-        }
-
-        .metodos-pago {
-            display: grid;
-            grid-template-columns: repeat(3,1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .metodo-pago {
-            border: 2px solid #e5e5e5;
-            background: white;
-            border-radius: 12px;
-            padding: 17px 8px;
-            cursor: pointer;
-            text-align: center;
-            color: #555;
-        }
-
-        .metodo-pago i {
-            display: block;
-            font-size: 26px;
-            margin-bottom: 8px;
-        }
-
-        .metodo-pago.seleccionado {
-            border-color: #6a1b9a;
-            background: #f3e5f5;
-            color: #6a1b9a;
-        }
-
-        .datos-efectivo {
-            display: none;
-            background: #f8f8f8;
-            border-radius: 12px;
-            padding: 17px;
-            margin-bottom: 20px;
-        }
-
-        .datos-efectivo.mostrar {
-            display: block;
-        }
-
-        .campo-efectivo label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-
-        .campo-efectivo input {
-            width: 100%;
-            padding: 13px;
-            border: 1px solid #ddd;
-            border-radius: 9px;
-            font-size: 18px;
-        }
-
-        .cambio {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 13px;
-            padding-top: 13px;
-            border-top: 1px solid #ddd;
-        }
-
-        #cambioValor {
-            color: #2e7d32;
-            font-size: 19px;
-            font-weight: bold;
-        }
-
-        .mensaje-pago {
-            display: none;
-            padding: 11px 13px;
-            border-radius: 8px;
-            background: #ffebee;
-            color: #c62828;
-            font-size: 13px;
-            margin-bottom: 15px;
-        }
-
-        .mensaje-pago.mostrar {
-            display: block;
-        }
-
-        .boton-confirmar-pago {
-            background: #2e7d32;
-            color: white;
-        }
-
-        .boton-confirmar-pago:disabled {
-            background: #ccc;
-        }
-
-        /* ==========================================================
-           MODAL VENTA EXITOSA
-        ========================================================== */
-
-        .modal-venta-exitosa {
-            z-index: 12000;
-        }
-
-        .venta-exitosa-contenido {
-            width: 100%;
-            max-width: 430px;
-            background: white;
-            border-radius: 20px;
-            padding: 32px;
-            text-align: center;
-            box-shadow: 0 20px 60px rgba(0,0,0,.30);
-            animation: aparecerVenta .20s ease;
-        }
-
-        @keyframes aparecerVenta {
-
-            from {
-                opacity: 0;
-                transform: scale(.92);
-            }
-
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-
-        }
-
-        .venta-exitosa-icono {
-            width: 75px;
-            height: 75px;
-            margin: 0 auto 18px;
-            border-radius: 50%;
-            background: #e8f5e9;
-            color: #2e7d32;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 40px;
-        }
-
-        .venta-exitosa-contenido h2 {
-            margin: 0 0 8px;
-            color: #333;
-            font-size: 25px;
-        }
-
-        .venta-exitosa-contenido p {
-            margin: 0 0 22px;
-            color: #777;
-        }
-
-        .folio-venta {
-            background: #f3e5f5;
-            border-radius: 13px;
-            padding: 18px;
-            margin-bottom: 24px;
-        }
-
-        .folio-venta span {
-            display: block;
-            color: #777;
-            font-size: 13px;
-            margin-bottom: 7px;
-        }
-
-        .folio-venta strong {
-            display: block;
-            color: #6a1b9a;
-            font-size: 30px;
-        }
-
-        .venta-exitosa-botones {
-            display: flex;
-            gap: 10px;
-        }
-
-        .boton-cerrar-exito,
-        .boton-ticket {
-            flex: 1;
-            border: none;
-            border-radius: 10px;
-            padding: 13px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .boton-cerrar-exito {
-            background: #6a1b9a;
-            color: white;
-        }
-
-        .boton-cerrar-exito:hover {
-            background: #4a126b;
-        }
-
-        .boton-ticket {
-            background: #2e7d32;
-            color: white;
-        }
-
-        .boton-ticket:hover {
-            background: #1b5e20;
-        }
-
-        /* ==========================================================
-           RESPONSIVE
-        ========================================================== */
-
-        @media(max-width:950px) {
-
-            .caja-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .servicios {
-                max-height: none;
-            }
-
-        }
-
-        @media(max-width:600px) {
-
-            .encabezado {
-                padding: 0 15px;
-            }
-
-            .titulo-caja h1 {
-                font-size: 18px;
-            }
-
-            .perfil-nombre {
-                display: none;
-            }
-
-            .contenedor {
-                padding: 15px;
-            }
-
-            .panel {
-                padding: 17px;
-            }
-
-            .servicios {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .cliente-buscador {
-                flex-wrap: wrap;
-            }
-
-            .cliente-buscador input {
-                width: 100%;
-                flex-basis: 100%;
-            }
-
-            .boton-nuevo-cliente {
-                padding: 12px 15px;
-            }
-
-            .metodos-pago {
-                grid-template-columns: 1fr;
-            }
-
-            .venta-exitosa-botones {
-                flex-direction: column;
-            }
-
-            .mensaje-cliente-registrado {
-                top: 85px;
-                left: 15px;
-                right: 15px;
-                min-width: 0;
-                max-width: none;
-            }
-
-        }
-
-        @media(max-width:420px) {
-
-            .servicios {
-                grid-template-columns: 1fr;
-            }
-
-            .producto-carrito {
-                grid-template-columns: 1fr;
-            }
-
-        }
-
-    </style>
-
-</head>
-
-<body>
-
-<header class="encabezado">
-
-    <div class="titulo-caja">
-
-        <i class="fa-solid fa-cash-register"></i>
-
-        <h1>Caja registradora</h1>
-
-    </div>
-
-    <div class="perfil-caja">
-
-        <button
-            type="button"
-            class="perfil-boton"
-            onclick="toggleMenuPerfil()"
-        >
-
-            @if(auth()->user()->foto_perfil)
-
-                <img
-                    src="{{ asset('storage/' . auth()->user()->foto_perfil) }}"
-                    class="perfil-foto"
-                    alt="Perfil"
-                >
-
-            @else
-
-                <div class="perfil-icono">
-                    <i class="fa-solid fa-user"></i>
-                </div>
-
-            @endif
-
-            <span class="perfil-nombre">
-                {{ auth()->user()->name }}
-            </span>
-
-            <i class="fa-solid fa-chevron-down perfil-flecha"></i>
-
-        </button>
-
-        <div class="menu-perfil" id="menuPerfil">
-
-            <div class="menu-perfil-info">
-
-                <strong>
-                    {{ auth()->user()->name }}
-                    {{ auth()->user()->apellido ?? '' }}
-                </strong>
-
-                <span>
-                    {{ ucfirst(auth()->user()->rol ?? '') }}
-                </span>
-
-            </div>
-
-            <button
-                type="button"
-                onclick="abrirModalCerrarCaja()"
-            >
-
-                <i class="fa-solid fa-door-open"></i>
-
-                Cerrar caja
-
-            </button>
-
-        </div>
-
-    </div>
-
-</header>
-
-
-<!-- ==========================================================
-     MENSAJE CLIENTE REGISTRADO
-========================================================== -->
-
-<div
-    class="mensaje-cliente-registrado"
-    id="mensajeClienteRegistrado"
+<x-layouts.panel
+    titulo="Caja registradora"
+    :regresar="route('empleado.punto_venta')"
+    :migas="[
+        ['texto' => 'Caja registradora', 'url' => '#'],
+    ]"
 >
 
-    <i class="fa-solid fa-circle-check"></i>
+<x-lista-estilos />
 
-    <div>
+@push('estilos')
+<style>
+    .cj-perfil { position: relative; }
+    .cj-perfil-boton {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        height: 40px;
+        padding: 0 12px 0 6px;
+        background: #fff;
+        border: 1px solid var(--borde);
+        border-radius: 0;
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--texto);
+        cursor: pointer;
+        transition: border-color 0.2s ease;
+    }
+    .cj-perfil-boton:hover { border-color: var(--primario); }
+    .cj-perfil-foto,
+    .cj-perfil-icono {
+        width: 28px;
+        height: 28px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--primario);
+        color: #fff;
+        font-size: 12px;
+        object-fit: cover;
+    }
+    .cj-menu-perfil {
+        display: none;
+        position: absolute;
+        right: 0;
+        top: 46px;
+        width: 220px;
+        background: #fff;
+        border: 1px solid var(--borde);
+        z-index: 50;
+    }
+    .cj-menu-perfil.mostrar { display: block; }
+    .cj-menu-perfil-info {
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--borde);
+    }
+    .cj-menu-perfil-info strong { display: block; font-size: 14px; color: var(--texto); }
+    .cj-menu-perfil-info span { font-size: 12px; color: var(--texto-suave); }
+    .cj-menu-perfil button {
+        width: 100%;
+        padding: 12px 16px;
+        background: #fff;
+        border: none;
+        text-align: left;
+        font-family: inherit;
+        font-size: 13px;
+        color: #b91c1c;
+        cursor: pointer;
+    }
+    .cj-menu-perfil button:hover { background: #fef2f2; }
+    .cj-menu-perfil button i { width: 20px; }
+    .cj-toast {
+        display: none;
+        position: fixed;
+        top: 90px;
+        right: 24px;
+        z-index: 15000;
+        min-width: 300px;
+        max-width: 420px;
+        padding: 14px 16px;
+        background: #ecfdf5;
+        border: 1px solid #a7f3d0;
+        border-left: 4px solid #047857;
+        align-items: center;
+        gap: 12px;
+        color: #047857;
+    }
+    .cj-toast.mostrar { display: flex; }
+    .cj-toast i { font-size: 22px; flex-shrink: 0; }
+    .cj-toast strong { display: block; margin-bottom: 3px; font-size: 14px; }
+    .cj-toast span { font-size: 13px; color: var(--texto-suave); }
+    .cj-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.7fr) minmax(340px, 0.9fr);
+        gap: 20px;
+        align-items: start;
+    }
+    .cj-panel {
+        background: #fff;
+        border: 1px solid var(--borde);
+        border-radius: 0;
+        padding: 22px;
+    }
+    .cj-panel-titulo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 18px;
+    }
+    .cj-panel-titulo i { color: var(--primario); font-size: 18px; }
+    .cj-panel-titulo h2 { margin: 0; font-size: 17px; font-weight: 600; color: var(--texto); }
 
-        <strong>
-            ¡Cliente registrado correctamente!
-        </strong>
+    .cj-buscador { position: relative; margin-bottom: 18px; }
+    .cj-buscador i {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--texto-suave);
+        font-size: 14px;
+    }
+    .cj-buscador input,
+    .cj-input {
+        width: 100%;
+        height: 42px;
+        padding: 0 14px;
+        background: #fff;
+        border: 1px solid var(--borde);
+        border-radius: 0;
+        font-family: inherit;
+        font-size: 14px;
+        color: var(--texto);
+        outline: none;
+        transition: border-color 0.2s ease;
+    }
+    .cj-buscador input { padding-left: 40px; }
+    .cj-buscador input:focus,
+    .cj-input:focus { border-color: var(--primario); }
 
-        <span id="textoClienteRegistrado"></span>
+    .cj-servicios {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 14px;
+        max-height: 640px;
+        overflow-y: auto;
+        padding-right: 4px;
+    }
+    .cj-servicio {
+        padding: 14px;
+        background: #fff;
+        border: 1px solid var(--borde);
+        transition: border-color 0.2s ease;
+    }
+    .cj-servicio:hover { border-color: var(--primario); }
+    .cj-servicio-imagen {
+        width: 100%;
+        height: 140px;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        background: #f9fafb;
+        border: 1px solid var(--borde);
+    }
+    .cj-servicio-imagen img { width: 100%; height: 100%; object-fit: cover; }
+    .cj-servicio-vacio { color: var(--primario); font-size: 38px; }
+    .cj-servicio h3 { margin: 0 0 6px; font-size: 15px; font-weight: 600; color: var(--texto); }
+    .cj-servicio-precio {
+        margin-bottom: 6px;
+        font-size: 19px;
+        font-weight: 700;
+        color: var(--primario);
+    }
+    .cj-servicio-stock { margin-bottom: 12px; font-size: 12px; color: var(--texto-suave); }
 
-    </div>
+    .cj-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        height: 40px;
+        padding: 0 16px;
+        background: var(--primario);
+        border: 1px solid var(--primario);
+        border-radius: 0;
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 600;
+        color: #fff;
+        cursor: pointer;
+        transition: opacity 0.2s ease;
+    }
+    .cj-btn:hover { opacity: 0.88; }
+    .cj-btn:disabled { background: #d1d5db; border-color: #d1d5db; cursor: not-allowed; opacity: 1; }
+    .cj-btn-verde { background: #047857; border-color: #047857; }
+    .cj-btn-rojo { background: #b91c1c; border-color: #b91c1c; }
+    .cj-btn-claro {
+        background: #fff;
+        border-color: var(--borde);
+        color: var(--texto);
+    }
+    .cj-btn-claro:hover { background: #f9fafb; opacity: 1; }
 
-</div>
+    .cj-sin-servicios {
+        grid-column: 1 / -1;
+        padding: 50px 20px;
+        text-align: center;
+        color: var(--texto-suave);
+    }
+    .cj-sin-servicios i { display: block; margin-bottom: 14px; font-size: 40px; color: #c4b5fd; }
 
+    .cj-cliente { margin-bottom: 22px; }
+    .cj-cliente-buscador { display: flex; gap: 8px; }
+    .cj-cliente-buscador .cj-input { flex: 1; min-width: 0; }
+    .cj-cliente-buscador .cj-btn { width: auto; white-space: nowrap; }
+    .cj-clientes-lista {
+        margin-top: 6px;
+        max-height: 160px;
+        overflow-y: auto;
+    }
+    .cj-cliente-opcion {
+        padding: 10px 12px;
+        border: 1px solid var(--borde);
+        border-top: none;
+        background: #fff;
+        cursor: pointer;
+    }
+    .cj-cliente-opcion:first-child { border-top: 1px solid var(--borde); }
+    .cj-cliente-opcion:hover { background: #f5f3ff; }
+    .cj-cliente-opcion strong { display: block; font-size: 14px; }
+    .cj-cliente-opcion span { font-size: 12px; color: var(--texto-suave); }
+    .cj-cliente-seleccionado {
+        display: none;
+        margin-top: 10px;
+        padding: 11px 12px;
+        background: #f5f3ff;
+        border: 1px solid #ddd6fe;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--primario);
+    }
 
-<main class="contenedor">
+    .cj-carrito {
+        min-height: 140px;
+        max-height: 340px;
+        overflow-y: auto;
+        margin-bottom: 18px;
+    }
+    .cj-carrito-vacio {
+        padding: 40px 10px;
+        text-align: center;
+        font-size: 14px;
+        color: var(--texto-suave);
+    }
+    .cj-carrito-vacio i { display: block; margin-bottom: 10px; font-size: 34px; color: #c4b5fd; }
+    .cj-producto {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 12px;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--borde);
+    }
+    .cj-producto-info { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .cj-producto-imagen {
+        width: 48px;
+        height: 48px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        background: #f9fafb;
+        border: 1px solid var(--borde);
+        color: var(--primario);
+    }
+    .cj-producto-imagen img { width: 100%; height: 100%; object-fit: cover; }
+    .cj-producto-nombre { font-size: 14px; font-weight: 600; }
+    .cj-producto-precio { margin-top: 3px; font-size: 14px; font-weight: 700; color: var(--primario); }
+    .cj-controles { display: flex; align-items: center; gap: 6px; }
+    .cj-cantidad-btn {
+        width: 30px;
+        height: 30px;
+        background: #fff;
+        border: 1px solid var(--borde);
+        border-radius: 0;
+        font-family: inherit;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.2s ease, color 0.2s ease;
+    }
+    .cj-cantidad-btn:hover { background: var(--primario); border-color: var(--primario); color: #fff; }
+    .cj-cantidad { min-width: 24px; text-align: center; font-weight: 700; font-size: 14px; }
+    .cj-eliminar {
+        margin-left: 4px;
+        background: transparent;
+        border: none;
+        color: #b91c1c;
+        cursor: pointer;
+    }
 
-    <div class="caja-grid">
+    .cj-totales { padding-top: 16px; border-top: 1px solid var(--borde); }
+    .cj-fila {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        font-size: 14px;
+    }
+    .cj-porcentaje { display: flex; align-items: center; gap: 6px; }
+    .cj-porcentaje input {
+        width: 90px;
+        height: 36px;
+        padding: 0 10px;
+        text-align: right;
+        border: 1px solid var(--borde);
+        border-radius: 0;
+        font-family: inherit;
+        outline: none;
+    }
+    .cj-porcentaje input:focus { border-color: var(--primario); }
+    .cj-porcentaje span { font-weight: 700; color: var(--primario); }
+    .cj-fila-final {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid var(--borde);
+    }
+    .cj-fila-final > span:first-child { font-size: 17px; font-weight: 600; }
+    #total { font-size: 28px; font-weight: 700; color: var(--primario); }
+    .cj-cobrar { height: 50px; margin-top: 18px; font-size: 16px; }
 
-        <!-- ======================================================
-             SERVICIOS
-        ======================================================= -->
+    .lst-modal .lst-modal-caja.cj-ancho { max-width: 520px; }
+    .cj-centro { text-align: center; }
+    .cj-modal-icono {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        font-size: 28px;
+    }
+    .cj-icono-info  { background: #f5f3ff; color: var(--primario); }
+    .cj-icono-exito { background: #ecfdf5; color: #047857; }
+    .cj-botones { display: flex; gap: 10px; margin-top: 20px; }
+    .cj-botones .cj-btn { flex: 1; }
+    .cj-campo { margin-bottom: 16px; text-align: left; }
+    .cj-campo label { display: block; margin-bottom: 7px; font-size: 13px; font-weight: 600; }
 
-        <section class="panel">
+    .cj-total-cobro {
+        margin-bottom: 20px;
+        padding: 16px;
+        text-align: center;
+        background: #f5f3ff;
+        border: 1px solid #ddd6fe;
+    }
+    .cj-total-cobro small { display: block; margin-bottom: 4px; color: var(--texto-suave); }
+    .cj-total-cobro strong { font-size: 32px; color: var(--primario); }
+    .cj-titulo-metodo { margin-bottom: 10px; font-size: 13px; font-weight: 600; text-align: left; }
+    .cj-metodos {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-bottom: 18px;
+    }
+    .cj-metodo {
+        padding: 16px 8px;
+        background: #fff;
+        border: 1px solid var(--borde);
+        border-radius: 0;
+        font-family: inherit;
+        font-size: 13px;
+        color: var(--texto);
+        text-align: center;
+        cursor: pointer;
+        transition: border-color 0.2s ease, background 0.2s ease;
+    }
+    .cj-metodo i { display: block; margin-bottom: 8px; font-size: 24px; }
+    .cj-metodo:hover { border-color: var(--primario); }
+    .cj-metodo.seleccionado {
+        border-color: var(--primario);
+        background: #f5f3ff;
+        color: var(--primario);
+    }
+    .cj-efectivo {
+        display: none;
+        margin-bottom: 18px;
+        padding: 16px;
+        text-align: left;
+        border: 1px solid var(--borde);
+    }
+    .cj-efectivo.mostrar { display: block; }
+    .cj-efectivo label { display: block; margin-bottom: 8px; font-size: 13px; font-weight: 600; }
+    .cj-efectivo input { font-size: 17px; height: 46px; }
+    .cj-cambio {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid var(--borde);
+        font-size: 14px;
+    }
+    #cambioValor { font-size: 18px; font-weight: 700; color: #047857; }
+    .cj-mensaje-pago {
+        display: none;
+        margin-bottom: 14px;
+        padding: 10px 12px;
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        font-size: 13px;
+        color: #b91c1c;
+        text-align: left;
+    }
+    .cj-mensaje-pago.mostrar { display: block; }
 
-            <div class="panel-titulo">
+    .cj-folio {
+        margin: 16px 0 4px;
+        padding: 16px;
+        background: #f5f3ff;
+        border: 1px solid #ddd6fe;
+    }
+    .cj-folio span { display: block; margin-bottom: 6px; font-size: 13px; color: var(--texto-suave); }
+    .cj-folio strong { font-size: 28px; color: var(--primario); }
 
-                <i class="fa-solid fa-list"></i>
-
-                <h2>Servicios</h2>
-
+    @media (max-width: 1000px) {
+        .cj-grid { grid-template-columns: 1fr; }
+        .cj-servicios { max-height: none; }
+    }
+    @media (max-width: 600px) {
+        .cj-perfil-nombre { display: none; }
+        .cj-servicios { grid-template-columns: 1fr 1fr; }
+        .cj-cliente-buscador { flex-wrap: wrap; }
+        .cj-cliente-buscador .cj-btn { width: 100%; }
+        .cj-metodos { grid-template-columns: 1fr; }
+        .cj-botones { flex-direction: column; }
+        .cj-toast { top: 80px; left: 14px; right: 14px; min-width: 0; max-width: none; }
+    }
+    @media (max-width: 420px) {
+        .cj-servicios { grid-template-columns: 1fr; }
+        .cj-producto { grid-template-columns: 1fr; }
+    }
+</style>
+@endpush
+<div class="lst-pagina">
+    <div class="lst-encabezado">
+        <div>
+            <div class="lst-titulo-fila">
+                <h1>Caja registradora</h1>
             </div>
-
-            <div class="buscador">
-
-                <i class="fa-solid fa-magnifying-glass"></i>
-
-                <input
-                    type="text"
-                    id="buscarServicio"
-                    placeholder="Buscar servicio..."
-                >
-
-            </div>
-
-            <div
-                class="servicios"
-                id="listaServicios"
-            >
-
-                @forelse($servicios as $servicio)
-
-                    <div
-                        class="servicio"
-                        data-nombre="{{ strtolower($servicio->nombre) }}"
+            <p>Registra ventas, selecciona clientes y cobra los servicios.</p>
+        </div>
+        <div class="cj-perfil">
+            <button type="button" class="cj-perfil-boton" onclick="toggleMenuPerfil()">
+                @if(auth()->user()->foto_perfil)
+                    <img
+                        src="{{ asset('storage/' . auth()->user()->foto_perfil) }}"
+                        class="cj-perfil-foto"
+                        alt="Perfil"
                     >
-
-                        <div class="servicio-imagen">
-
+                @else
+                    <span class="cj-perfil-icono">
+                        <i class="fa-solid fa-user"></i>
+                    </span>
+                @endif
+                <span class="cj-perfil-nombre">{{ auth()->user()->name }}</span>
+                <i class="fa-solid fa-chevron-down" style="font-size:11px;"></i>
+            </button>
+            <div class="cj-menu-perfil" id="menuPerfil">
+                <div class="cj-menu-perfil-info">
+                    <strong>
+                        {{ auth()->user()->name }}
+                        {{ auth()->user()->apellido ?? '' }}
+                    </strong>
+                    <span>{{ ucfirst(auth()->user()->rol ?? '') }}</span>
+                </div>
+                <button type="button" onclick="abrirModalCerrarCaja()">
+                    <i class="fa-solid fa-door-open"></i>
+                    Cerrar caja
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="cj-toast" id="mensajeClienteRegistrado">
+        <i class="fa-solid fa-circle-check"></i>
+        <div>
+            <strong>¡Cliente registrado correctamente!</strong>
+            <span id="textoClienteRegistrado"></span>
+        </div>
+    </div>
+    <div class="cj-grid">
+        <section class="cj-panel">
+            <div class="cj-panel-titulo">
+                <i class="fa-solid fa-list"></i>
+                <h2>Servicios</h2>
+            </div>
+            <div class="cj-buscador">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="buscarServicio" placeholder="Buscar servicio..." autocomplete="off">
+            </div>
+            <div class="cj-servicios" id="listaServicios">
+                @forelse($servicios as $servicio)
+                    <div class="cj-servicio" data-nombre="{{ strtolower($servicio->nombre) }}">
+                        <div class="cj-servicio-imagen">
                             @if($servicio->foto)
-
                                 <img
                                     src="{{ asset('storage/' . $servicio->foto) }}"
                                     alt="{{ $servicio->nombre }}"
                                 >
-
                             @else
-
-                                <div class="servicio-imagen-vacia">
-
+                                <div class="cj-servicio-vacio">
                                     <i class="fa-solid fa-concierge-bell"></i>
-
                                 </div>
-
                             @endif
-
                         </div>
-
-                        <h3>
-                            {{ $servicio->nombre }}
-                        </h3>
-
-                        <div class="servicio-precio">
-                            ${{ number_format($servicio->precio,2) }}
+                        <h3>{{ $servicio->nombre }}</h3>
+                        <div class="cj-servicio-precio">
+                            ${{ number_format($servicio->precio, 2) }}
                         </div>
-
-                        <div class="servicio-stock">
+                        <div class="cj-servicio-stock">
                             Disponible: {{ $servicio->cantidad }}
                         </div>
-
                         <button
                             type="button"
-                            class="boton-agregar"
+                            class="cj-btn"
                             onclick="agregarProducto(
                                 {{ $servicio->id }},
                                 @js($servicio->nombre),
@@ -1277,762 +537,274 @@
                                 {{ $servicio->cantidad }}
                             )"
                         >
-
                             <i class="fa-solid fa-plus"></i>
-
                             Agregar
-
                         </button>
-
                     </div>
-
                 @empty
-
-                    <div class="sin-servicios">
-
+                    <div class="cj-sin-servicios">
                         <i class="fa-solid fa-box-open"></i>
-
-                        <div>
-                            No hay servicios registrados.
-                        </div>
-
+                        <div>No hay servicios registrados.</div>
                     </div>
-
                 @endforelse
-
             </div>
-
         </section>
-
-
-        <!-- ======================================================
-             PANEL DERECHO
-        ======================================================= -->
-
-        <section class="panel">
-
-            <!-- CLIENTE -->
-
-            <div class="cliente-panel">
-
-                <div class="panel-titulo">
-
+        <section class="cj-panel">
+            <div class="cj-cliente">
+                <div class="cj-panel-titulo">
                     <i class="fa-solid fa-user"></i>
-
                     <h2>Cliente</h2>
-
                 </div>
-
-                <div class="cliente-buscador">
-
+                <div class="cj-cliente-buscador">
                     <input
                         type="text"
                         id="buscarCliente"
+                        class="cj-input"
                         placeholder="Buscar cliente..."
                         autocomplete="off"
                     >
-
-                    <button
-                        type="button"
-                        class="boton-nuevo-cliente"
-                        onclick="abrirModalCliente()"
-                    >
-
+                    <button type="button" class="cj-btn" onclick="abrirModalCliente()">
                         <i class="fa-solid fa-user-plus"></i>
-
                         Nuevo cliente
-
                     </button>
-
                 </div>
-
-                <div
-                    class="clientes-lista"
-                    id="clientesLista"
-                ></div>
-
-                <div
-                    class="cliente-seleccionado"
-                    id="clienteSeleccionado"
-                >
-
+                <div class="cj-clientes-lista" id="clientesLista"></div>
+                <div class="cj-cliente-seleccionado" id="clienteSeleccionado">
                     <i class="fa-solid fa-user-check"></i>
-
                     <span id="clienteNombre"></span>
-
                 </div>
-
             </div>
-
-
-            <!-- VENTA -->
-
-            <div class="panel-titulo">
-
+            <div class="cj-panel-titulo">
                 <i class="fa-solid fa-cart-shopping"></i>
-
                 <h2>Venta actual</h2>
-
             </div>
-
-            <div
-                class="carrito"
-                id="carrito"
-            >
-
-                <div class="carrito-vacio">
-
+            <div class="cj-carrito" id="carrito">
+                <div class="cj-carrito-vacio">
                     <i class="fa-solid fa-cart-shopping"></i>
-
                     Agrega servicios a la venta.
-
                 </div>
-
             </div>
-
-
-            <!-- TOTALES -->
-
-            <div class="totales">
-
-                <div class="fila-total">
-
+            <div class="cj-totales">
+                <div class="cj-fila">
                     <span>Subtotal</span>
-
-                    <strong id="subtotal">
-                        $0.00
-                    </strong>
-
+                    <strong id="subtotal">$0.00</strong>
                 </div>
-
-                <div class="fila-total">
-
+                <div class="cj-fila">
                     <span>Descuento</span>
-
-                    <div class="campo-porcentaje">
-
-                        <input
-                            type="number"
-                            id="descuento"
-                            value="0"
-                            min="0"
-                            max="100"
-                            step="0.01"
-                        >
-
-                        <span class="simbolo-porcentaje">
-                            %
-                        </span>
-
+                    <div class="cj-porcentaje">
+                        <input type="number" id="descuento" value="0" min="0" max="100" step="0.01">
+                        <span>%</span>
                     </div>
-
                 </div>
-
-                <div class="fila-total">
-
+                <div class="cj-fila">
                     <span>Impuesto</span>
-
-                    <div class="campo-porcentaje">
-
-                        <input
-                            type="number"
-                            id="impuesto"
-                            value="0"
-                            min="0"
-                            max="100"
-                            step="0.01"
-                        >
-
-                        <span class="simbolo-porcentaje">
-                            %
-                        </span>
-
+                    <div class="cj-porcentaje">
+                        <input type="number" id="impuesto" value="0" min="0" max="100" step="0.01">
+                        <span>%</span>
                     </div>
-
                 </div>
-
-                <div class="fila-total-final">
-
+                <div class="cj-fila-final">
                     <span>Total</span>
-
-                    <span id="total">
-                        $0.00
-                    </span>
-
+                    <span id="total">$0.00</span>
                 </div>
-
                 <button
                     type="button"
-                    class="boton-cobrar"
+                    class="cj-btn cj-cobrar"
                     id="botonCobrar"
                     disabled
                     onclick="abrirModalCobro()"
                 >
-
                     <i class="fa-solid fa-money-bill-wave"></i>
-
                     Cobrar
-
                 </button>
-
             </div>
-
         </section>
-
     </div>
-
-</main>
-
-
-<!-- ==========================================================
-     MODAL CLIENTE
-========================================================== -->
-
-<div
-    class="modal-cliente"
-    id="modalCliente"
->
-
-    <div class="modal-contenido">
-
-        <div class="modal-encabezado">
-
-            <div>
-
-                <i class="fa-solid fa-user-plus"></i>
-
-                Registrar cliente
-
-            </div>
-
-            <button
-                type="button"
-                onclick="cerrarModalCliente()"
-                class="modal-cerrar"
-            >
-
-                <i class="fa-solid fa-xmark"></i>
-
-            </button>
-
-        </div>
-
-        <form
-            method="POST"
-            action="{{ route('cliente.registrar.caja') }}"
-            id="formRegistrarCliente"
-        >
-
+</div>
+<div class="lst-modal" id="modalCliente" role="dialog" aria-modal="true" aria-labelledby="tituloModalCliente">
+    <div class="lst-modal-caja">
+        <h2 id="tituloModalCliente">Registrar cliente</h2>
+        <form method="POST" action="{{ route('cliente.registrar.caja') }}" id="formRegistrarCliente">
             @csrf
-
-            <div class="campo">
-
+            <div class="cj-campo">
                 <label>Nombre</label>
-
-                <input
-                    type="text"
-                    name="name"
-                    required
-                    maxlength="255"
-                    placeholder="Nombre del cliente"
-                >
-
+                <input type="text" name="name" class="cj-input" required maxlength="255" placeholder="Nombre del cliente">
             </div>
-
-            <div class="campo">
-
+            <div class="cj-campo">
                 <label>Apellido</label>
-
-                <input
-                    type="text"
-                    name="apellido"
-                    required
-                    maxlength="255"
-                    placeholder="Apellido del cliente"
-                >
-
+                <input type="text" name="apellido" class="cj-input" required maxlength="255" placeholder="Apellido del cliente">
             </div>
-
-            <div class="campo">
-
+            <div class="cj-campo">
                 <label>Teléfono</label>
-
-                <input
-                    type="text"
-                    name="telefono"
-                    maxlength="20"
-                    placeholder="Número de teléfono"
-                >
-
+                <input type="text" name="telefono" class="cj-input" maxlength="20" placeholder="Número de teléfono">
             </div>
-
-            <div class="modal-botones">
-
-                <button
-                    type="button"
-                    onclick="cerrarModalCliente()"
-                    class="boton-cancelar"
-                >
-
+            <div class="lst-modal-botones">
+                <button type="button" class="lst-btn-cancelar" onclick="cerrarModalCliente()">
                     Cancelar
-
                 </button>
-
-                <button
-                    type="submit"
-                    class="boton-guardar"
-                >
-
+                <button type="submit" class="lst-btn-confirmar boton-guardar">
                     <i class="fa-solid fa-user-plus"></i>
-
                     Registrar cliente
-
                 </button>
-
             </div>
-
         </form>
-
     </div>
-
 </div>
-
-
-<!-- ==========================================================
-     MODAL CERRAR CAJA
-========================================================== -->
-
-<div
-    class="modal-cerrar-caja"
-    id="modalCerrarCaja"
->
-
-    <div class="cerrar-caja-contenido">
-
-        <div class="cerrar-caja-icono">
-
+<div class="lst-modal" id="modalCerrarCaja" role="dialog" aria-modal="true" aria-labelledby="tituloCerrarCaja">
+    <div class="lst-modal-caja cj-centro">
+        <div class="cj-modal-icono cj-icono-info">
             <i class="fa-solid fa-cash-register"></i>
-
         </div>
-
-        <h2>¿Cerrar la caja?</h2>
-
+        <h2 id="tituloCerrarCaja">¿Cerrar la caja?</h2>
         <p>
-
             Vas a cerrar la caja.
-
             <br><br>
-
             Recuerda que
-            <strong>
-                no puedes volver a poner el dinero inicial
-            </strong>.
-
+            <strong>no puedes volver a poner el dinero inicial</strong>.
         </p>
-
-        <div class="cerrar-caja-botones">
-
-            <button
-                type="button"
-                class="boton-no"
-                onclick="cerrarModalCerrarCaja()"
-            >
-
+        <div class="lst-modal-botones">
+            <button type="button" class="lst-btn-cancelar" onclick="cerrarModalCerrarCaja()">
                 Cancelar
-
             </button>
-
-            <button
-                type="button"
-                class="boton-si"
-                onclick="cerrarCaja()"
-            >
-
+            <button type="button" class="lst-btn-confirmar" onclick="cerrarCaja()">
                 Sí, cerrar caja
-
             </button>
-
         </div>
-
     </div>
-
 </div>
-
-
-<!-- ==========================================================
-     MODAL COBRO
-========================================================== -->
-
-<div
-    class="modal-cobro"
-    id="modalCobro"
->
-
-    <div class="modal-cobro-contenido">
-
-        <div class="cobro-encabezado">
-
-            <div>
-
-                <i class="fa-solid fa-cash-register"></i>
-
-                Cobrar venta
-
-            </div>
-
-            <button
-                type="button"
-                class="cobro-cerrar"
-                onclick="cerrarModalCobro()"
-            >
-
-                <i class="fa-solid fa-xmark"></i>
-
+<div class="lst-modal" id="modalCobro" role="dialog" aria-modal="true" aria-labelledby="tituloCobro">
+    <div class="lst-modal-caja cj-ancho">
+        <h2 id="tituloCobro">Cobrar venta</h2>
+        <div class="cj-total-cobro">
+            <small>Total a pagar</small>
+            <strong id="totalModalCobro">$0.00</strong>
+        </div>
+        <div class="cj-titulo-metodo">Selecciona la forma de pago:</div>
+        <div class="cj-metodos">
+            <button type="button" class="cj-metodo" id="metodoEfectivo" onclick="seleccionarMetodoPago('efectivo')">
+                <i class="fa-solid fa-money-bill-wave"></i>
+                <span>Efectivo</span>
             </button>
-
+            <button type="button" class="cj-metodo" id="metodoTarjeta" onclick="seleccionarMetodoPago('tarjeta')">
+                <i class="fa-solid fa-credit-card"></i>
+                <span>Tarjeta</span>
+            </button>
+            <button type="button" class="cj-metodo" id="metodoTransferencia" onclick="seleccionarMetodoPago('transferencia')">
+                <i class="fa-solid fa-building-columns"></i>
+                <span>Transferencia</span>
+            </button>
         </div>
-
-        <div class="cobro-cuerpo">
-
-            <div class="total-cobro">
-
-                <small>
-                    Total a pagar
-                </small>
-
-                <strong id="totalModalCobro">
-                    $0.00
-                </strong>
-
+        <div class="cj-efectivo" id="datosEfectivo">
+            <label for="efectivoRecibido">Efectivo recibido</label>
+            <input type="number" id="efectivoRecibido" class="cj-input" min="0" step="0.01" placeholder="0.00">
+            <div class="cj-cambio">
+                <span>Cambio:</span>
+                <span id="cambioValor">$0.00</span>
             </div>
-
-            <div class="titulo-metodo">
-                Selecciona la forma de pago:
-            </div>
-
-            <div class="metodos-pago">
-
-                <button
-                    type="button"
-                    class="metodo-pago"
-                    id="metodoEfectivo"
-                    onclick="seleccionarMetodoPago('efectivo')"
-                >
-
-                    <i class="fa-solid fa-money-bill-wave"></i>
-
-                    <span>Efectivo</span>
-
-                </button>
-
-                <button
-                    type="button"
-                    class="metodo-pago"
-                    id="metodoTarjeta"
-                    onclick="seleccionarMetodoPago('tarjeta')"
-                >
-
-                    <i class="fa-solid fa-credit-card"></i>
-
-                    <span>Tarjeta</span>
-
-                </button>
-
-                <button
-                    type="button"
-                    class="metodo-pago"
-                    id="metodoTransferencia"
-                    onclick="seleccionarMetodoPago('transferencia')"
-                >
-
-                    <i class="fa-solid fa-building-columns"></i>
-
-                    <span>Transferencia</span>
-
-                </button>
-
-            </div>
-
-            <div
-                class="datos-efectivo"
-                id="datosEfectivo"
-            >
-
-                <div class="campo-efectivo">
-
-                    <label>
-                        Efectivo recibido
-                    </label>
-
-                    <input
-                        type="number"
-                        id="efectivoRecibido"
-                        min="0"
-                        step="0.01"
-                        placeholder="0.00"
-                    >
-
-                </div>
-
-                <div class="cambio">
-
-                    <span>Cambio:</span>
-
-                    <span id="cambioValor">
-                        $0.00
-                    </span>
-
-                </div>
-
-            </div>
-
-            <div
-                class="mensaje-pago"
-                id="mensajePago"
-            ></div>
-
-            <div class="botones-cobro">
-
-                <button
-                    type="button"
-                    class="boton-cobro-cancelar"
-                    onclick="cerrarModalCobro()"
-                >
-
-                    Cancelar
-
-                </button>
-
-                <button
-                    type="button"
-                    class="boton-confirmar-pago"
-                    id="botonConfirmarPago"
-                    onclick="confirmarPago()"
-                >
-
-                    <i class="fa-solid fa-check"></i>
-
-                    Confirmar pago
-
-                </button>
-
-            </div>
-
         </div>
-
-    </div>
-
-</div>
-
-
-<!-- ==========================================================
-     MODAL VENTA REGISTRADA
-========================================================== -->
-
-<div
-    class="modal-venta-exitosa"
-    id="modalVentaExitosa"
->
-
-    <div class="venta-exitosa-contenido">
-
-        <div class="venta-exitosa-icono">
-
-            <i class="fa-solid fa-circle-check"></i>
-
-        </div>
-
-        <h2>
-            ¡Venta registrada!
-        </h2>
-
-        <p>
-            La venta se registró correctamente.
-        </p>
-
-        <div class="folio-venta">
-
-            <span>
-                Número de folio
-            </span>
-
-            <strong id="folioVenta">
-                —
-            </strong>
-
-        </div>
-
-        <div class="venta-exitosa-botones">
-
-            <button
-                type="button"
-                class="boton-cerrar-exito"
-                onclick="cerrarModalVentaExitosa()"
-            >
-
+        <div class="cj-mensaje-pago" id="mensajePago"></div>
+        <div class="lst-modal-botones">
+            <button type="button" class="lst-btn-cancelar" onclick="cerrarModalCobro()">
+                Cancelar
+            </button>
+            <button type="button" class="lst-btn-confirmar" id="botonConfirmarPago" onclick="confirmarPago()">
                 <i class="fa-solid fa-check"></i>
+                Confirmar pago
+            </button>
+        </div>
+    </div>
+</div>
+<div class="lst-modal" id="modalVentaExitosa" role="dialog" aria-modal="true" aria-labelledby="tituloVenta">
+    <div class="lst-modal-caja cj-centro">
+        <div class="cj-modal-icono cj-icono-exito">
+            <i class="fa-solid fa-circle-check"></i>
+        </div>
 
+        <h2 id="tituloVenta">¡Venta registrada!</h2>
+        <p>La venta se registró correctamente.</p>
+
+        <div class="cj-folio">
+            <span>Número de folio</span>
+            <strong id="folioVenta">—</strong>
+        </div>
+
+        <div class="cj-botones">
+            <button type="button" class="cj-btn" onclick="cerrarModalVentaExitosa()">
+                <i class="fa-solid fa-check"></i>
                 Aceptar
-
             </button>
 
             <button
                 type="button"
-                class="boton-ticket"
+                class="cj-btn cj-btn-verde"
                 id="botonAbrirTicket"
                 onclick="abrirTicket()"
                 style="display:none;"
             >
-
                 <i class="fa-solid fa-print"></i>
-
                 Ver ticket
-
             </button>
-
         </div>
-
     </div>
-
 </div>
-
-
-<!-- ==========================================================
-     FORMULARIO CERRAR CAJA
-========================================================== -->
-
-<form
-    id="formCerrarCaja"
-    method="POST"
-    action="{{ route('punto_venta.cerrar') }}"
-    style="display:none;"
->
-
+<form id="formCerrarCaja" method="POST" action="{{ route('punto_venta.cerrar') }}" style="display:none;">
     @csrf
-
 </form>
 
-
+@push('scripts')
 <script>
-
-    /* ==========================================================
-       DATOS
-    ========================================================== */
-
     let carrito = [];
-
     let clienteSeleccionado = null;
-
     let metodoPagoSeleccionado = null;
-
     let ticketUrlVenta = null;
 
     const clientes = @json($clientes ?? []);
+    const puntoVentaId = @json(session('punto_venta_id'));
+    const urlRegistrarVenta = @json(route('venta.store'));
+    const csrfToken = @json(csrf_token());
 
-    const puntoVentaId =
-        @json(session('punto_venta_id'));
-
-    const urlRegistrarVenta =
-        @json(route('venta.store'));
-
-    const csrfToken =
-        document
-            .querySelector('meta[name="csrf-token"]')
-            .getAttribute('content');
-
-
-    /* ==========================================================
-       AGREGAR PRODUCTO
-    ========================================================== */
-
-    function agregarProducto(
-        id,
-        nombre,
-        precio,
-        foto,
-        stock
-    ) {
-
-        const producto =
-            carrito.find(item => item.id === id);
+    function agregarProducto(id, nombre, precio, foto, stock) {
+        const producto = carrito.find(item => item.id === id);
 
         if (producto) {
-
             if (producto.cantidad >= stock) {
-
                 alert(
-                    'No puedes agregar más unidades de "' +
-                    nombre +
-                    '". Existencia disponible: ' +
-                    stock
+                    'No puedes agregar más unidades de "' + nombre +
+                    '". Existencia disponible: ' + stock
                 );
-
                 return;
             }
-
             producto.cantidad++;
-
         } else {
-
             if (stock <= 0) {
-
-                alert(
-                    'El servicio "' +
-                    nombre +
-                    '" no tiene existencia disponible.'
-                );
-
+                alert('El servicio "' + nombre + '" no tiene existencia disponible.');
                 return;
             }
 
             carrito.push({
-
                 id: id,
-
                 nombre: nombre,
-
                 precio: parseFloat(precio),
-
                 foto: foto,
-
                 cantidad: 1,
-
                 stock: stock
-
             });
-
         }
 
         mostrarCarrito();
-
         calcularTotal();
-
     }
 
-
-    /* ==========================================================
-       MOSTRAR CARRITO
-    ========================================================== */
-
     function mostrarCarrito() {
-
-        const contenedor =
-            document.getElementById('carrito');
+        const contenedor = document.getElementById('carrito');
 
         if (carrito.length === 0) {
-
             contenedor.innerHTML = `
-
-                <div class="carrito-vacio">
-
+                <div class="cj-carrito-vacio">
                     <i class="fa-solid fa-cart-shopping"></i>
-
                     Agrega servicios a la venta.
-
                 </div>
-
             `;
-
             return;
         }
 
@@ -2040,789 +812,293 @@
 
         carrito.forEach((producto, indice) => {
 
-            const subtotalProducto =
-                producto.precio *
-                producto.cantidad;
+            const subtotalProducto = producto.precio * producto.cantidad;
 
             let imagen;
 
             if (producto.foto) {
-
-                imagen = `
-
-                    <img
-                        src="/storage/${producto.foto}"
-                        alt="${escapeHtml(producto.nombre)}"
-                    >
-
-                `;
-
+                imagen = `<img src="/storage/${producto.foto}" alt="${escapeHtml(producto.nombre)}">`;
             } else {
-
-                imagen = `
-
-                    <i class="fa-solid fa-concierge-bell"></i>
-
-                `;
-
+                imagen = `<i class="fa-solid fa-concierge-bell"></i>`;
             }
 
             contenedor.innerHTML += `
-
-                <div class="producto-carrito">
-
-                    <div class="producto-info">
-
-                        <div class="producto-imagen">
-
-                            ${imagen}
-
-                        </div>
-
+                <div class="cj-producto">
+                    <div class="cj-producto-info">
+                        <div class="cj-producto-imagen">${imagen}</div>
                         <div>
-
-                            <div class="producto-nombre">
-
-                                ${escapeHtml(producto.nombre)}
-
-                            </div>
-
-                            <div class="producto-precio">
-
-                                $${subtotalProducto.toFixed(2)}
-
-                            </div>
-
+                            <div class="cj-producto-nombre">${escapeHtml(producto.nombre)}</div>
+                            <div class="cj-producto-precio">$${subtotalProducto.toFixed(2)}</div>
                         </div>
-
                     </div>
 
-                    <div class="producto-controles">
-
-                        <button
-                            type="button"
-                            class="cantidad-btn"
-                            onclick="cambiarCantidad(${indice}, -1)"
-                        >
-                            -
-                        </button>
-
-                        <span class="cantidad">
-                            ${producto.cantidad}
-                        </span>
-
-                        <button
-                            type="button"
-                            class="cantidad-btn"
-                            onclick="cambiarCantidad(${indice}, 1)"
-                        >
-                            +
-                        </button>
-
-                        <button
-                            type="button"
-                            class="eliminar"
-                            onclick="eliminarProducto(${indice})"
-                        >
-
+                    <div class="cj-controles">
+                        <button type="button" class="cj-cantidad-btn" onclick="cambiarCantidad(${indice}, -1)">-</button>
+                        <span class="cj-cantidad">${producto.cantidad}</span>
+                        <button type="button" class="cj-cantidad-btn" onclick="cambiarCantidad(${indice}, 1)">+</button>
+                        <button type="button" class="cj-eliminar" onclick="eliminarProducto(${indice})">
                             <i class="fa-solid fa-trash"></i>
-
                         </button>
-
                     </div>
-
                 </div>
-
             `;
-
         });
-
     }
-
-
-    /* ==========================================================
-       ESCAPAR HTML
-    ========================================================== */
 
     function escapeHtml(text) {
-
-        const div =
-            document.createElement('div');
-
+        const div = document.createElement('div');
         div.textContent = text;
-
         return div.innerHTML;
-
     }
 
+    function cambiarCantidad(indice, cambio) {
 
-    /* ==========================================================
-       CAMBIAR CANTIDAD
-    ========================================================== */
-
-    function cambiarCantidad(
-        indice,
-        cambio
-    ) {
-
-        const producto =
-            carrito[indice];
+        const producto = carrito[indice];
 
         if (!producto) {
             return;
         }
 
-        const nuevaCantidad =
-            producto.cantidad + cambio;
+        const nuevaCantidad = producto.cantidad + cambio;
 
         if (nuevaCantidad > producto.stock) {
-
-            alert(
-                'No hay suficiente existencia. Disponible: ' +
-                producto.stock
-            );
-
+            alert('No hay suficiente existencia. Disponible: ' + producto.stock);
             return;
         }
 
-        producto.cantidad =
-            nuevaCantidad;
+        producto.cantidad = nuevaCantidad;
 
         if (producto.cantidad <= 0) {
-
             carrito.splice(indice, 1);
-
         }
 
         mostrarCarrito();
-
         calcularTotal();
-
     }
-
-
-    /* ==========================================================
-       ELIMINAR
-    ========================================================== */
 
     function eliminarProducto(indice) {
-
         carrito.splice(indice, 1);
-
         mostrarCarrito();
-
         calcularTotal();
-
     }
-
-
-    /* ==========================================================
-       TOTALES
-    ========================================================== */
 
     function obtenerTotales() {
 
         let subtotal = 0;
 
         carrito.forEach(producto => {
-
-            subtotal +=
-                producto.precio *
-                producto.cantidad;
-
+            subtotal += producto.precio * producto.cantidad;
         });
 
-        let descuentoPorcentaje =
-            parseFloat(
-                document.getElementById('descuento').value
-            ) || 0;
+        let descuentoPorcentaje = parseFloat(document.getElementById('descuento').value) || 0;
+        let impuestoPorcentaje = parseFloat(document.getElementById('impuesto').value) || 0;
 
-        let impuestoPorcentaje =
-            parseFloat(
-                document.getElementById('impuesto').value
-            ) || 0;
+        descuentoPorcentaje = Math.min(Math.max(descuentoPorcentaje, 0), 100);
+        impuestoPorcentaje = Math.min(Math.max(impuestoPorcentaje, 0), 100);
 
-        descuentoPorcentaje =
-            Math.min(
-                Math.max(
-                    descuentoPorcentaje,
-                    0
-                ),
-                100
-            );
-
-        impuestoPorcentaje =
-            Math.min(
-                Math.max(
-                    impuestoPorcentaje,
-                    0
-                ),
-                100
-            );
-
-        const descuento =
-            subtotal *
-            (descuentoPorcentaje / 100);
-
-        const subtotalConDescuento =
-            subtotal -
-            descuento;
-
-        const impuesto =
-            subtotalConDescuento *
-            (impuestoPorcentaje / 100);
-
-        const total =
-            Math.max(
-                0,
-                subtotalConDescuento + impuesto
-            );
+        const descuento = subtotal * (descuentoPorcentaje / 100);
+        const subtotalConDescuento = subtotal - descuento;
+        const impuesto = subtotalConDescuento * (impuestoPorcentaje / 100);
+        const total = Math.max(0, subtotalConDescuento + impuesto);
 
         return {
-
             subtotal,
-
             descuentoPorcentaje,
-
             descuento,
-
             impuestoPorcentaje,
-
             impuesto,
-
             total
-
         };
-
     }
-
-
-    /* ==========================================================
-       CALCULAR TOTAL
-    ========================================================== */
 
     function calcularTotal() {
-
-        const totales =
-            obtenerTotales();
-
-        document.getElementById(
-            'subtotal'
-        ).textContent =
-            '$' +
-            totales.subtotal.toFixed(2);
-
-        document.getElementById(
-            'total'
-        ).textContent =
-            '$' +
-            totales.total.toFixed(2);
-
-        document.getElementById(
-            'botonCobrar'
-        ).disabled =
-            carrito.length === 0;
-
+        const totales = obtenerTotales();
+        document.getElementById('subtotal').textContent = '$' + totales.subtotal.toFixed(2);
+        document.getElementById('total').textContent = '$' + totales.total.toFixed(2);
+        document.getElementById('botonCobrar').disabled = carrito.length === 0;
     }
 
 
-    document
-        .getElementById('descuento')
-        .addEventListener(
-            'input',
-            calcularTotal
-        );
+    document.getElementById('descuento').addEventListener('input', calcularTotal);
+    document.getElementById('impuesto').addEventListener('input', calcularTotal);
 
-    document
-        .getElementById('impuesto')
-        .addEventListener(
-            'input',
-            calcularTotal
-        );
+    document.getElementById('buscarServicio').addEventListener('input', function () {
 
+        const texto = this.value.toLowerCase().trim();
 
-    /* ==========================================================
-       BUSCAR SERVICIO
-    ========================================================== */
+        document.querySelectorAll('.cj-servicio').forEach(servicio => {
+            servicio.style.display =
+                servicio.dataset.nombre.includes(texto) ? '' : 'none';
+        });
+    });
 
-    document
-        .getElementById('buscarServicio')
-        .addEventListener(
-            'input',
-            function() {
+    document.getElementById('buscarCliente').addEventListener('input', function () {
 
-                const texto =
-                    this.value
-                        .toLowerCase()
-                        .trim();
+        const texto = this.value.toLowerCase().trim();
+        const lista = document.getElementById('clientesLista');
 
-                document
-                    .querySelectorAll('.servicio')
-                    .forEach(servicio => {
+        lista.innerHTML = '';
 
-                        const nombre =
-                            servicio.dataset.nombre;
+        if (!texto) {
+            return;
+        }
 
-                        servicio.style.display =
-                            nombre.includes(texto)
-                                ? ''
-                                : 'none';
+        const resultados = clientes.filter(cliente => {
+            const nombre =
+                ((cliente.name || '') + ' ' + (cliente.apellido || '')).toLowerCase();
+            return nombre.includes(texto);
+        });
 
-                    });
+        resultados.forEach(cliente => {
 
-            }
-        );
+            const nombreCompleto =
+                ((cliente.name || '') + ' ' + (cliente.apellido || '')).trim();
 
+            const elemento = document.createElement('div');
+            elemento.className = 'cj-cliente-opcion';
 
-    /* ==========================================================
-       BUSCAR CLIENTES
-    ========================================================== */
+            elemento.innerHTML = `
+                <strong>${escapeHtml(nombreCompleto)}</strong>
+                <span>Cliente registrado</span>
+            `;
 
-    document
-        .getElementById('buscarCliente')
-        .addEventListener(
-            'input',
-            function() {
+            elemento.onclick = function () {
+                seleccionarCliente(cliente.id, nombreCompleto);
+            };
 
-                const texto =
-                    this.value
-                        .toLowerCase()
-                        .trim();
+            lista.appendChild(elemento);
+        });
+    });
 
-                const lista =
-                    document.getElementById(
-                        'clientesLista'
-                    );
+    function seleccionarCliente(id, nombre) {
 
-                lista.innerHTML = '';
+        clienteSeleccionado = { id: id, nombre: nombre };
 
-                if (!texto) {
-                    return;
-                }
-
-                const resultados =
-                    clientes.filter(cliente => {
-
-                        const nombre =
-                            (
-                                (cliente.name || '') +
-                                ' ' +
-                                (cliente.apellido || '')
-                            ).toLowerCase();
-
-                        return nombre.includes(texto);
-
-                    });
-
-                resultados.forEach(cliente => {
-
-                    const nombreCompleto =
-                        (
-                            (cliente.name || '') +
-                            ' ' +
-                            (cliente.apellido || '')
-                        ).trim();
-
-                    const elemento =
-                        document.createElement('div');
-
-                    elemento.className =
-                        'cliente-opcion';
-
-                    elemento.innerHTML = `
-
-                        <strong>
-                            ${escapeHtml(nombreCompleto)}
-                        </strong>
-
-                        <span>
-                            Cliente registrado
-                        </span>
-
-                    `;
-
-                    elemento.onclick =
-                        function() {
-
-                            seleccionarCliente(
-                                cliente.id,
-                                nombreCompleto
-                            );
-
-                        };
-
-                    lista.appendChild(elemento);
-
-                });
-
-            }
-        );
-
-
-    /* ==========================================================
-       SELECCIONAR CLIENTE
-    ========================================================== */
-
-    function seleccionarCliente(
-        id,
-        nombre
-    ) {
-
-        clienteSeleccionado = {
-
-            id: id,
-
-            nombre: nombre
-
-        };
-
-        document.getElementById(
-            'clienteNombre'
-        ).textContent =
-            nombre;
-
-        document.getElementById(
-            'clienteSeleccionado'
-        ).style.display =
-            'block';
-
-        document.getElementById(
-            'clientesLista'
-        ).innerHTML = '';
-
-        document.getElementById(
-            'buscarCliente'
-        ).value =
-            nombre;
-
+        document.getElementById('clienteNombre').textContent = nombre;
+        document.getElementById('clienteSeleccionado').style.display = 'block';
+        document.getElementById('clientesLista').innerHTML = '';
+        document.getElementById('buscarCliente').value = nombre;
     }
-
-
-    /* ==========================================================
-       MODAL CLIENTE
-    ========================================================== */
 
     function abrirModalCliente() {
-
-        document.getElementById(
-            'modalCliente'
-        ).style.display =
-            'flex';
-
+        document.getElementById('modalCliente').classList.add('activo');
     }
-
 
     function cerrarModalCliente() {
-
-        document.getElementById(
-            'modalCliente'
-        ).style.display =
-            'none';
-
+        document.getElementById('modalCliente').classList.remove('activo');
     }
 
-
-    /* ==========================================================
-       REGISTRAR CLIENTE CON FETCH
-    ========================================================== */
-
-    document
-        .getElementById('formRegistrarCliente')
-        .addEventListener(
-            'submit',
-            async function(event) {
-
-                event.preventDefault();
-
-                const formulario =
-                    this;
-
-                const boton =
-                    formulario.querySelector(
-                        '.boton-guardar'
-                    );
-
-                const textoOriginal =
-                    boton.innerHTML;
-
-                boton.disabled = true;
-
-                boton.innerHTML = `
-
-                    <i class="fa-solid fa-spinner fa-spin"></i>
-
-                    Registrando...
-
-                `;
-
-                try {
-
-                    const respuesta =
-                        await fetch(
-                            formulario.action,
-                            {
-
-                                method: 'POST',
-
-                                credentials: 'same-origin',
-
-                                headers: {
-
-                                    'Accept':
-                                        'application/json',
-
-                                    'X-CSRF-TOKEN':
-                                        csrfToken,
-
-                                    'X-Requested-With':
-                                        'XMLHttpRequest'
-
-                                },
-
-                                body:
-                                    new FormData(
-                                        formulario
-                                    )
-
-                            }
-                        );
-
-
-                    const resultado =
-                        await respuesta.json();
-
-
-                    if (
-                        !respuesta.ok ||
-                        !resultado.success
-                    ) {
-
-                        throw new Error(
-                            resultado.message ||
-                            'No se pudo registrar el cliente.'
-                        );
-
-                    }
-
-
-                    /* ==========================================
-                       CLIENTE DEVUELTO POR EL CONTROLADOR
-                    ========================================== */
-
-                    const cliente =
-                        resultado.cliente;
-
-
-                    if (!cliente || !cliente.id) {
-
-                        throw new Error(
-                            'El servidor registró el cliente, pero no devolvió sus datos.'
-                        );
-
-                    }
-
-
-                    /* ==========================================
-                       AGREGAR CLIENTE A LA LISTA LOCAL
-                    ========================================== */
-
-                    clientes.push(cliente);
-
-
-                    /* ==========================================
-                       NOMBRE COMPLETO
-                    ========================================== */
-
-                    const nombreCompleto =
-                        (
-                            (cliente.name || '') +
-                            ' ' +
-                            (cliente.apellido || '')
-                        ).trim();
-
-
-                    /* ==========================================
-                       SELECCIONAR AUTOMÁTICAMENTE
-                    ========================================== */
-
-                    seleccionarCliente(
-                        cliente.id,
-                        nombreCompleto
-                    );
-
-
-                    /* ==========================================
-                       CERRAR MODAL
-                    ========================================== */
-
-                    cerrarModalCliente();
-
-
-                    /* ==========================================
-                       LIMPIAR FORMULARIO
-                    ========================================== */
-
-                    formulario.reset();
-
-
-                    /* ==========================================
-                       MOSTRAR MENSAJE
-                    ========================================== */
-
-                    const mensaje =
-                        document.getElementById(
-                            'mensajeClienteRegistrado'
-                        );
-
-                    const texto =
-                        document.getElementById(
-                            'textoClienteRegistrado'
-                        );
-
-                    texto.textContent =
-                        nombreCompleto +
-                        ' fue agregado correctamente.';
-
-                    mensaje.style.display =
-                        'flex';
-
-
-                    /* ==========================================
-                       OCULTAR MENSAJE
-                    ========================================== */
-
-                    setTimeout(
-                        function() {
-
-                            mensaje.style.display =
-                                'none';
-
-                        },
-                        4000
-                    );
-
-
-                } catch (error) {
-
-                    console.error(
-                        'Error al registrar cliente:',
-                        error
-                    );
-
-                    alert(
-                        error.message ||
-                        'Ocurrió un error al registrar el cliente.'
-                    );
-
-
-                } finally {
-
-                    boton.disabled = false;
-
-                    boton.innerHTML =
-                        textoOriginal;
-
-                }
-
-            }
-        );
-
-
-    /* ==========================================================
-       MENU PERFIL
-    ========================================================== */
-
-    function toggleMenuPerfil() {
-
-        document
-            .getElementById('menuPerfil')
-            .classList
-            .toggle('mostrar');
-
-    }
-
-
-    document.addEventListener(
-        'click',
-        function(event) {
-
-            const perfil =
-                document.querySelector(
-                    '.perfil-caja'
-                );
-
-            const menu =
-                document.getElementById(
-                    'menuPerfil'
-                );
-
-            if (
-                perfil &&
-                !perfil.contains(event.target)
-            ) {
-
-                menu.classList.remove(
-                    'mostrar'
-                );
-
-            }
-
-        }
-    );
-
-
-    /* ==========================================================
-       CERRAR CAJA
-    ========================================================== */
-
-    function abrirModalCerrarCaja() {
-
-        document
-            .getElementById('menuPerfil')
-            .classList
-            .remove('mostrar');
-
-        document.getElementById(
-            'modalCerrarCaja'
-        ).style.display =
-            'flex';
-
-    }
-
-
-    function cerrarModalCerrarCaja() {
-
-        document.getElementById(
-            'modalCerrarCaja'
-        ).style.display =
-            'none';
-
-    }
-
-
-    function cerrarCaja() {
-
-        document
-            .getElementById('formCerrarCaja')
-            .submit();
-
-    }
-
-
-    function confirmarSalidaCaja(event) {
+    document.getElementById('formRegistrarCliente').addEventListener('submit', async function (event) {
 
         event.preventDefault();
 
-        abrirModalCerrarCaja();
+        const formulario = this;
+        const boton = formulario.querySelector('.boton-guardar');
+        const textoOriginal = boton.innerHTML;
 
-        return false;
+        boton.disabled = true;
 
+        boton.innerHTML = `
+            <i class="fa-solid fa-spinner fa-spin"></i>
+            Registrando...
+        `;
+
+        try {
+
+            const respuesta = await fetch(formulario.action, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: new FormData(formulario)
+            });
+
+            const resultado = await respuesta.json();
+
+            if (!respuesta.ok || !resultado.success) {
+                throw new Error(
+                    resultado.message || 'No se pudo registrar el cliente.'
+                );
+            }
+
+            const cliente = resultado.cliente;
+
+            if (!cliente || !cliente.id) {
+                throw new Error(
+                    'El servidor registró el cliente, pero no devolvió sus datos.'
+                );
+            }
+
+            clientes.push(cliente);
+
+            const nombreCompleto =
+                ((cliente.name || '') + ' ' + (cliente.apellido || '')).trim();
+
+            seleccionarCliente(cliente.id, nombreCompleto);
+
+            cerrarModalCliente();
+
+            formulario.reset();
+
+            const mensaje = document.getElementById('mensajeClienteRegistrado');
+
+            document.getElementById('textoClienteRegistrado').textContent =
+                nombreCompleto + ' fue agregado correctamente.';
+
+            mensaje.classList.add('mostrar');
+
+            setTimeout(function () {
+                mensaje.classList.remove('mostrar');
+            }, 4000);
+
+        } catch (error) {
+
+            console.error('Error al registrar cliente:', error);
+
+            alert(error.message || 'Ocurrió un error al registrar el cliente.');
+
+        } finally {
+
+            boton.disabled = false;
+            boton.innerHTML = textoOriginal;
+        }
+    });
+
+    function toggleMenuPerfil() {
+        document.getElementById('menuPerfil').classList.toggle('mostrar');
     }
 
+    document.addEventListener('click', function (event) {
 
-    /* ==========================================================
-       MODAL COBRO
-    ========================================================== */
+        const perfil = document.querySelector('.cj-perfil');
+        const menu = document.getElementById('menuPerfil');
+
+        if (perfil && !perfil.contains(event.target)) {
+            menu.classList.remove('mostrar');
+        }
+    });
+
+    function abrirModalCerrarCaja() {
+        document.getElementById('menuPerfil').classList.remove('mostrar');
+        document.getElementById('modalCerrarCaja').classList.add('activo');
+    }
+
+    function cerrarModalCerrarCaja() {
+        document.getElementById('modalCerrarCaja').classList.remove('activo');
+    }
+
+    function cerrarCaja() {
+        document.getElementById('formCerrarCaja').submit();
+    }
+
+    function confirmarSalidaCaja(event) {
+        event.preventDefault();
+        abrirModalCerrarCaja();
+        return false;
+    }
 
     function abrirModalCobro() {
 
@@ -2830,268 +1106,108 @@
             return;
         }
 
-        const totales =
-            obtenerTotales();
+        const totales = obtenerTotales();
 
-        document.getElementById(
-            'totalModalCobro'
-        ).textContent =
-            '$' +
-            totales.total.toFixed(2);
+        document.getElementById('totalModalCobro').textContent =
+            '$' + totales.total.toFixed(2);
 
         metodoPagoSeleccionado = null;
 
-        document
-            .querySelectorAll('.metodo-pago')
-            .forEach(boton => {
+        document.querySelectorAll('.cj-metodo').forEach(boton => {
+            boton.classList.remove('seleccionado');
+        });
 
-                boton.classList.remove(
-                    'seleccionado'
-                );
-
-            });
-
-        document.getElementById(
-            'datosEfectivo'
-        ).classList.remove(
-            'mostrar'
-        );
-
-        document.getElementById(
-            'efectivoRecibido'
-        ).value = '';
-
-        document.getElementById(
-            'cambioValor'
-        ).textContent =
-            '$0.00';
+        document.getElementById('datosEfectivo').classList.remove('mostrar');
+        document.getElementById('efectivoRecibido').value = '';
+        document.getElementById('cambioValor').textContent = '$0.00';
 
         ocultarMensajePago();
 
-        document.getElementById(
-            'modalCobro'
-        ).style.display =
-            'flex';
-
+        document.getElementById('modalCobro').classList.add('activo');
     }
-
 
     function cerrarModalCobro() {
-
-        document.getElementById(
-            'modalCobro'
-        ).style.display =
-            'none';
-
+        document.getElementById('modalCobro').classList.remove('activo');
     }
 
+    function seleccionarMetodoPago(metodo) {
 
-    /* ==========================================================
-       METODO DE PAGO
-    ========================================================== */
+        metodoPagoSeleccionado = metodo;
 
-    function seleccionarMetodoPago(
-        metodo
-    ) {
+        document.querySelectorAll('.cj-metodo').forEach(boton => {
+            boton.classList.remove('seleccionado');
+        });
 
-        metodoPagoSeleccionado =
-            metodo;
-
-        document
-            .querySelectorAll('.metodo-pago')
-            .forEach(boton => {
-
-                boton.classList.remove(
-                    'seleccionado'
-                );
-
-            });
-
-        const boton =
-            document.getElementById(
-                'metodo' +
-                metodo.charAt(0).toUpperCase() +
-                metodo.slice(1)
-            );
+        const boton = document.getElementById(
+            'metodo' + metodo.charAt(0).toUpperCase() + metodo.slice(1)
+        );
 
         if (boton) {
-
-            boton.classList.add(
-                'seleccionado'
-            );
-
+            boton.classList.add('seleccionado');
         }
 
         if (metodo === 'efectivo') {
 
-            document.getElementById(
-                'datosEfectivo'
-            ).classList.add(
-                'mostrar'
-            );
-
-            document.getElementById(
-                'efectivoRecibido'
-            ).focus();
-
+            document.getElementById('datosEfectivo').classList.add('mostrar');
+            document.getElementById('efectivoRecibido').focus();
             calcularCambio();
 
         } else {
 
-            document.getElementById(
-                'datosEfectivo'
-            ).classList.remove(
-                'mostrar'
-            );
-
+            document.getElementById('datosEfectivo').classList.remove('mostrar');
             ocultarMensajePago();
-
         }
-
     }
-
-
-    /* ==========================================================
-       CAMBIO
-    ========================================================== */
 
     function calcularCambio() {
 
-        const totales =
-            obtenerTotales();
+        const totales = obtenerTotales();
 
         const recibido =
-            parseFloat(
-                document.getElementById(
-                    'efectivoRecibido'
-                ).value
-            ) || 0;
+            parseFloat(document.getElementById('efectivoRecibido').value) || 0;
 
-        const cambio =
-            recibido -
-            totales.total;
+        const cambio = recibido - totales.total;
 
-        document.getElementById(
-            'cambioValor'
-        ).textContent =
-            '$' +
-            Math.max(
-                0,
-                cambio
-            ).toFixed(2);
+        document.getElementById('cambioValor').textContent =
+            '$' + Math.max(0, cambio).toFixed(2);
 
-        if (
-            recibido > 0 &&
-            recibido < totales.total
-        ) {
-
-            mostrarMensajePago(
-                'El efectivo recibido es menor al total.'
-            );
-
+        if (recibido > 0 && recibido < totales.total) {
+            mostrarMensajePago('El efectivo recibido es menor al total.');
         } else {
-
             ocultarMensajePago();
-
         }
-
     }
 
+    document.getElementById('efectivoRecibido').addEventListener('input', calcularCambio);
 
-    document
-        .getElementById('efectivoRecibido')
-        .addEventListener(
-            'input',
-            calcularCambio
-        );
+    function mostrarMensajePago(mensaje) {
 
+        const elemento = document.getElementById('mensajePago');
 
-    /* ==========================================================
-       MENSAJES DE PAGO
-    ========================================================== */
-
-    function mostrarMensajePago(
-        mensaje
-    ) {
-
-        const elemento =
-            document.getElementById(
-                'mensajePago'
-            );
-
-        elemento.textContent =
-            mensaje;
-
-        elemento.classList.add(
-            'mostrar'
-        );
-
+        elemento.textContent = mensaje;
+        elemento.classList.add('mostrar');
     }
-
 
     function ocultarMensajePago() {
-
-        document
-            .getElementById('mensajePago')
-            .classList
-            .remove('mostrar');
-
+        document.getElementById('mensajePago').classList.remove('mostrar');
     }
 
+    function mostrarModalVentaExitosa(folio, ticketUrl = null) {
 
-    /* ==========================================================
-       MODAL VENTA EXITOSA
-    ========================================================== */
+        ticketUrlVenta = ticketUrl;
 
-    function mostrarModalVentaExitosa(
-        folio,
-        ticketUrl = null
-    ) {
+        document.getElementById('folioVenta').textContent = folio || '—';
 
-        ticketUrlVenta =
-            ticketUrl;
+        document.getElementById('botonAbrirTicket').style.display =
+            ticketUrlVenta ? 'inline-flex' : 'none';
 
-        document.getElementById(
-            'folioVenta'
-        ).textContent =
-            folio || '—';
-
-        const botonTicket =
-            document.getElementById(
-                'botonAbrirTicket'
-            );
-
-        if (ticketUrlVenta) {
-
-            botonTicket.style.display =
-                'block';
-
-        } else {
-
-            botonTicket.style.display =
-                'none';
-
-        }
-
-        document.getElementById(
-            'modalVentaExitosa'
-        ).style.display =
-            'flex';
-
+        document.getElementById('modalVentaExitosa').classList.add('activo');
     }
-
 
     function cerrarModalVentaExitosa() {
-
-        document.getElementById(
-            'modalVentaExitosa'
-        ).style.display =
-            'none';
-
+        document.getElementById('modalVentaExitosa').classList.remove('activo');
         ticketUrlVenta = null;
-
     }
-
 
     function abrirTicket() {
 
@@ -3099,399 +1215,162 @@
             return;
         }
 
-        window.open(
-            ticketUrlVenta,
-            '_blank'
-        );
-
+        window.open(ticketUrlVenta, '_blank');
     }
-
-
-    /* ==========================================================
-       CONFIRMAR PAGO
-    ========================================================== */
 
     async function confirmarPago() {
 
         if (!metodoPagoSeleccionado) {
-
-            mostrarMensajePago(
-                'Selecciona una forma de pago para continuar.'
-            );
-
+            mostrarMensajePago('Selecciona una forma de pago para continuar.');
             return;
-
         }
 
         if (!puntoVentaId) {
-
-            mostrarMensajePago(
-                'No se encontró el punto de venta actual en la sesión.'
-            );
-
+            mostrarMensajePago('No se encontró el punto de venta actual en la sesión.');
             return;
-
         }
 
         if (carrito.length === 0) {
-
-            mostrarMensajePago(
-                'El carrito está vacío.'
-            );
-
+            mostrarMensajePago('El carrito está vacío.');
             return;
-
         }
 
-        const totales =
-            obtenerTotales();
+        const totales = obtenerTotales();
 
         let efectivoRecibido = null;
-
         let cambio = null;
 
-        if (
-            metodoPagoSeleccionado ===
-            'efectivo'
-        ) {
+        if (metodoPagoSeleccionado === 'efectivo') {
 
             efectivoRecibido =
-                parseFloat(
-                    document.getElementById(
-                        'efectivoRecibido'
-                    ).value
-                ) || 0;
+                parseFloat(document.getElementById('efectivoRecibido').value) || 0;
 
-            if (
-                efectivoRecibido <
-                totales.total
-            ) {
-
-                mostrarMensajePago(
-                    'El efectivo recibido no alcanza para cubrir el total.'
-                );
-
+            if (efectivoRecibido < totales.total) {
+                mostrarMensajePago('El efectivo recibido no alcanza para cubrir el total.');
                 return;
-
             }
 
-            cambio =
-                efectivoRecibido -
-                totales.total;
-
+            cambio = efectivoRecibido - totales.total;
         }
 
-
-        /* ======================================================
-           DATOS DE LA VENTA
-        ====================================================== */
-
         const datosVenta = {
-
-            punto_venta_id:
-                parseInt(puntoVentaId),
-
-            cliente_id:
-                clienteSeleccionado
-                    ? clienteSeleccionado.id
-                    : null,
-
-            subtotal:
-                Number(
-                    totales.subtotal.toFixed(2)
-                ),
-
-            descuento_porcentaje:
-                Number(
-                    totales.descuentoPorcentaje.toFixed(2)
-                ),
-
-            descuento:
-                Number(
-                    totales.descuento.toFixed(2)
-                ),
-
-            impuesto_porcentaje:
-                Number(
-                    totales.impuestoPorcentaje.toFixed(2)
-                ),
-
-            impuesto:
-                Number(
-                    totales.impuesto.toFixed(2)
-                ),
-
-            total:
-                Number(
-                    totales.total.toFixed(2)
-                ),
-
-            forma_pago:
-                metodoPagoSeleccionado,
-
-            metodo_pago:
-                metodoPagoSeleccionado,
+            punto_venta_id: parseInt(puntoVentaId),
+            cliente_id: clienteSeleccionado ? clienteSeleccionado.id : null,
+            subtotal: Number(totales.subtotal.toFixed(2)),
+            descuento_porcentaje: Number(totales.descuentoPorcentaje.toFixed(2)),
+            descuento: Number(totales.descuento.toFixed(2)),
+            impuesto_porcentaje: Number(totales.impuestoPorcentaje.toFixed(2)),
+            impuesto: Number(totales.impuesto.toFixed(2)),
+            total: Number(totales.total.toFixed(2)),
+            forma_pago: metodoPagoSeleccionado,
+            metodo_pago: metodoPagoSeleccionado,
 
             efectivo_recibido:
                 efectivoRecibido !== null
-                    ? Number(
-                        efectivoRecibido.toFixed(2)
-                    )
+                    ? Number(efectivoRecibido.toFixed(2))
                     : null,
 
             cambio:
                 cambio !== null
-                    ? Number(
-                        cambio.toFixed(2)
-                    )
+                    ? Number(cambio.toFixed(2))
                     : null,
 
-            productos:
-                carrito.map(producto => ({
-
-                    id:
-                        producto.id,
-
-                    cantidad:
-                        producto.cantidad,
-
-                    precio:
-                        Number(
-                            producto.precio.toFixed(2)
-                        )
-
-                }))
-
+            productos: carrito.map(producto => ({
+                id: producto.id,
+                cantidad: producto.cantidad,
+                precio: Number(producto.precio.toFixed(2))
+            }))
         };
 
-
-        /* ======================================================
-           BOTÓN
-        ====================================================== */
-
-        const boton =
-            document.getElementById(
-                'botonConfirmarPago'
-            );
+        const boton = document.getElementById('botonConfirmarPago');
 
         boton.disabled = true;
 
         boton.innerHTML = `
-
             <i class="fa-solid fa-spinner fa-spin"></i>
-
             Registrando...
-
         `;
 
         ocultarMensajePago();
 
-
         try {
 
-            const respuesta =
-                await fetch(
-                    urlRegistrarVenta,
-                    {
+            const respuesta = await fetch(urlRegistrarVenta, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify(datosVenta)
+            });
 
-                        method: 'POST',
+            const resultado = await respuesta.json();
 
-                        credentials: 'same-origin',
-
-                        headers: {
-
-                            'Content-Type':
-                                'application/json',
-
-                            'Accept':
-                                'application/json',
-
-                            'X-CSRF-TOKEN':
-                                csrfToken,
-
-                            'X-Requested-With':
-                                'XMLHttpRequest'
-
-                        },
-
-                        body:
-                            JSON.stringify(
-                                datosVenta
-                            )
-
-                    }
-                );
-
-
-            const resultado =
-                await respuesta.json();
-
-
-            if (
-                !respuesta.ok ||
-                !resultado.success
-            ) {
-
+            if (!respuesta.ok || !resultado.success) {
                 throw new Error(
-                    resultado.message ||
-                    'No se pudo registrar la venta.'
+                    resultado.message || 'No se pudo registrar la venta.'
                 );
-
             }
 
-
-            /* ==================================================
-               LIMPIAR VENTA
-            ================================================== */
-
             carrito = [];
-
             clienteSeleccionado = null;
 
-            document.getElementById(
-                'clienteSeleccionado'
-            ).style.display =
-                'none';
-
-            document.getElementById(
-                'buscarCliente'
-            ).value = '';
-
-            document.getElementById(
-                'descuento'
-            ).value =
-                '0';
-
-            document.getElementById(
-                'impuesto'
-            ).value =
-                '0';
+            document.getElementById('clienteSeleccionado').style.display = 'none';
+            document.getElementById('buscarCliente').value = '';
+            document.getElementById('descuento').value = '0';
+            document.getElementById('impuesto').value = '0';
 
             mostrarCarrito();
-
             calcularTotal();
-
             cerrarModalCobro();
-
-
-            /* ==================================================
-               MOSTRAR VENTA EXITOSA
-            ================================================== */
 
             mostrarModalVentaExitosa(
                 resultado.folio,
                 resultado.ticket_url || null
             );
 
-
         } catch (error) {
 
-            console.error(
-                'Error al registrar venta:',
-                error
-            );
+            console.error('Error al registrar venta:', error);
 
             mostrarMensajePago(
-                error.message ||
-                'Ocurrió un error al registrar la venta.'
+                error.message || 'Ocurrió un error al registrar la venta.'
             );
-
 
         } finally {
 
             boton.disabled = false;
 
             boton.innerHTML = `
-
                 <i class="fa-solid fa-check"></i>
-
                 Confirmar pago
-
             `;
-
         }
-
     }
 
+    document.getElementById('modalCliente').addEventListener('click', function (event) {
+        if (event.target === this) cerrarModalCliente();
+    });
 
-    /* ==========================================================
-       CERRAR MODALES AL HACER CLICK AFUERA
-    ========================================================== */
+    document.getElementById('modalCerrarCaja').addEventListener('click', function (event) {
+        if (event.target === this) cerrarModalCerrarCaja();
+    });
 
-    document
-        .getElementById('modalCliente')
-        .addEventListener(
-            'click',
-            function(event) {
+    document.getElementById('modalCobro').addEventListener('click', function (event) {
+        if (event.target === this) cerrarModalCobro();
+    });
 
-                if (event.target === this) {
-
-                    cerrarModalCliente();
-
-                }
-
-            }
-        );
-
-
-    document
-        .getElementById('modalCerrarCaja')
-        .addEventListener(
-            'click',
-            function(event) {
-
-                if (event.target === this) {
-
-                    cerrarModalCerrarCaja();
-
-                }
-
-            }
-        );
-
-
-    document
-        .getElementById('modalCobro')
-        .addEventListener(
-            'click',
-            function(event) {
-
-                if (event.target === this) {
-
-                    cerrarModalCobro();
-
-                }
-
-            }
-        );
-
-
-    document
-        .getElementById('modalVentaExitosa')
-        .addEventListener(
-            'click',
-            function(event) {
-
-                if (event.target === this) {
-
-                    cerrarModalVentaExitosa();
-
-                }
-
-            }
-        );
-
-
-    /* ==========================================================
-       INICIALIZAR
-    ========================================================== */
+    document.getElementById('modalVentaExitosa').addEventListener('click', function (event) {
+        if (event.target === this) cerrarModalVentaExitosa();
+    });
 
     mostrarCarrito();
-
     calcularTotal();
 
 </script>
+@endpush
 
-</body>
-
-</html>
+</x-layouts.panel>
