@@ -1,1588 +1,425 @@
-<!DOCTYPE html>
-<html lang="es">
-
-<head>
-
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Mi información - Los Amates</title>
-
-    <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-    >
-
-    <style>
-
-        * {
-            box-sizing: border-box;
-        }
-
-        :root {
-            --morado: #6a1b9a;
-            --morado-oscuro: #4a126d;
-            --morado-claro: #f3e8f8;
-            --blanco: #ffffff;
-            --fondo: #f6f5f8;
-            --texto: #29252d;
-            --texto-suave: #77727c;
-            --borde: #e9e5ec;
-        }
-
-        body {
-            margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
-            background: var(--fondo);
-            color: var(--texto);
-        }
-
-        /* =====================================
-           ESTRUCTURA
-        ===================================== */
-
-        .dashboard {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        /* =====================================
-           SIDEBAR
-        ===================================== */
-
-        .sidebar {
-            width: 250px;
-            min-height: 100vh;
-            background: var(--morado);
-            color: white;
-            padding: 25px 18px;
-            position: fixed;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            overflow-y: auto;
-            z-index: 100;
-        }
-
-        .logo-container {
-            text-align: center;
-            padding-bottom: 25px;
-            margin-bottom: 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.18);
-        }
-
-        .logo {
-            width: 90px;
-            height: 90px;
-            object-fit: contain;
-            background: white;
-            border-radius: 18px;
-            padding: 8px;
-            margin-bottom: 12px;
-        }
-
-        .logo-container h2 {
-            margin: 0;
-            font-size: 18px;
-            font-weight: bold;
-        }
-
-        .logo-container p {
-            margin: 5px 0 0;
-            font-size: 12px;
-            opacity: 0.75;
-        }
-
-        .menu-titulo {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            opacity: 0.6;
-            margin: 25px 12px 10px;
-        }
-
-        .menu {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .menu a {
-            display: flex;
-            align-items: center;
-            gap: 13px;
-            padding: 12px 14px;
-            border-radius: 10px;
-            color: white;
-            text-decoration: none;
-            font-size: 14px;
-            transition: 0.25s ease;
-        }
-
-        .menu a i {
-            width: 20px;
-            text-align: center;
-            font-size: 16px;
-        }
-
-        .menu a:hover {
-            background: rgba(255,255,255,0.14);
-            transform: translateX(3px);
-        }
-
-        .menu a.activo {
-            background: white;
-            color: var(--morado);
-            font-weight: bold;
-        }
-
-        /* =====================================
-           CONTENIDO
-        ===================================== */
-
-        .contenido {
-            width: calc(100% - 250px);
-            margin-left: 250px;
-            min-height: 100vh;
-        }
-
-        /* =====================================
-           TOPBAR
-        ===================================== */
-
-        .topbar {
-            height: 82px;
-            background: white;
-            border-bottom: 1px solid var(--borde);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 35px;
-            position: sticky;
-            top: 0;
-            z-index: 50;
-        }
-
-        .saludo h1 {
-            margin: 0;
-            font-size: 23px;
-            color: var(--texto);
-        }
-
-        .saludo p {
-            margin: 5px 0 0;
-            color: var(--texto-suave);
-            font-size: 13px;
-        }
-
-        /* =====================================
-           PERFIL TOPBAR
-        ===================================== */
-
-        .perfil-top {
-            position: relative;
-        }
-
-        .avatar-top {
-            width: 45px;
-            height: 45px;
-            border: 3px solid var(--morado-claro);
-            border-radius: 50%;
-            background-color: {{ auth()->user()->color_perfil ?? '#6a1b9a' }};
-            color: white;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            padding: 0;
-            transition: 0.25s;
-        }
-
-        .avatar-top:hover {
-            transform: scale(1.06);
-            border-color: var(--morado);
-        }
-
-        .avatar-top img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .menu-perfil {
-            display: none;
-            position: absolute;
-            top: 58px;
-            right: 0;
-            width: 210px;
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            border: 1px solid var(--borde);
-        }
-
-        .menu-perfil.activo {
-            display: block;
-        }
-
-        .nombre-usuario {
-            padding: 16px;
-            font-weight: bold;
-            color: var(--texto);
-            border-bottom: 1px solid var(--borde);
-        }
-
-        .nombre-usuario small {
-            display: block;
-            margin-top: 4px;
-            color: var(--texto-suave);
-            font-weight: normal;
-        }
-
-        .boton-logout {
-            width: 100%;
-            padding: 14px 16px;
-            background: white;
-            color: #d33d3d;
-            border: none;
-            text-align: left;
-            font-size: 14px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .boton-logout:hover {
-            background: #fff0f0;
-        }
-
-        .boton-logout i {
-            width: 22px;
-            margin-right: 6px;
-        }
-
-        /* =====================================
-           CONTENEDOR
-        ===================================== */
-
-        .contenedor {
-            padding: 35px;
-            max-width: 1500px;
-            margin: auto;
-        }
-
-        .titulo-seccion {
-            margin-bottom: 25px;
-        }
-
-        .titulo-seccion h2 {
-            margin: 0;
-            font-size: 22px;
-        }
-
-        .titulo-seccion p {
-            color: var(--texto-suave);
-            margin: 7px 0 0;
-            font-size: 14px;
-        }
-
-        /* =====================================
-           MENSAJE
-        ===================================== */
-
-        .mensaje {
-            background: #e8f5e9;
-            color: #2e7d32;
-            padding: 13px 16px;
-            border-radius: 10px;
-            margin-bottom: 22px;
-            font-size: 14px;
-            font-weight: bold;
-            border: 1px solid #c8e6c9;
-        }
-
-        /* =====================================
-           TARJETA
-        ===================================== */
-
-        .tarjeta {
-            background: white;
-            border: 1px solid var(--borde);
-            border-radius: 18px;
-            padding: 30px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.04);
-        }
-
-        /* =====================================
-           CABECERA PERFIL
-        ===================================== */
-
-        .cabecera-perfil {
-            display: flex;
-            align-items: center;
-            gap: 25px;
-            padding-bottom: 28px;
-            border-bottom: 1px solid var(--borde);
-        }
-
-        .perfil-avatar {
-            position: relative;
-            width: 115px;
-            height: 115px;
-            flex-shrink: 0;
-        }
-
-        .avatar {
-            width: 105px;
-            height: 105px;
-            border-radius: 50%;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 42px;
-            font-weight: bold;
-            overflow: hidden;
-            border: 5px solid var(--morado-claro);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.10);
-        }
-
-        .avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        /* =====================================
-           BOTÓN EDITAR FOTO
-        ===================================== */
-
-        .boton-editar-foto {
-            position: absolute;
-            bottom: 5px;
-            right: 5px;
-            width: 38px;
-            height: 38px;
-            border: 3px solid white;
-            border-radius: 50%;
-            background: var(--morado);
-            color: white;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.20);
-            cursor: pointer;
-            font-size: 14px;
-            transition: 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .boton-editar-foto:hover {
-            background: var(--morado-oscuro);
-            transform: scale(1.08);
-        }
-
-        /* =====================================
-           MENÚ FOTO
-        ===================================== */
-
-        .menu-foto {
-            display: none;
-            position: absolute;
-            top: 120px;
-            left: 0;
-            width: 200px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            border: 1px solid var(--borde);
-            overflow: hidden;
-            z-index: 100;
-        }
-
-        .menu-foto.mostrar {
-            display: block;
-        }
-
-        .menu-foto button {
-            width: 100%;
-            padding: 13px 15px;
-            border: none;
-            background: white;
-            color: #444;
-            text-align: left;
-            cursor: pointer;
-            font-size: 14px;
-            transition: 0.25s;
-        }
-
-        .menu-foto button:hover {
-            background: var(--morado-claro);
-            color: var(--morado);
-        }
-
-        .menu-foto button i {
-            width: 25px;
-            color: var(--morado);
-        }
-
-        /* =====================================
-           PANEL COLORES
-        ===================================== */
-
-        .panel-colores {
-            display: none;
-            position: absolute;
-            top: 120px;
-            left: 0;
-            width: 230px;
-            background: white;
-            border-radius: 12px;
-            padding: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            border: 1px solid var(--borde);
-            z-index: 101;
-        }
-
-        .panel-colores.mostrar {
-            display: block;
-        }
-
-        .panel-colores p {
-            margin: 0 0 13px;
-            color: var(--texto);
-            font-size: 14px;
-            font-weight: bold;
-        }
-
-        .colores {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-        }
-
-        .color-opcion {
-            width: 45px;
-            height: 45px;
-            border: 3px solid transparent;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .color-opcion:hover {
-            transform: scale(1.12);
-            border-color: #333;
-        }
-
-        .formulario-oculto {
-            display: none;
-        }
-
-        /* =====================================
-           DATOS PERFIL
-        ===================================== */
-
-        .datos-perfil h2 {
-            margin: 0 0 6px;
-            color: var(--texto);
-            font-size: 23px;
-        }
-
-        .datos-perfil p {
-            margin: 0;
-            color: var(--texto-suave);
-            font-size: 14px;
-        }
-
-        .etiqueta-vendedor {
-            display: inline-block;
-            margin-top: 12px;
-            padding: 6px 11px;
-            background: var(--morado-claro);
-            color: var(--morado);
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        /* =====================================
-           INFORMACIÓN
-        ===================================== */
-
-        .titulo-informacion {
-            margin: 30px 0 17px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .titulo-informacion i {
-            width: 35px;
-            height: 35px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--morado-claro);
-            color: var(--morado);
-            border-radius: 9px;
-        }
-
-        .titulo-informacion h3 {
-            margin: 0;
-            font-size: 17px;
-        }
-
-        .informacion {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-        }
-
-        .dato {
-            background: #faf9fb;
-            padding: 17px;
-            border: 1px solid var(--borde);
-            border-radius: 12px;
-            transition: 0.25s;
-        }
-
-        .dato:hover {
-            border-color: #d8c1e2;
-            background: #fcf9fd;
-        }
-
-        .dato strong {
-            display: flex;
-            align-items: center;
-            color: var(--texto-suave);
-            margin-bottom: 8px;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.4px;
-        }
-
-        .dato i {
-            color: var(--morado);
-            margin-right: 8px;
-            font-size: 14px;
-        }
-
-        .dato span {
-            color: var(--texto);
-            font-size: 14px;
-            word-break: break-word;
-        }
-
-        /* =====================================
-           BOTÓN EDITAR
-        ===================================== */
-
-        .acciones {
-            display: flex;
-            justify-content: flex-end;
-            margin-top: 28px;
-            padding-top: 22px;
-            border-top: 1px solid var(--borde);
-        }
-
-        .boton-editar {
-            display: inline-flex;
-            align-items: center;
-            gap: 9px;
-            background: var(--morado);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 10px;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 14px;
-            transition: 0.25s;
-        }
-
-        .boton-editar:hover {
-            background: var(--morado-oscuro);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(106,27,154,0.20);
-        }
-
-        /* =====================================
-           RESPONSIVE
-        ===================================== */
-
-        @media (max-width: 1100px) {
-
-            .informacion {
-                grid-template-columns: 1fr;
-            }
-
-        }
-
-        @media (max-width: 900px) {
-
-            .sidebar {
-                width: 210px;
-            }
-
-            .contenido {
-                width: calc(100% - 210px);
-                margin-left: 210px;
-            }
-
-        }
-
-        @media (max-width: 700px) {
-
-            .dashboard {
-                display: block;
-            }
-
-            .sidebar {
-                position: relative;
-                width: 100%;
-                min-height: auto;
-                padding: 15px;
-            }
-
-            .logo-container {
-                display: flex;
-                align-items: center;
-                text-align: left;
-                gap: 12px;
-                padding-bottom: 15px;
-                margin-bottom: 10px;
-            }
-
-            .logo {
-                width: 55px;
-                height: 55px;
-                margin: 0;
-            }
-
-            .logo-container p {
-                display: none;
-            }
-
-            .menu-titulo {
-                display: none;
-            }
-
-            .menu {
-                display: grid;
-                grid-template-columns: 1fr;
-            }
-
-            .menu a {
-                font-size: 12px;
-                padding: 10px;
-            }
-
-            .contenido {
-                width: 100%;
-                margin-left: 0;
-            }
-
-            .topbar {
-                height: 72px;
-                padding: 0 18px;
-            }
-
-            .saludo h1 {
-                font-size: 18px;
-            }
-
-            .saludo p {
-                font-size: 11px;
-            }
-
-            .contenedor {
-                padding: 22px 16px;
-            }
-
-            .tarjeta {
-                padding: 20px;
-            }
-
-            .cabecera-perfil {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .menu-foto,
-            .panel-colores {
-                left: 50%;
-                transform: translateX(-50%);
-            }
-
-            .acciones {
-                justify-content: center;
-            }
-
-            .boton-editar {
-                width: 100%;
-                justify-content: center;
-            }
-
-        }
-
-        @media (max-width: 450px) {
-
-            .informacion {
-                grid-template-columns: 1fr;
-            }
-
-            .cabecera-perfil {
-                gap: 15px;
-            }
-
-            .datos-perfil h2 {
-                font-size: 20px;
-            }
-
-        }
-
-    </style>
-
-</head>
-
-
-<body>
-
-
-<div class="dashboard">
-
-
-    <!-- =====================================
-         SIDEBAR
-    ====================================== -->
-
-    <aside class="sidebar">
-
-        <div class="logo-container">
-
-            <img
-                src="{{ asset('images/logo-los-amates.png') }}"
-                alt="Logo Los Amates"
-                class="logo"
-            >
-
-            <div>
-
-                <h2>
-                    Los Amates
-                </h2>
-
-                <p>
-                    Gestor de Ventas
-                </p>
-
+@php
+    $usuario = auth()->user();
+    $colorPerfil = $usuario->color_perfil ?? '#6a1b9a';
+    $inicial = strtoupper(substr($usuario->name, 0, 1));
+
+    $nacimiento = $usuario->fecha_nacimiento;
+    $nacimientoTexto = $nacimiento
+        ? (method_exists($nacimiento, 'format') ? $nacimiento->format('d/m/Y') : $nacimiento)
+        : null;
+
+    $colores = [
+        '#6a1b9a' => 'Morado',
+        '#2196F3' => 'Azul',
+        '#F44336' => 'Rojo',
+        '#4CAF50' => 'Verde',
+        '#FF9800' => 'Naranja',
+        '#263238' => 'Oscuro',
+    ];
+
+    $datos = [
+        ['icono' => 'fa-user',          'etiqueta' => 'Nombre',               'valor' => $usuario->name],
+        ['icono' => 'fa-user',          'etiqueta' => 'Apellidos',            'valor' => $usuario->apellido],
+        ['icono' => 'fa-envelope',      'etiqueta' => 'Correo electrónico',   'valor' => $usuario->email],
+        ['icono' => 'fa-phone',         'etiqueta' => 'Teléfono',             'valor' => $usuario->telefono],
+        ['icono' => 'fa-location-dot',  'etiqueta' => 'Dirección',            'valor' => $usuario->direccion],
+        ['icono' => 'fa-calendar',      'etiqueta' => 'Fecha de nacimiento',  'valor' => $nacimientoTexto],
+    ];
+@endphp
+
+<x-layouts.panel
+    titulo="Mi información"
+    :migas="[['texto' => 'Mi información', 'url' => null]]"
+>
+
+<x-lista-estilos />
+
+@push('estilos')
+<style>
+    .mi-grid {
+        display: grid;
+        grid-template-columns: 300px minmax(0, 1fr);
+        gap: 20px;
+        align-items: start;
+    }
+
+    .mi-card {
+        background: #fff;
+        border: 1px solid var(--borde, #e5e7eb);
+        border-radius: 8px;
+    }
+    .mi-card-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 20px;
+        border-bottom: 1px solid var(--borde, #e5e7eb);
+    }
+    .mi-card-head h2 {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--texto, #1f2937);
+    }
+
+    /* ---------- Perfil ---------- */
+    .mi-perfil {
+        padding: 28px 20px 24px;
+        text-align: center;
+    }
+    .mi-avatar-wrap {
+        position: relative;
+        width: 104px;
+        margin: 0 auto 16px;
+    }
+    .mi-avatar {
+        width: 104px;
+        height: 104px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        color: #fff;
+        font-size: 40px;
+        font-weight: 600;
+        border: 1px solid var(--borde, #e5e7eb);
+    }
+    .mi-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+    .mi-btn-foto {
+        position: absolute;
+        right: -2px;
+        bottom: -2px;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        background: var(--texto, #1f2937);
+        color: #fff;
+        font-size: 12px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .mi-btn-foto:hover { background: #000; }
+
+    .mi-cerrar-sesion { padding: 0 20px 20px; }
+    .mi-btn-salir {
+        width: 100%;
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        padding: 10px 14px;
+        background: #fff; color: #b91c1c;
+        border: 1px solid #fecaca; border-radius: 8px;
+        font: inherit; font-weight: 600; cursor: pointer;
+        transition: background 0.2s ease;
+    }
+    .mi-btn-salir:hover { background: #fef2f2; }
+
+    .mi-pop {
+        display: none;
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 50%;
+        transform: translateX(-50%);
+        width: 220px;
+        background: #fff;
+        border: 1px solid var(--borde, #e5e7eb);
+        border-radius: 8px;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, .12);
+        text-align: left;
+        z-index: 30;
+    }
+    .mi-pop.mostrar { display: block; }
+    .mi-pop-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        padding: 10px 14px;
+        border: none;
+        background: none;
+        font: inherit;
+        font-size: 13px;
+        color: var(--texto, #1f2937);
+        cursor: pointer;
+    }
+    .mi-pop-item + .mi-pop-item { border-top: 1px solid var(--borde, #e5e7eb); }
+    .mi-pop-item:hover { background: #f9fafb; }
+    .mi-pop-item i { width: 16px; color: var(--texto-suave, #6b7280); }
+
+    .mi-pop-colores { padding: 14px; }
+    .mi-pop-colores p {
+        margin: 0 0 10px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--texto, #1f2937);
+    }
+    .mi-colores { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+    .mi-color {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        box-shadow: 0 0 0 1px var(--borde, #d1d5db);
+        cursor: pointer;
+        padding: 0;
+    }
+    .mi-color:hover { box-shadow: 0 0 0 2px var(--texto-suave, #6b7280); }
+    .mi-color.actual { box-shadow: 0 0 0 2px var(--texto, #1f2937); }
+
+    .mi-nombre {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--texto, #1f2937);
+    }
+    .mi-empresa {
+        margin: 4px 0 12px;
+        font-size: 13px;
+        color: var(--texto-suave, #6b7280);
+    }
+    .mi-rol {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 3px 10px;
+        font-size: 12px;
+        font-weight: 600;
+        border-radius: 999px;
+        background: var(--primario-suave, #f3e8f8);
+        color: var(--primario-oscuro, #4a126d);
+    }
+
+    .mi-contacto {
+        border-top: 1px solid var(--borde, #e5e7eb);
+        padding: 14px 20px;
+        font-size: 13px;
+    }
+    .mi-contacto div {
+        display: flex;
+        gap: 10px;
+        align-items: baseline;
+        color: var(--texto, #1f2937);
+        word-break: break-word;
+    }
+    .mi-contacto div + div { margin-top: 8px; }
+    .mi-contacto i { width: 14px; color: var(--texto-suave, #6b7280); }
+
+    .mi-campos {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px 24px;
+        padding: 20px;
+    }
+    .mi-campo small {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 12px;
+        color: var(--texto-suave, #6b7280);
+    }
+    .mi-valor {
+        min-height: 36px;
+        padding: 8px 12px;
+        font-size: 14px;
+        color: var(--texto, #1f2937);
+        background: #f9fafb;
+        border: 1px solid var(--borde, #e5e7eb);
+        border-radius: 6px;
+        word-break: break-word;
+    }
+    .mi-valor.vacio { color: var(--texto-suave, #9ca3af); }
+
+    .gx-alerta {
+        padding: 12px 16px;
+        margin-bottom: 16px;
+        font-size: 14px;
+        background: #ecfdf3;
+        border: 1px solid #abefc6;
+        border-radius: 6px;
+        color: #067647;
+    }
+
+    .mi-oculto { display: none; }
+
+    @media (max-width: 900px) {
+        .mi-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 560px) {
+        .mi-campos { grid-template-columns: 1fr; }
+    }
+</style>
+@endpush
+
+<x-sidebar activo="informacion" />
+
+<div class="lst-pagina">
+
+    <div class="lst-encabezado">
+        <div>
+            <div class="lst-titulo-fila">
+                <button type="button" class="btn-menu-lateral" data-abrir-sidebar aria-label="Mostrar menú lateral">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <h1>Mi información</h1>
             </div>
-
+            <p>Consulta los datos de tu cuenta y personaliza tu perfil.</p>
         </div>
+        <a href="{{ route('vendedor.informacion.editar') }}" class="lst-btn-principal">Editar información</a>
+    </div>
 
-
-        <div class="menu-titulo">
-            Vendedor
-        </div>
-
-
-        <nav class="menu">
-
-            <a href="{{ route('vendedor.dashboard') }}">
-
-                <i class="fa-solid fa-house"></i>
-
-                Menú Principal
-
-            </a>
-
-            @if(auth()->user()->puntoVenta)
-
-        <a
-            href="{{ route('empleado.punto_venta') }}"
-            class=""
-        >
-            <i class="fa-solid fa-cash-register"></i>
-            Punto de venta
-        </a>
-
+    @if(session('success'))
+        <div class="gx-alerta">{{ session('success') }}</div>
+        @if($errors->any())
+            <div class="gx-alerta" style="background:#fef3f2;border-color:#fecdca;color:#b42318;">
+                {{ $errors->first() }}
+            </div>
+        @endif
     @endif
 
-            <a
-                href="{{ route('vendedor.informacion') }}"
-                class="activo"
-            >
+    <div class="mi-grid">
+        <aside class="mi-card">
+            <div class="mi-perfil">
 
-                <i class="fa-solid fa-user"></i>
-
-                Mi información
-
-            </a>
-
-        </nav>
-
-    </aside>
-
-
-    <!-- =====================================
-         CONTENIDO
-    ====================================== -->
-
-    <main class="contenido">
-
-
-        <!-- =====================================
-             TOPBAR
-        ====================================== -->
-
-        <header class="topbar">
-
-            <div class="saludo">
-
-                <h1>
-                    Mi información
-                </h1>
-
-                <p>
-                    Administra los datos de tu cuenta
-                </p>
-
-            </div>
-
-
-            <!-- PERFIL -->
-
-            <div class="perfil-top">
-
-                <button
-                    type="button"
-                    class="avatar-top"
-                    id="botonPerfil"
-                >
-
-                    @if(auth()->user()->foto_perfil)
-
-                        <img
-                            src="{{ asset('storage/' . auth()->user()->foto_perfil) }}"
-                            alt="Foto de perfil"
-                        >
-
-                    @else
-
-                        {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
-
-                    @endif
-
-                </button>
-
-
-                <div
-                    class="menu-perfil"
-                    id="menuPerfil"
-                >
-
-                    <div class="nombre-usuario">
-
-                        {{ auth()->user()->name }}
-                        {{ auth()->user()->apellido }}
-
-                        <small>
-                            Vendedor
-                        </small>
-
+                <div class="mi-avatar-wrap">
+                    <div class="mi-avatar" style="background-color: {{ $colorPerfil }};">
+                        @if($usuario->foto_perfil)
+                            <img src="{{ asset('storage/' . $usuario->foto_perfil) }}" alt="Foto de perfil">
+                        @else
+                            {{ $inicial }}
+                        @endif
                     </div>
 
-
-                    <form
-                        action="{{ route('logout') }}"
-                        method="POST"
-                    >
-
-                        @csrf
-
-                        <button
-                            type="submit"
-                            class="boton-logout"
-                        >
-
-                            <i class="fa-solid fa-right-from-bracket"></i>
-
-                            Cerrar sesión
-
+                    <button type="button" class="mi-btn-foto" id="botonEditarFoto"
+                            title="Editar foto de perfil" aria-label="Editar foto de perfil"
+                            aria-haspopup="true" aria-expanded="false">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
+                    <div class="mi-pop" id="menuFoto">
+                        <button type="button" class="mi-pop-item" id="subirFoto">
+                            <i class="fa-solid fa-camera"></i> Subir foto
                         </button>
-
-                    </form>
-
-                </div>
-
-            </div>
-
-        </header>
-
-
-        <!-- =====================================
-             CONTENIDO
-        ====================================== -->
-
-        <section class="contenedor">
-
-
-            <div class="titulo-seccion">
-
-                <h2>
-                    Información de mi cuenta
-                </h2>
-
-                <p>
-                    Consulta y administra tus datos personales y preferencias.
-                </p>
-
-            </div>
-
-
-            @if(session('success'))
-
-                <div class="mensaje">
-
-                    <i class="fa-solid fa-circle-check"></i>
-
-                    {{ session('success') }}
-
-                </div>
-
-            @endif
-
-
-            <!-- =====================================
-                 TARJETA
-            ====================================== -->
-
-            <div class="tarjeta">
-
-
-                <!-- CABECERA PERFIL -->
-
-                <div class="cabecera-perfil">
-
-
-                    <div class="perfil-avatar">
-
-
-                        <!-- AVATAR -->
-
-                        <div
-                            class="avatar"
-                            style="
-                                background-color:
-                                {{ auth()->user()->color_perfil ?? '#6a1b9a' }};
-                            "
-                        >
-
-                            @if(auth()->user()->foto_perfil)
-
-                                <img
-                                    src="{{ asset('storage/' . auth()->user()->foto_perfil) }}"
-                                    alt="Foto de perfil"
-                                >
-
-                            @else
-
-                                {{ strtoupper(
-                                    substr(auth()->user()->name, 0, 1)
-                                ) }}
-
-                            @endif
-
-                        </div>
-
-
-                        <!-- BOTÓN EDITAR FOTO -->
-
-                        <button
-                            type="button"
-                            class="boton-editar-foto"
-                            id="botonEditarFoto"
-                            title="Editar foto de perfil"
-                        >
-
-                            <i class="fa-solid fa-pen"></i>
-
+                        <button type="button" class="mi-pop-item" id="cambiarColor">
+                            <i class="fa-solid fa-palette"></i> Cambiar color
                         </button>
+                    </div>
 
-
-                        <!-- MENÚ FOTO -->
-
-                        <div
-                            class="menu-foto"
-                            id="menuFoto"
-                        >
-
-                            <button
-                                type="button"
-                                id="subirFoto"
-                            >
-
-                                <i class="fa-solid fa-camera"></i>
-
-                                Subir foto
-
-                            </button>
-
-
-                            <button
-                                type="button"
-                                id="cambiarColor"
-                            >
-
-                                <i class="fa-solid fa-palette"></i>
-
-                                Cambiar color
-
-                            </button>
-
-
-                            @if(auth()->user()->foto_perfil)
-
-                                <form
-                                    action="{{ route('vendedor.foto.eliminar') }}"
-                                    method="POST"
-                                >
-
-                                    @csrf
-
-                                    <button
-                                        type="submit"
-                                        style="color:#d32f2f;"
-                                        onclick="
-                                            return confirm(
-                                                '¿Seguro que quieres eliminar tu foto de perfil?'
-                                            );
-                                        "
-                                    >
-
-                                        <i
-                                            class="fa-solid fa-trash"
-                                            style="color:#d32f2f;"
-                                        ></i>
-
-                                        Eliminar foto
-
-                                    </button>
-
-                                </form>
-
-                            @endif
-
-                        </div>
-
-
-                        <!-- PANEL COLORES -->
-
-                        <div
-                            class="panel-colores"
-                            id="panelColores"
-                        >
-
-                            <form
-                                id="formularioColor"
-                                action="{{ route('vendedor.color.actualizar') }}"
-                                method="POST"
-                            >
-
-                                @csrf
-
-                                <input
-                                    type="hidden"
-                                    name="color_perfil"
-                                    id="colorPerfilSeleccionado"
-                                >
-
-
-                                <p>
-                                    Selecciona un color
-                                </p>
-
-
-                                <div class="colores">
-
-                                    <button
-                                        type="button"
-                                        class="color-opcion"
-                                        data-color="#6a1b9a"
-                                        style="background-color:#6a1b9a;"
-                                        title="Morado"
-                                    ></button>
-
-
-                                    <button
-                                        type="button"
-                                        class="color-opcion"
-                                        data-color="#2196F3"
-                                        style="background-color:#2196F3;"
-                                        title="Azul"
-                                    ></button>
-
-
-                                    <button
-                                        type="button"
-                                        class="color-opcion"
-                                        data-color="#F44336"
-                                        style="background-color:#F44336;"
-                                        title="Rojo"
-                                    ></button>
-
-
-                                    <button
-                                        type="button"
-                                        class="color-opcion"
-                                        data-color="#4CAF50"
-                                        style="background-color:#4CAF50;"
-                                        title="Verde"
-                                    ></button>
-
-
-                                    <button
-                                        type="button"
-                                        class="color-opcion"
-                                        data-color="#FF9800"
-                                        style="background-color:#FF9800;"
-                                        title="Naranja"
-                                    ></button>
-
-
-                                    <button
-                                        type="button"
-                                        class="color-opcion"
-                                        data-color="#263238"
-                                        style="background-color:#263238;"
-                                        title="Oscuro"
-                                    ></button>
-
-                                </div>
-
-                            </form>
-
-                        </div>
-
-
-                        <!-- FORMULARIO FOTO -->
-
-                        <form
-                            id="formularioFoto"
-                            class="formulario-oculto"
-                            action="{{ route('vendedor.foto.actualizar') }}"
-                            method="POST"
-                            enctype="multipart/form-data"
-                        >
-
+                    <div class="mi-pop mi-pop-colores" id="panelColores">
+                        <form id="formularioColor" action="{{ route('vendedor.color.actualizar') }}" method="POST">
                             @csrf
-
-                            <input
-                                type="file"
-                                id="inputFotoPerfil"
-                                name="foto_perfil"
-                                accept="image/*"
-                            >
-
+                            <input type="hidden" name="color_perfil" id="colorPerfilSeleccionado">
+                            <p>Color del perfil</p>
+                            <div class="mi-colores">
+                                @foreach($colores as $hex => $nombre)
+                                    <button type="button"
+                                            class="mi-color {{ strtolower($hex) === strtolower($colorPerfil) ? 'actual' : '' }}"
+                                            data-color="{{ $hex }}"
+                                            style="background-color: {{ $hex }};"
+                                            title="{{ $nombre }}" aria-label="{{ $nombre }}"></button>
+                                @endforeach
+                            </div>
                         </form>
-
                     </div>
-
-
-                    <!-- DATOS DEL PERFIL -->
-
-                    <div class="datos-perfil">
-
-                        <h2>
-
-                            {{ auth()->user()->name }}
-
-                            {{ auth()->user()->apellido }}
-
-                        </h2>
-
-
-                        <p>
-                            Vendedor de Orquídeas y más "Los Amates"
-                        </p>
-
-
-                        <span class="etiqueta-vendedor">
-
-                            <i class="fa-solid fa-user-tie"></i>
-
-                            Vendedor
-
-                        </span>
-
-                    </div>
-
+                    <form id="formularioFoto" class="mi-oculto" action="{{ route('vendedor.foto.actualizar') }}"
+                          method="POST" enctype="multipart/form-data">
+                        @csrf
+                        <input type="file" id="inputFotoPerfil" name="foto_perfil" accept="image/*">
+                    </form>
                 </div>
 
-
-                <!-- =====================================
-                     INFORMACIÓN
-                ====================================== -->
-
-                <div class="titulo-informacion">
-
-                    <i class="fa-solid fa-address-card"></i>
-
-                    <h3>
-                        Datos personales
-                    </h3>
-
-                </div>
-
-
-                <div class="informacion">
-
-
-                    <!-- NOMBRE -->
-
-                    <div class="dato">
-
-                        <strong>
-
-                            <i class="fa-solid fa-user"></i>
-
-                            Nombre
-
-                        </strong>
-
-                        <span>
-                            {{ auth()->user()->name }}
-                        </span>
-
-                    </div>
-
-
-                    <!-- APELLIDOS -->
-
-                    <div class="dato">
-
-                        <strong>
-
-                            <i class="fa-solid fa-user"></i>
-
-                            Apellidos
-
-                        </strong>
-
-                        <span>
-                            {{ auth()->user()->apellido }}
-                        </span>
-
-                    </div>
-
-
-                    <!-- CORREO -->
-
-                    <div class="dato">
-
-                        <strong>
-
-                            <i class="fa-solid fa-envelope"></i>
-
-                            Correo electrónico
-
-                        </strong>
-
-                        <span>
-                            {{ auth()->user()->email }}
-                        </span>
-
-                    </div>
-
-
-                    <!-- TELÉFONO -->
-
-                    <div class="dato">
-
-                        <strong>
-
-                            <i class="fa-solid fa-phone"></i>
-
-                            Teléfono
-
-                        </strong>
-
-                        <span>
-                            {{ auth()->user()->telefono ?? 'No registrado' }}
-                        </span>
-
-                    </div>
-
-
-                    <!-- DIRECCIÓN -->
-
-                    <div class="dato">
-
-                        <strong>
-
-                            <i class="fa-solid fa-location-dot"></i>
-
-                            Dirección
-
-                        </strong>
-
-                        <span>
-                            {{ auth()->user()->direccion ?? 'No registrada' }}
-                        </span>
-
-                    </div>
-
-
-                    <!-- FECHA NACIMIENTO -->
-
-                    <div class="dato">
-
-                        <strong>
-
-                            <i class="fa-solid fa-calendar"></i>
-
-                            Fecha de nacimiento
-
-                        </strong>
-
-                        <span>
-                            {{ auth()->user()->fecha_nacimiento ?? 'No registrada' }}
-                        </span>
-
-                    </div>
-
-                </div>
-
-
-                <!-- =====================================
-                     ACCIONES
-                ====================================== -->
-
-                <div class="acciones">
-
-                    <a
-                        href="{{ route('vendedor.informacion.editar') }}"
-                        class="boton-editar"
-                    >
-
-                        <i class="fa-solid fa-pen-to-square"></i>
-
-                        Editar información
-
-                    </a>
-
-                </div>
-
-
+                <h2 class="mi-nombre">{{ $usuario->name }} {{ $usuario->apellido }}</h2>
+                <p class="mi-empresa">Orquídeas y más "Los Amates"</p>
+                <span class="mi-rol"><i class="fa-solid fa-shield-halved"></i> Vendedor</span>
             </div>
 
+            <div class="mi-contacto">
+                <div><i class="fa-solid fa-envelope"></i> {{ $usuario->email }}</div>
+                <div><i class="fa-solid fa-phone"></i> {{ $usuario->telefono ?: 'Teléfono no registrado' }}</div>
+            </div>
+            <form action="{{ route('logout') }}" method="POST" class="mi-cerrar-sesion">
+                @csrf
+                <button type="submit" class="mi-btn-salir">
+                    <i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión
+                </button>
+            </form>
+        </aside>
+        <section class="mi-card">
+            <div class="mi-card-head">
+                <h2>Datos personales</h2>
+            </div>
+
+            <div class="mi-campos">
+                @foreach($datos as $dato)
+                    <div class="mi-campo">
+                        <small>{{ $dato['etiqueta'] }}</small>
+                        <div class="mi-valor {{ $dato['valor'] ? '' : 'vacio' }}">
+                            {{ $dato['valor'] ?: 'Sin registrar' }}
+                        </div>
+                    </div>
+                @endforeach
+            </div>
         </section>
 
-    </main>
-
+    </div>
 </div>
 
-
-<!-- =====================================
-     JAVASCRIPT
-====================================== -->
-
+@push('scripts')
 <script>
+(function () {
+    const botonEditar = document.getElementById('botonEditarFoto');
+    const menuFoto = document.getElementById('menuFoto');
+    const panelColores = document.getElementById('panelColores');
+    const inputFoto = document.getElementById('inputFotoPerfil');
+    const formFoto = document.getElementById('formularioFoto');
+    const formColor = document.getElementById('formularioColor');
+    const colorInput = document.getElementById('colorPerfilSeleccionado');
 
-    /* =====================================
-       MENÚ PERFIL TOPBAR
-    ====================================== */
+    function cerrar() {
+        menuFoto.classList.remove('mostrar');
+        panelColores.classList.remove('mostrar');
+        botonEditar.setAttribute('aria-expanded', 'false');
+    }
 
-    const botonPerfil =
-        document.getElementById('botonPerfil');
+    botonEditar.addEventListener('click', e => {
+        e.stopPropagation();
+        const abierto = menuFoto.classList.toggle('mostrar');
+        panelColores.classList.remove('mostrar');
+        botonEditar.setAttribute('aria-expanded', abierto ? 'true' : 'false');
+    });
 
-    const menuPerfil =
-        document.getElementById('menuPerfil');
+    document.getElementById('subirFoto').addEventListener('click', e => {
+        e.stopPropagation();
+        inputFoto.click();
+    });
 
+    inputFoto.addEventListener('change', () => {
+        if (inputFoto.files.length > 0) formFoto.submit();
+    });
 
-    botonPerfil.addEventListener(
-        'click',
-        function(event) {
+    document.getElementById('cambiarColor').addEventListener('click', e => {
+        e.stopPropagation();
+        menuFoto.classList.remove('mostrar');
+        panelColores.classList.add('mostrar');
+    });
 
-            event.stopPropagation();
+    document.querySelectorAll('.mi-color').forEach(op => {
+        op.addEventListener('click', e => {
+            e.stopPropagation();
+            colorInput.value = op.dataset.color;
+            formColor.submit();
+        });
+    });
 
-            menuPerfil.classList.toggle('activo');
-
+    document.addEventListener('click', e => {
+        if (!menuFoto.contains(e.target) && !panelColores.contains(e.target) && !botonEditar.contains(e.target)) {
+            cerrar();
         }
-    );
-
-
-    /* =====================================
-       ELEMENTOS FOTO
-    ====================================== */
-
-    const botonEditarFoto =
-        document.getElementById('botonEditarFoto');
-
-    const menuFoto =
-        document.getElementById('menuFoto');
-
-    const panelColores =
-        document.getElementById('panelColores');
-
-    const subirFoto =
-        document.getElementById('subirFoto');
-
-    const cambiarColor =
-        document.getElementById('cambiarColor');
-
-    const inputFotoPerfil =
-        document.getElementById('inputFotoPerfil');
-
-    const formularioFoto =
-        document.getElementById('formularioFoto');
-
-    const formularioColor =
-        document.getElementById('formularioColor');
-
-    const colorPerfilSeleccionado =
-        document.getElementById('colorPerfilSeleccionado');
-
-    const opcionesColor =
-        document.querySelectorAll('.color-opcion');
-
-
-    /* =====================================
-       ABRIR MENÚ FOTO
-    ====================================== */
-
-    botonEditarFoto.addEventListener(
-        'click',
-        function(event) {
-
-            event.stopPropagation();
-
-            menuFoto.classList.toggle('mostrar');
-
-            panelColores.classList.remove('mostrar');
-
-        }
-    );
-
-
-    /* =====================================
-       SUBIR FOTO
-    ====================================== */
-
-    subirFoto.addEventListener(
-        'click',
-        function(event) {
-
-            event.stopPropagation();
-
-            inputFotoPerfil.click();
-
-        }
-    );
-
-
-    /* =====================================
-       GUARDAR FOTO
-    ====================================== */
-
-    inputFotoPerfil.addEventListener(
-        'change',
-        function() {
-
-            if (this.files.length > 0) {
-
-                formularioFoto.submit();
-
-            }
-
-        }
-    );
-
-
-    /* =====================================
-       CAMBIAR COLOR
-    ====================================== */
-
-    cambiarColor.addEventListener(
-        'click',
-        function(event) {
-
-            event.stopPropagation();
-
-            menuFoto.classList.remove('mostrar');
-
-            panelColores.classList.toggle('mostrar');
-
-        }
-    );
-
-
-    /* =====================================
-       SELECCIONAR COLOR
-    ====================================== */
-
-    opcionesColor.forEach(
-        function(opcion) {
-
-            opcion.addEventListener(
-                'click',
-                function(event) {
-
-                    event.stopPropagation();
-
-                    const color =
-                        this.getAttribute('data-color');
-
-                    colorPerfilSeleccionado.value =
-                        color;
-
-                    formularioColor.submit();
-
-                }
-            );
-
-        }
-    );
-
-
-    /* =====================================
-       CERRAR MENÚS
-    ====================================== */
-
-    document.addEventListener(
-        'click',
-        function(event) {
-
-            if (
-                !botonEditarFoto.contains(event.target) &&
-                !menuFoto.contains(event.target) &&
-                !panelColores.contains(event.target)
-            ) {
-
-                menuFoto.classList.remove('mostrar');
-
-                panelColores.classList.remove('mostrar');
-
-            }
-
-
-            if (
-                !botonPerfil.contains(event.target) &&
-                !menuPerfil.contains(event.target)
-            ) {
-
-                menuPerfil.classList.remove('activo');
-
-            }
-
-        }
-    );
-
+    });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrar(); });
+})();
 </script>
+@endpush
 
-
-</body>
-
-</html>
+</x-layouts.panel>
