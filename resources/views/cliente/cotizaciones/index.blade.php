@@ -30,6 +30,15 @@
         font-size: 13px; font-weight: 500; color: var(--primario); text-decoration: none;
         transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
     }
+
+    .lst-titulo-fila h1 {
+        margin: 0 0 4px;
+        font-size: 26px;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        line-height: 1.2;
+        color: var(--texto);
+    }
     .ped-btn-ver:hover { background: var(--primario); border-color: var(--primario); color: #fff; }
     .lst-tabla th.num, .lst-tabla td.num { text-align: right; font-variant-numeric: tabular-nums; }
     .ped-total { font-weight: 700; }
