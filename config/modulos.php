@@ -18,9 +18,17 @@ return [
             ['clave' => 'configuracion', 'texto' => 'Configuración',      'icono' => 'fa-gear',              'ruta' => null],
         ],
     ],
+    'vendedor' => [
+        'Navegacion' => [
+            
+        ],
+        'Mi cuenta' => [
+            ['clave' => 'informacion',   'texto' => 'Mi información',     'icono' => 'fa-circle-user',       'ruta' => 'cliente.informacion'],
+        ],
+    ],
     'cliente' =>[
         'Navegacion' => [
-             ['clave' => 'dashboard',     'texto' => 'Menú Principal',     'icono' => 'fa-table-cells-large', 'ruta' => 'cliente.dashboard'],
+            ['clave' => 'dashboard',     'texto' => 'Menú Principal',     'icono' => 'fa-table-cells-large', 'ruta' => 'cliente.dashboard'],
             ['clave' => 'compras',       'texto' => 'Compras',            'icono' => 'fa-cart-shopping',     'ruta' => 'cliente.compras'],
             ['clave' => 'pedidos',       'texto' => 'Mis pedidos',            'icono' => 'fa-file-lines',        'ruta' => 'cliente.cotizaciones'],
         ],
