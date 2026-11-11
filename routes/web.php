@@ -52,6 +52,8 @@ Route::get(
 ->middleware('rol:cliente')
 ->name('cliente.dashboard');
 
+Route::get('cliente/compras', [ClienteController::class, 'compras'])->name('cliente.compras');
+
 
 Route::prefix('admin/pago-servicios')
     ->name('admin.pago_servicios.')
