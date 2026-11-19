@@ -16,6 +16,7 @@ return [
         'Mi cuenta' => [
             ['clave' => 'informacion',   'texto' => 'Mi información',     'icono' => 'fa-circle-user',       'ruta' => 'admin.informacion'],
             ['clave' => 'configuracion', 'texto' => 'Configuración',      'icono' => 'fa-gear',              'ruta' => null],
+            ['clave' => 'cerrar_sesion', 'texto' => 'Cerrar sesión', 'icono' => 'fa-right-from-bracket', 'ruta' => 'logout', 'peligro' => true],
         ],
     ],
     'vendedor' => [
@@ -24,6 +25,7 @@ return [
         ],
         'Mi cuenta' => [
             ['clave' => 'informacion',   'texto' => 'Mi información',     'icono' => 'fa-circle-user',       'ruta' => 'cliente.informacion'],
+            ['clave' => 'cerrar_sesion', 'texto' => 'Cerrar sesión', 'icono' => 'fa-right-from-bracket', 'ruta' => 'logout', 'peligro' => true],
         ],
     ],
     'cliente' =>[
