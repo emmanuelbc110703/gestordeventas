@@ -6,8 +6,6 @@
 
 @php
     $usuario = auth()->user();
-
-    // Los módulos vienen de config/modulos.php (misma lista que usa el buscador del header)
     $secciones = [];
     foreach (config('modulos.' . $usuario->rol, []) as $titulo => $items) {
         $secciones[$titulo] = array_map(function ($item) use ($totalInventario, $pedidosPendientes) {
@@ -20,8 +18,6 @@
             return $item;
         }, $items);
     }
-
-    // Solo aparece si el usuario tiene un punto de venta asignado
     if ($usuario && $usuario->puntoVenta) {
         $secciones['Mi cuenta'][] = [
             'clave' => 'punto_venta',
@@ -31,8 +27,6 @@
             'badge' => null,
         ];
     }
-
-    // Nombre del módulo actual (el que se muestra en grande arriba, como en ERPNext)
     $nombreModulo = 'Menú';
     foreach ($secciones as $items) {
         foreach ($items as $item) {
@@ -77,7 +71,7 @@
     body.sb-listo.con-sidebar .sidebar-app {
         transition: transform 0.25s ease, visibility 0s;
     }
-
+    body:not(.con-sidebar) #sbCerrar { display: none; }
     
     .sb-cabecera {
         flex-shrink: 0;
@@ -255,14 +249,6 @@
 </script>
 
 <aside class="sidebar-app" id="sidebarApp" aria-label="Menú lateral">
-    <div class="sb-cabecera">
-        <button type="button" class="sb-cerrar" id="sbCerrar" aria-label="Ocultar menú lateral" title="Ocultar menú">
-            <i class="fa-solid fa-bars ic-barras"></i>
-            <i class="fa-solid fa-arrow-left ic-flecha"></i>
-        </button>
-
-        <h2 class="sb-titulo-modulo" title="{{ $nombreModulo }}">{{ $nombreModulo }}</h2>
-    </div>
     <nav class="sb-nav">
         @foreach($secciones as $titulo => $items)
             <div class="sb-seccion">
