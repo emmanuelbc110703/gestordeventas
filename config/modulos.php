@@ -34,6 +34,7 @@ return [
         ],
         'Mi cuenta' => [
             ['clave' => 'informacion',   'texto' => 'Mi información',     'icono' => 'fa-circle-user',       'ruta' => 'cliente.informacion'],
+            ['clave' => 'cerrar_sesion', 'texto' => 'Cerrar sesión', 'icono' => 'fa-right-from-bracket', 'ruta' => 'logout', 'peligro' => true],
         ],
     ]
 

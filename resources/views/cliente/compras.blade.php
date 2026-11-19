@@ -10,7 +10,6 @@
 <x-pedido-estilos />
 
 @php
-    // Estados que cuentan como compra (todo lo que ya salió de "enviado")
     $estadosTexto = [
         'procesando' => 'Procesando',
         'finalizado' => 'Finalizado',
@@ -25,7 +24,6 @@
         'finalizadas' => 'Finalizadas',
     ];
 
-    // AJUSTA este nombre de ruta al de tu vista de detalle del pedido
     $urlDetalle = fn ($compra) => route('cliente.cotizaciones.mostrar', $compra);
 @endphp
 

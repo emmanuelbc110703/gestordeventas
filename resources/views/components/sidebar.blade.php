@@ -194,6 +194,24 @@
         background: #e4d9fb;
         color: var(--primario);
     }
+    
+    .sb-form { margin: 0; }
+    button.sb-link {
+        width: 100%;
+        background: none;
+        border: 0;
+        border-left: 3px solid transparent;
+        font-family: inherit;
+        text-align: left;
+        cursor: pointer;
+    }
+    .sb-link-salir,
+    .sb-link-salir i { color: #b91c1c; }
+    .sb-link-salir:hover {
+        background: #fef2f2;
+        color: #b91c1c;
+    }
+    .sb-link-salir:hover i { color: #b91c1c; }
 
     .btn-menu-lateral {
         display: none;
@@ -276,16 +294,26 @@
             <div class="sb-seccion">
                 <p class="sb-titulo">{{ $titulo }}</p>
                 @foreach($items as $item)
-                    <a
-                        href="{{ $item['url'] }}"
-                        class="sb-link {{ $activo === $item['clave'] ? 'activo' : '' }}"
-                    >
-                        <i class="fa-solid {{ $item['icono'] }}"></i>
-                        <span>{{ $item['texto'] }}</span>
-                        @if(!empty($item['badge']))
-                            <span class="sb-badge">{{ $item['badge'] }}</span>
-                        @endif
-                    </a>
+                    @if(!empty($item['peligro']))
+                        <form action="{{ $item['url'] }}" method="POST" class="sb-form">
+                            @csrf
+                            <button type="submit" class="sb-link sb-link-salir">
+                                <i class="fa-solid {{ $item['icono'] }}"></i>
+                                <span>{{ $item['texto'] }}</span>
+                            </button>
+                        </form>
+                    @else
+                        <a
+                            href="{{ $item['url'] }}"
+                            class="sb-link {{ $activo === $item['clave'] ? 'activo' : '' }}"
+                        >
+                            <i class="fa-solid {{ $item['icono'] }}"></i>
+                            <span>{{ $item['texto'] }}</span>
+                            @if(!empty($item['badge']))
+                                <span class="sb-badge">{{ $item['badge'] }}</span>
+                            @endif
+                        </a>
+                    @endif
                 @endforeach
             </div>
         @endforeach
