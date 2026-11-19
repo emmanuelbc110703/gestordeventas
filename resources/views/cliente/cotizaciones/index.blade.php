@@ -31,14 +31,6 @@
         transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
     }
 
-    .lst-titulo-fila h1 {
-        margin: 0 0 4px;
-        font-size: 26px;
-        font-weight: 700;
-        letter-spacing: -0.01em;
-        line-height: 1.2;
-        color: var(--texto);
-    }
     .ped-btn-ver:hover { background: var(--primario); border-color: var(--primario); color: #fff; }
     .lst-tabla th.num, .lst-tabla td.num { text-align: right; font-variant-numeric: tabular-nums; }
     .ped-total { font-weight: 700; }
@@ -51,6 +43,10 @@
     <div class="lst-encabezado">
         <div>
             <div class="lst-titulo-fila">
+                <button type="button" class="sb-cerrar" id="sbCerrar" aria-label="Ocultar menú lateral" title="Ocultar menú">
+                    <i class="fa-solid fa-bars ic-barras"></i>
+                    <i class="fa-solid fa-arrow-left ic-flecha"></i>
+                </button>
                 <button type="button" class="btn-menu-lateral" data-abrir-sidebar aria-label="Mostrar menú lateral">
                     <i class="fa-solid fa-bars"></i>
                 </button>

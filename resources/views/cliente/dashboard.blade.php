@@ -237,9 +237,18 @@
 <x-sidebar activo="dashboard" />
 
 <div class="lst-pagina cd-pagina">
-    <div class="cd-encabezado">
+    <div class="lst-encabezado">
         <div>
-            <h1>Bienvenido, {{ $usuario->name }}</h1>
+            <div class="lst-titulo-fila">
+                <button type="button" class="sb-cerrar" id="sbCerrar" aria-label="Ocultar menú lateral" title="Ocultar menú">
+                    <i class="fa-solid fa-bars ic-barras"></i>
+                    <i class="fa-solid fa-arrow-left ic-flecha"></i>
+                </button>
+                <button type="button" class="btn-menu-lateral" data-abrir-sidebar aria-label="Mostrar menú lateral">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <h1>Bienvenido, {{ $usuario->name }}</h1>
+            </div>
             <p>Panel de cliente · Los Amates</p>
         </div>
         <form action="{{ route('logout') }}" method="POST">
