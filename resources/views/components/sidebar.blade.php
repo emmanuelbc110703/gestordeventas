@@ -217,6 +217,28 @@
     }
     body:not(.con-sidebar) .btn-menu-lateral { display: inline-flex; }
 
+    .btn-cerrar-lateral {
+        display: none;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        flex-shrink: 0;
+        background: #fff;
+        border: 1px solid var(--borde);
+        border-radius: 0;
+        color: var(--texto);
+        font-size: 16px;
+        cursor: pointer;
+        transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+    }
+    .btn-cerrar-lateral:hover {
+        border-color: #c4b5fd;
+        background: #fcfbff;
+        color: var(--primario);
+    }
+    body.con-sidebar .btn-cerrar-lateral { display: inline-flex; }
+    
     .sb-fondo {
         display: none;
         position: fixed;

@@ -39,6 +39,10 @@
     <div class="lst-encabezado">
         <div>
             <div class="lst-titulo-fila">
+                <button type="button" class="sb-cerrar" id="sbCerrar" aria-label="Ocultar menú lateral" title="Ocultar menú">
+                    <i class="fa-solid fa-bars ic-barras"></i>
+                    <i class="fa-solid fa-arrow-left ic-flecha"></i>
+                </button>
                 <button type="button" class="btn-menu-lateral" data-abrir-sidebar aria-label="Mostrar menú lateral">
                     <i class="fa-solid fa-bars"></i>
                 </button>
