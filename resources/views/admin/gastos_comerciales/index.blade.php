@@ -1,23 +1,14 @@
 @php
     $filtro = $filtro ?? 'todos';
 
-    $categorias = [
-        'publicidad'    => 'Publicidad',
-        'transporte'    => 'Transporte',
-        'papeleria'     => 'Papelería',
-        'servicios'     => 'Servicios',
-        'mantenimiento' => 'Mantenimiento',
-        'compras'       => 'Compras',
-        'otros'         => 'Otros',
-    ];
-
-    $etiquetaCategoria = fn ($clave) => $categorias[$clave] ?? ucfirst($clave);
-
     $totalPeriodo = $gastos->sum('monto');
 
-    $porCategoria = $gastos->groupBy('categoria')->map(fn ($g) => $g->sum('monto'))->sortDesc();
-    $topCategoria = $porCategoria->keys()->first();
-    $topMonto     = $porCategoria->first();
+    $porCategoria   = $gastos->groupBy('categoria_id')->map(fn ($g) => $g->sum('monto'))->sortDesc();
+    $topCategoriaId = $porCategoria->keys()->first();
+    $topMonto       = $porCategoria->first();
+    $topCategoria   = $topCategoriaId
+        ? ($categorias->firstWhere('id', $topCategoriaId)->nombre ?? 'Sin categoría')
+        : null;
 @endphp
 
 <x-layouts.panel
@@ -156,7 +147,7 @@
         <div>
             <small>Mayor categoría</small>
             @if($topCategoria)
-                <strong>{{ $etiquetaCategoria($topCategoria) }}</strong>
+                <strong>{{ $topCategoria }}</strong>
                 <span>${{ number_format($topMonto, 2) }}</span>
             @else
                 <strong>—</strong>
@@ -183,8 +174,8 @@
             <div class="lst-selector">
                 <select id="categoriaGastos" aria-label="Filtrar por categoría">
                     <option value="">Todas las categorías</option>
-                    @foreach($categorias as $clave => $nombre)
-                        <option value="{{ $clave }}">{{ $nombre }}</option>
+                    @foreach($categorias as $c)
+                        <option value="{{ $c->id }}">{{ $c->nombre }}</option>
                     @endforeach
                 </select>
                 <i class="fa-solid fa-chevron-down"></i>
@@ -220,10 +211,10 @@
                     @foreach($gastos as $gasto)
                         <tr class="fila-gasto"
                             data-url="{{ route('admin.gastos_comerciales.edit', $gasto->id) }}"
-                            data-categoria="{{ $gasto->categoria }}"
+                            data-categoria="{{ $gasto->categoria_id }}"
                             data-fecha="{{ $gasto->fecha->format('Y-m-d') }}"
                             data-monto="{{ $gasto->monto }}"
-                            data-texto="{{ $gasto->concepto }} {{ $gasto->descripcion }} {{ $etiquetaCategoria($gasto->categoria) }}">
+                            data-texto="{{ $gasto->concepto }} {{ $gasto->descripcion }} {{ $gasto->categoria?->nombre }}">
                             <td data-label="Fecha">{{ $gasto->fecha->format('d/m/Y') }}</td>
                             <td data-label="Concepto">
                                 <div class="gx-concepto">{{ $gasto->concepto }}</div>
@@ -232,7 +223,7 @@
                                 @endif
                             </td>
                             <td data-label="Categoría">
-                                <span class="gx-categoria">{{ $etiquetaCategoria($gasto->categoria) }}</span>
+                                <span class="gx-categoria">{{ $gasto->categoria?->nombre ?? 'Sin categoría' }}</span>
                             </td>
                             <td data-label="Monto" class="gx-monto">${{ number_format($gasto->monto, 2) }}</td>
                             <td data-label="Acciones">

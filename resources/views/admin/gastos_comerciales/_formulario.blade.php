@@ -1,22 +1,6 @@
 @php
     $esEdicion = isset($gasto) && $gasto;
-
-    $categorias = [
-        'publicidad'    => 'Publicidad',
-        'transporte'    => 'Transporte',
-        'papeleria'     => 'Papelería',
-        'servicios'     => 'Servicios',
-        'mantenimiento' => 'Mantenimiento',
-        'compras'       => 'Compras',
-        'otros'         => 'Otros',
-    ];
-
-    $categoriaActual = old('categoria', $esEdicion ? $gasto->categoria : '');
-
-    // Si la categoría guardada no está en la lista, se agrega para no perderla al editar.
-    if ($categoriaActual && !isset($categorias[$categoriaActual])) {
-        $categorias = [$categoriaActual => ucfirst($categoriaActual)] + $categorias;
-    }
+    $categoriaActual = (int) old('categoria_id', $esEdicion ? $gasto->categoria_id : 0);
 @endphp
 
 <style>
@@ -85,15 +69,18 @@
                 <div class="frm-campo">
                     <label for="categoria">Categoría</label>
                     <div class="frm-control">
-                        <select name="categoria" id="categoria" required class="{{ $errors->has('categoria') ? 'invalido' : '' }}">
+                        <select name="categoria_id" id="categoria" required class="{{ $errors->has('categoria_id') ? 'invalido' : '' }}">
                             <option value="">Selecciona una categoría</option>
-                            @foreach($categorias as $clave => $nombre)
-                                <option value="{{ $clave }}" @selected($categoriaActual === $clave)>{{ $nombre }}</option>
+                            @foreach($categorias as $c)
+                                <option value="{{ $c->id }}" @selected($categoriaActual === $c->id)>{{ $c->nombre }}</option>
                             @endforeach
                         </select>
                         <i class="fa-solid fa-chevron-down frm-icono-select"></i>
                     </div>
-                    @error('categoria') <span class="frm-error">{{ $message }}</span> @enderror
+                    @if($categorias->isEmpty())
+                        <span class="frm-error">No hay categorías de gasto. Créalas en el módulo de Categorías.</span>
+                    @endif
+                    @error('categoria_id') <span class="frm-error">{{ $message }}</span> @enderror
                 </div>
 
                 <div class="frm-campo">

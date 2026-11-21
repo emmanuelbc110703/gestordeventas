@@ -16,6 +16,7 @@ use App\Http\Controllers\RestablecerContrasenaController;
 use App\Http\Controllers\Admin\CuentaFinancieraController;
 use Livewire\Volt\Volt;
 use App\Http\Controllers\Admin\RegistroPagoServicioController;
+use App\Http\Controllers\Admin\CategoriaController;
 
 // ========================================
 // DASHBOARD ADMINISTRADOR
@@ -792,4 +793,16 @@ Route::prefix('admin/cuentas'
         )->whereNumber('cuenta')->name('estado');
         Route::delete('/{cuenta}', [CuentaFinancieraController::class, 'destroy']
         )->whereNumber('cuenta')->name('destroy');
+    });
+
+Route::prefix('admin/categorias')
+    ->name('admin.categorias.')
+    ->middleware(['auth', 'rol:admin'])
+    ->group(function () {
+        Route::get('/', [CategoriaController::class, 'index'])->name('index');
+        Route::get('/crear', [CategoriaController::class, 'create'])->name('create');
+        Route::post('/', [CategoriaController::class, 'store'])->name('store');
+        Route::get('/{id}/editar', [CategoriaController::class, 'edit'])->whereNumber('id')->name('edit');
+        Route::put('/{id}', [CategoriaController::class, 'update'])->whereNumber('id')->name('update');
+        Route::delete('/{id}', [CategoriaController::class, 'destroy'])->whereNumber('id')->name('destroy');
     });
