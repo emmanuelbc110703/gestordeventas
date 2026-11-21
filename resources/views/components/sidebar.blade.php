@@ -19,7 +19,8 @@
         }, $items);
     }
     if ($usuario && $usuario->puntoVenta) {
-        $secciones['Mi cuenta'][] = [
+        $destino = isset($secciones['Navegacion']) ? 'Navegacion' : 'Mi cuenta';
+        $secciones[$destino][] = [
             'clave' => 'punto_venta',
             'texto' => 'Punto de venta',
             'icono' => 'fa-cash-register',
