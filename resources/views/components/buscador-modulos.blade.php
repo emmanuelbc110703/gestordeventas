@@ -1,9 +1,9 @@
 @php
     $usuario = auth()->user();
     $modulos = [];
-    foreach (config('modulos', []) as $seccion => $items) {
+    foreach (config('modulos.' . ($usuario->rol ?? 'admin'), []) as $seccion => $items) {
         foreach ($items as $item) {
-            if (empty($item['ruta'])) continue;
+            if (empty($item['ruta']) || !empty($item['peligro'])) continue;
             $modulos[] = [
                 'texto'   => $item['texto'],
                 'icono'   => $item['icono'],

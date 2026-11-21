@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\CuentaFinancieraController;
 use Livewire\Volt\Volt;
 use App\Http\Controllers\Admin\RegistroPagoServicioController;
 use App\Http\Controllers\Admin\CategoriaController;
+use App\Http\Controllers\Admin\EstadisticasController;
 
 // ========================================
 // DASHBOARD ADMINISTRADOR
@@ -806,3 +807,7 @@ Route::prefix('admin/categorias')
         Route::put('/{id}', [CategoriaController::class, 'update'])->whereNumber('id')->name('update');
         Route::delete('/{id}', [CategoriaController::class, 'destroy'])->whereNumber('id')->name('destroy');
     });
+
+Route::get('/admin/estadisticas', [EstadisticasController::class, 'index'])
+    ->middleware(['auth', 'rol:admin'])
+    ->name('admin.estadisticas');

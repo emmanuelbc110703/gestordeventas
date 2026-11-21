@@ -534,6 +534,13 @@
                 <p>Controla los pagos de servicios recurrentes.</p>
                 <span class="modulo-pie">Abrir módulo <i class="fa-solid fa-arrow-right"></i></span>
             </a>
+
+            <a href="{{ route('admin.estadisticas') }}" class="modulo c-turquesa">
+                <span class="modulo-icono"><i class="fa-solid fa-chart-line"></i></span>
+                <h3>Estadísticas del negocio</h3>
+                <p>Consulta reportes de ventas, inventario, pedidos y más.</p>
+                <span class="modulo-pie">Abrir módulo <i class="fa-solid fa-arrow-right"></i></span>
+            </a>
         </div>
     </section>
     <section class="dash-seccion">

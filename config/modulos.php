@@ -11,6 +11,7 @@ return [
             ['clave' => 'gastos',        'texto' => 'Gastos comerciales', 'icono' => 'fa-wallet',            'ruta' => 'admin.gastos_comerciales'],
             ['clave' => 'cuenta',        'texto' => 'Cuenta del negocio', 'icono' => 'fa-building-columns',  'ruta' => 'admin.cuentas.index'],
             ['clave' => 'categorias',    'texto' => 'Categorias',         'icono' => 'fa-building-columns',  'ruta' => 'admin.categorias.index'],
+            ['clave' => 'estadisticas',  'texto' => 'Estadísticas del negocio', 'icono' => 'fa-chart-line', 'ruta' => 'admin.estadisticas'],
             ['clave' => 'pagos',         'texto' => 'Pago de servicios',  'icono' => 'fa-file-invoice',      'ruta' => 'admin.pago_servicios.index'],
             ['clave' => 'respaldos',     'texto' => 'Respaldos',          'icono' => 'fa-database',          'ruta' => 'admin.respaldos'],
         ],
