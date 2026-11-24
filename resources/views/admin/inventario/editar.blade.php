@@ -89,6 +89,12 @@
         background: var(--primario-oscuro);
         border-color: var(--primario-oscuro);
     }
+    .editar-acciones-pie {
+        justify-content: flex-end;
+        margin-top: 32px;
+        padding-top: 24px;
+        border-top: 1px solid var(--borde);
+    }
 
     /* ===== ERRORES ===== */
     .errores {
@@ -464,6 +470,13 @@
                     </div>
                 </div>
             </div>
+        </div>
+        <div class="editar-acciones editar-acciones-pie">
+            <a href="{{ route('admin.bienes') }}" class="btn-cancelar">Cancelar</a>
+            <button type="submit" class="btn-guardar">
+                <i class="fa-solid fa-check"></i>
+                Guardar cambios
+            </button>
         </div>
     </form>
 

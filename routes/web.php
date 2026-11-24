@@ -690,10 +690,9 @@ Route::post(
 // ========================================
 
 // Lista de servicios
-Route::get(
-    '/admin/servicios',
-    [InventarioController::class, 'servicios']
-)->name('admin.servicios');
+Route::get('/admin/servicios', function () {
+    return redirect()->route('admin.inventario', ['tipo' => 'servicio']);
+})->name('admin.servicios');
 
 // Mostrar formulario para agregar servicio
 Route::get(
