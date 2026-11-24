@@ -299,6 +299,74 @@
         font-size: 15px;
         pointer-events: none;
     }
+    .modal-fondo {
+        position: fixed;
+        inset: 0;
+        z-index: 1000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: rgba(17, 24, 39, 0.5);
+    }
+    .modal-fondo.abierto { display: flex; }
+
+    .modal-caja {
+        width: 100%;
+        max-width: 420px;
+        padding: 32px;
+        background: #fff;
+        border: 1px solid var(--borde);
+        border-radius: 0;
+        text-align: center;
+        animation: modalEntrada 0.18s ease;
+    }
+    @keyframes modalEntrada {
+        from { opacity: 0; transform: translateY(8px); }
+        to   { opacity: 1; transform: none; }
+    }
+    .modal-caja h3 {
+        margin: 0 0 10px;
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        color: var(--texto);
+    }
+    .modal-caja p {
+        margin: 0;
+        font-size: 15px;
+        line-height: 1.6;
+        color: var(--texto-suave);
+    }
+    .modal-caja p strong { color: var(--texto); }
+    .modal-acciones {
+        display: flex;
+        gap: 12px;
+        margin-top: 28px;
+    }
+    .modal-acciones .btn-cancelar,
+    .modal-acciones .btn-confirmar-eliminar { flex: 1; }
+    .btn-confirmar-eliminar {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 44px;
+        padding: 0 22px;
+        background: #b42318;
+        border: 1px solid #b42318;
+        border-radius: 0;
+        font-family: inherit;
+        font-size: 15px;
+        font-weight: 600;
+        color: #fff;
+        white-space: nowrap;
+        cursor: pointer;
+        transition: background 0.2s ease, border-color 0.2s ease;
+    }
+    .btn-confirmar-eliminar:hover {
+        background: #912018;
+        border-color: #912018;
+    }
 
     @media (max-width: 950px) {
         .editar-grid { grid-template-columns: 1fr; gap: 32px; }
@@ -314,7 +382,7 @@
         .campo-fila { grid-template-columns: 1fr; gap: 28px; }
         .foto-vista { height: 260px; }
         .foto-pie { flex-direction: column; align-items: stretch; }
-        .btn-cambiar-imagen { justify-content: center; }
+        .btn-cambiar-imagen { justify-content: center; }.modal-caja { padding: 24px 22px; }
     }
 </style>
 @endpush
@@ -329,11 +397,11 @@
             <p class="editar-subtitulo">Modifica la información del servicio seleccionado.</p>
         </div>
         <div class="editar-acciones">
-            <button type="submit" form="formEliminar" class="btn-eliminar">
+            <a href="{{ route('admin.servicios') }}" class="btn-cancelar">Cancelar</a>
+            <button type="button" class="btn-eliminar" data-abrir-modal>
                 <i class="fa-solid fa-trash"></i>
                 Eliminar
             </button>
-            <a href="{{ route('admin.servicios') }}" class="btn-cancelar">Cancelar</a>
             <button type="submit" form="formEditar" class="btn-guardar">
                 <i class="fa-solid fa-check"></i>
                 Actualizar Servicio
@@ -354,7 +422,6 @@
         id="formEliminar"
         action="{{ route('admin.inventario.eliminar', $inventario->id) }}"
         method="POST"
-        onsubmit="return confirm('¿Seguro que deseas eliminar este servicio? Esta acción no se puede deshacer.');"
     >
         @csrf
         @method('PUT')
@@ -476,11 +543,11 @@
             </div>
         </div>
         <div class="editar-acciones editar-acciones-pie">
-            <button type="submit" form="formEliminar" class="btn-eliminar">
+            <a href="{{ route('admin.servicios') }}" class="btn-cancelar">Cancelar</a>
+            <button type="button" class="btn-eliminar" data-abrir-modal>
                 <i class="fa-solid fa-trash"></i>
                 Eliminar
             </button>
-            <a href="{{ route('admin.servicios') }}" class="btn-cancelar">Cancelar</a>
             <button type="submit" class="btn-guardar">
                 <i class="fa-solid fa-check"></i>
                 Actualizar Servicio
@@ -489,7 +556,17 @@
         @csrf
         @method('DELETE')
     </form>
+    <div class="modal-fondo" id="modalEliminar" aria-hidden="true">
+        <div class="modal-caja" role="dialog" aria-modal="true" aria-labelledby="modalTitulo">
+            <h3 id="modalTitulo">¿Eliminar servicio?</h3>
+            <p>Vas a eliminar <strong>{{ $inventario->nombre }}</strong>. Esta acción no se puede deshacer.</p>
 
+            <div class="modal-acciones">
+                <button type="button" class="btn-cancelar" data-cerrar-modal>Cancelar</button>
+                <button type="submit" form="formEliminar" class="btn-confirmar-eliminar">Eliminar</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 @push('scripts')
@@ -499,6 +576,7 @@
     const sinImagen = document.getElementById('sinImagen');
     const nombreArchivo = document.getElementById('nombreArchivo');
     const fotoDimensiones = document.getElementById('fotoDimensiones');
+    const modalEliminar = document.getElementById('modalEliminar');
 
     function mostrarDimensiones() {
         if (imagenPrevia.naturalWidth) {
@@ -528,6 +606,31 @@
             nombreArchivo.textContent = archivo.name;
         };
         lector.readAsDataURL(archivo);
+    });
+
+    function abrirModal() {
+        modalEliminar.classList.add('abierto');
+        modalEliminar.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+    }
+    function cerrarModal() {
+        modalEliminar.classList.remove('abierto');
+        modalEliminar.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+    }
+
+    document.querySelectorAll('[data-abrir-modal]').forEach(function (boton) {
+        boton.addEventListener('click', abrirModal);
+    });
+    document.querySelectorAll('[data-cerrar-modal]').forEach(function (boton) {
+        boton.addEventListener('click', cerrarModal);
+    });
+
+    modalEliminar.addEventListener('click', function (e) {
+        if (e.target === modalEliminar) cerrarModal();
+    });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && modalEliminar.classList.contains('abierto')) cerrarModal();
     });
 </script>
 @endpush
