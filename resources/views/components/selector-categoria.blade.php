@@ -12,6 +12,23 @@
 <style>
     .selcat { position: relative; }
 
+    .selcat .campo-control { position: relative; }
+
+    .selcat .campo-control input {
+        display: block;
+        padding-right: 40px;
+    }
+
+    .selcat .icono-select {
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 12px;
+        color: var(--texto-suave);
+        cursor: pointer;
+    }
+
     .selcat-lista {
         position: absolute;
         top: calc(100% + 4px);
