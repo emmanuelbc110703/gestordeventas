@@ -127,6 +127,13 @@
         border-color: var(--lst-rojo);
         color: #fff;
     }
+    .cli-acciones-pie {
+        justify-content: flex-end;
+        flex-wrap: wrap;
+        margin-top: 32px;
+        padding-top: 24px;
+        border-top: 1px solid var(--borde);
+    }
     @media (max-width: 650px) {
         .cli-resumen { grid-template-columns: 1fr; }
     }
@@ -164,7 +171,7 @@
                 </form>
             @else
                 <a href="{{ route('admin.clientes.editar', $cliente->id) }}" class="frm-btn-guardar" style="text-decoration:none;">Editar cliente</a>
-                <button type="button" class="cli-btn-baja" id="btnAbrirBaja">Dar de baja</button>
+                <button type="button" class="cli-btn-baja" data-abrir-baja>Dar de baja</button>
             @endif
         </div>
     </div>
@@ -327,6 +334,19 @@
                 </table>
             </div>
         </section>
+    </div>
+    <div class="frm-acciones cli-acciones-pie">
+        <a href="{{ route('admin.clientes', $dadoDeBaja ? ['estado' => 'baja'] : []) }}" class="frm-btn-cancelar">Volver</a>
+
+        @if($dadoDeBaja)
+            <form action="{{ route('admin.clientes.restaurar', $cliente->id) }}" method="POST" class="cli-form-inline">
+                @csrf
+                <button type="submit" class="frm-btn-guardar">Reactivar cliente</button>
+            </form>
+        @else
+            <a href="{{ route('admin.clientes.editar', $cliente->id) }}" class="frm-btn-guardar" style="text-decoration:none;">Editar cliente</a>
+            <button type="button" class="cli-btn-baja" data-abrir-baja>Dar de baja</button>
+        @endif
     </div>
 </div>
 
