@@ -377,12 +377,14 @@
 <script>
     (function () {
         const modal = document.getElementById('modalBaja');
-        const abrir = document.getElementById('btnAbrirBaja');
-        if (!modal || !abrir) return;
+        if (!modal) return;
 
         function cerrar() { modal.classList.remove('activo'); }
 
-        abrir.addEventListener('click', function () { modal.classList.add('activo'); });
+        document.addEventListener('click', function (e) {
+            if (e.target.closest('[data-abrir-baja]')) modal.classList.add('activo');
+        });
+
         document.getElementById('btnCancelarBaja').addEventListener('click', cerrar);
         modal.addEventListener('click', function (e) { if (e.target === modal) cerrar(); });
         document.addEventListener('keydown', function (e) { if (e.key === 'Escape') cerrar(); });
