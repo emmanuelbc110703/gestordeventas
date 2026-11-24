@@ -2,7 +2,6 @@
     titulo="Editar Servicio"
     :regresar="route('admin.servicios')"
     :migas="[
-        ['texto' => 'Administración', 'url' => route('admin.dashboard')],
         ['texto' => 'Inventario', 'url' => route('admin.inventario')],
         ['texto' => 'Servicios', 'url' => route('admin.servicios')],
         ['texto' => 'Editar'],

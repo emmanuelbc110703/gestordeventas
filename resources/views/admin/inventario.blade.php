@@ -435,22 +435,18 @@
         font-weight: 400;
         color: var(--texto-suave);
     }
-    .btn-editar {
-        padding: 6px 16px;
-        background: var(--primario-suave);
-        border: 1px solid #ddd6fe;
-        border-radius: 0;
-        font-size: 13px;
-        font-weight: 500;
-        color: var(--primario);
+    .inv-card { position: relative; }
+    .inv-nombre a {
+        color: inherit;
         text-decoration: none;
-        transition: background 0.2s ease, color 0.2s ease;
     }
-    .btn-editar:hover {
-        background: var(--primario);
-        border-color: var(--primario);
-        color: #fff;
+    .inv-nombre a::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: 3;
     }
+    .inv-card:hover .inv-nombre a { color: var(--primario); }
 
     .inv-grid.lista {
         grid-template-columns: 1fr;
@@ -697,7 +693,9 @@
                     </div>
 
                     <div class="inv-cuerpo">
-                        <h3 class="inv-nombre" title="{{ $inventario->nombre }}">{{ $inventario->nombre }}</h3>
+                        <h3 class="inv-nombre" title="{{ $inventario->nombre }}">
+                            <a href="{{ route('admin.inventario.editar', $inventario->id) }}">{{ $inventario->nombre }}</a>
+                        </h3>
                         <p class="inv-descripcion">{{ $inventario->descripcion ?: 'Sin descripción' }}</p>
 
                         @if($inventario->tipo === 'bien')
@@ -714,7 +712,6 @@
                                 <span class="inv-etiqueta">{{ $inventario->tipo === 'servicio' ? 'Tarifa' : 'Valor unitario' }}</span>
                                 <span class="inv-precio">$ {{ number_format($inventario->precio, 2) }}</span>
                             </div>
-                            <a href="{{ route('admin.inventario.editar', $inventario->id) }}" class="btn-editar">Editar</a>
                         </div>
                     </div>
 
