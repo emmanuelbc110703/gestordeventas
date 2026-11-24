@@ -89,6 +89,29 @@
         background: var(--primario-oscuro);
         border-color: var(--primario-oscuro);
     }
+    .btn-eliminar {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        height: 44px;
+        padding: 0 22px;
+        background: #fff;
+        border: 1px solid #fecaca;
+        border-radius: 0;
+        font-family: inherit;
+        font-size: 15px;
+        font-weight: 600;
+        color: #b42318;
+        white-space: nowrap;
+        cursor: pointer;
+        transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    }
+    .btn-eliminar:hover {
+        background: #b42318;
+        border-color: #b42318;
+        color: #fff;
+    }
     .editar-acciones-pie {
         justify-content: flex-end;
         margin-top: 32px;
@@ -286,7 +309,7 @@
         .editar-encabezado { flex-direction: column; align-items: stretch; }
         .editar-titulo h1 { font-size: 26px; }
         .editar-acciones { width: 100%; }
-        .btn-cancelar, .btn-guardar { flex: 1; }
+        .btn-cancelar, .btn-guardar, .btn-eliminar { flex: 1; }
         .tarjeta-foto, .tarjeta-form { padding: 22px; }
         .campo-fila { grid-template-columns: 1fr; gap: 28px; }
         .foto-vista { height: 260px; }
@@ -306,6 +329,10 @@
             <p class="editar-subtitulo">Modifica la información del servicio seleccionado.</p>
         </div>
         <div class="editar-acciones">
+            <button type="submit" form="formEliminar" class="btn-eliminar">
+                <i class="fa-solid fa-trash"></i>
+                Eliminar
+            </button>
             <a href="{{ route('admin.servicios') }}" class="btn-cancelar">Cancelar</a>
             <button type="submit" form="formEditar" class="btn-guardar">
                 <i class="fa-solid fa-check"></i>
@@ -324,10 +351,10 @@
         </div>
     @endif
     <form
-        id="formEditar"
-        action="{{ route('admin.inventario.actualizar', $inventario->id) }}"
+        id="formEliminar"
+        action="{{ route('admin.inventario.eliminar', $inventario->id) }}"
         method="POST"
-        enctype="multipart/form-data"
+        onsubmit="return confirm('¿Seguro que deseas eliminar este servicio? Esta acción no se puede deshacer.');"
     >
         @csrf
         @method('PUT')
@@ -449,12 +476,18 @@
             </div>
         </div>
         <div class="editar-acciones editar-acciones-pie">
+            <button type="submit" form="formEliminar" class="btn-eliminar">
+                <i class="fa-solid fa-trash"></i>
+                Eliminar
+            </button>
             <a href="{{ route('admin.servicios') }}" class="btn-cancelar">Cancelar</a>
             <button type="submit" class="btn-guardar">
                 <i class="fa-solid fa-check"></i>
                 Actualizar Servicio
             </button>
         </div>
+        @csrf
+        @method('DELETE')
     </form>
 
 </div>
