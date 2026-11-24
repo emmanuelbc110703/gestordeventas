@@ -8,18 +8,25 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
+/**
+ * Controlador del inventario: administra bienes y servicios,
+ * sus categorías y sus fotos.
+ */
 class InventarioController extends Controller
 {
+    // Devuelve las categorías de tipo "bien" ordenadas por nombre.
     private function categoriasDeBien()
     {
         return Categoria::where('tipo', 'bien')->orderBy('nombre')->get();
     }
 
+    // Devuelve las categorías de tipo "servicio" ordenadas por nombre.
     private function categoriasDeServicio()
     {
         return Categoria::where('tipo', 'servicio')->orderBy('nombre')->get();
     }
 
+    // Mensajes de error personalizados en español para las validaciones.
     private function mensajes(): array
     {
         return [
@@ -37,6 +44,7 @@ class InventarioController extends Controller
         ];
     }
 
+    // Reglas de categoría: se elige una existente o se escribe una nueva (al menos una).
     private function reglasCategoria(string $tipo): array
     {
         return [
@@ -45,6 +53,7 @@ class InventarioController extends Controller
         ];
     }
 
+    // Reglas exclusivas de los servicios (costo, referencia, disponibilidad) más las de categoría.
     private function reglasServicio(): array
     {
         return [
@@ -54,20 +63,25 @@ class InventarioController extends Controller
         ] + $this->reglasCategoria('servicio');
     }
 
+    // Obtiene el id de la categoría: crea la nueva (evitando duplicados) o usa la seleccionada.
     private function resolverCategoriaId(Request $request, string $tipo): ?int
     {
         if ($request->filled('categoria_nueva')) {
+            // Limpia espacios repetidos del nombre.
             $nombre = trim(preg_replace('/\s+/', ' ', $request->input('categoria_nueva')));
 
+            // Busca una categoría igual sin distinguir mayúsculas/minúsculas.
             $existente = Categoria::where('tipo', $tipo)->get()
                 ->first(fn ($c) => mb_strtolower($c->nombre) === mb_strtolower($nombre));
 
+            // Si no existe, la crea.
             return ($existente ?? Categoria::create(['nombre' => $nombre, 'tipo' => $tipo]))->id;
         }
 
         return $request->filled('categoria_id') ? (int) $request->input('categoria_id') : null;
     }
 
+    // Lista todo el inventario con su categoría.
     public function index()
     {
         $inventarios = Inventario::with('categoria')->orderBy('nombre', 'asc')->get();
@@ -75,6 +89,7 @@ class InventarioController extends Controller
         return view('admin.inventario', compact('inventarios'));
     }
 
+    // Muestra el formulario para agregar un bien.
     public function createBien()
     {
         $categorias = $this->categoriasDeBien();
@@ -82,6 +97,7 @@ class InventarioController extends Controller
         return view('admin.agregar_bien', compact('categorias'));
     }
 
+    // Valida y guarda un nuevo bien.
     public function storeBien(Request $request)
     {
         $datos = $request->validate([
@@ -93,11 +109,13 @@ class InventarioController extends Controller
             'fecha_adquisicion' => ['required', 'date', 'before_or_equal:today'],
         ] + $this->reglasCategoria('bien'), $this->mensajes());
 
+        // "categoria_nueva" no es columna de la tabla, solo se usa para resolver la categoría.
         unset($datos['categoria_nueva']);
 
         $datos['categoria_id'] = $this->resolverCategoriaId($request, 'bien');
         $datos['tipo'] = 'bien';
 
+        // Guarda la foto en storage/app/public/inventario.
         if ($request->hasFile('foto')) {
             $datos['foto'] = $request->file('foto')->store('inventario', 'public');
         }
@@ -107,6 +125,7 @@ class InventarioController extends Controller
         return redirect()->route('admin.inventario', ['tipo' => 'bien'])->with('success', 'Bien registrado correctamente.');
     }
 
+    // Muestra el formulario para agregar un servicio.
     public function createServicio()
     {
         $categorias = $this->categoriasDeServicio();
@@ -114,6 +133,7 @@ class InventarioController extends Controller
         return view('admin.agregar_servicio', compact('categorias'));
     }
 
+    // Valida y guarda un nuevo servicio.
     public function storeServicio(Request $request)
     {
         $datos = $request->validate([
@@ -127,6 +147,7 @@ class InventarioController extends Controller
         unset($datos['categoria_nueva']);
 
         $datos['categoria_id'] = $this->resolverCategoriaId($request, 'servicio');
+        // Convierte el checkbox a true/false.
         $datos['disponible_punto_venta'] = $request->boolean('disponible_punto_venta');
         $datos['tipo'] = 'servicio';
 
@@ -139,6 +160,7 @@ class InventarioController extends Controller
         return redirect()->route('admin.servicios')->with('success', 'Servicio registrado correctamente.');
     }
 
+    // Lista solo los servicios, junto con sus categorías.
     public function servicios()
     {
         $servicios = Inventario::with('categoria')
@@ -151,6 +173,7 @@ class InventarioController extends Controller
         return view('admin.servicios', compact('servicios', 'categorias'));
     }
 
+    // Alta genérica de un registro (bien o servicio) sin manejo de categorías.
     public function store(Request $request)
     {
         $datos = $request->validate([
@@ -171,6 +194,7 @@ class InventarioController extends Controller
         return redirect()->route('admin.inventario');
     }
 
+    // Muestra el detalle de un registro.
     public function show($id)
     {
         $inventario = Inventario::findOrFail($id);
@@ -178,6 +202,7 @@ class InventarioController extends Controller
         return view('admin.inventario.detalle', compact('inventario'));
     }
 
+    // Muestra el formulario de edición según el tipo (servicio o bien).
     public function edit($id)
     {
         $inventario = Inventario::findOrFail($id);
@@ -193,6 +218,7 @@ class InventarioController extends Controller
         return view('admin.inventario.editar', compact('inventario', 'categorias'));
     }
 
+    // Valida y actualiza un registro; las reglas cambian según sea bien o servicio.
     public function update(Request $request, $id)
     {
         $inventario = Inventario::findOrFail($id);
@@ -205,15 +231,18 @@ class InventarioController extends Controller
             'cantidad' => 'required|integer|min:0',
         ];
 
+        // Registros antiguos sin categoría: no se les obliga a tener una.
         $esAntiguo = $inventario->categoria_id === null;
 
         if ($inventario->tipo === 'bien') {
+            // La fecha solo es obligatoria si el bien ya tenía una registrada.
             $reglas['fecha_adquisicion'] = [$inventario->fecha_adquisicion ? 'required' : 'nullable', 'date', 'before_or_equal:today'];
             $reglas += $this->reglasCategoria('bien');
         } else {
             $reglas += $this->reglasServicio();
         }
 
+        // Para registros antiguos, la categoría pasa a ser opcional.
         if ($esAntiguo) {
             $reglas['categoria_id']    = ['nullable', Rule::exists('categorias', 'id')->where('tipo', $inventario->tipo)];
             $reglas['categoria_nueva'] = ['nullable', 'string', 'min:2', 'max:255'];
@@ -229,8 +258,10 @@ class InventarioController extends Controller
             $datos['disponible_punto_venta'] = $request->boolean('disponible_punto_venta');
         }
 
+        // El tipo no se puede cambiar al editar.
         $datos['tipo'] = $inventario->tipo;
 
+        // Si se sube una foto nueva, borra la anterior y guarda la nueva.
         if ($request->hasFile('foto')) {
             if ($inventario->foto) {
                 Storage::disk('public')->delete($inventario->foto);
@@ -248,6 +279,7 @@ class InventarioController extends Controller
         return redirect()->route('admin.inventario', ['tipo' => 'bien'])->with('success', 'Bien actualizado correctamente.');
     }
 
+    // Elimina un registro y su foto del almacenamiento.
     public function destroy($id)
     {
         $inventario = Inventario::findOrFail($id);
