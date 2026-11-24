@@ -7,10 +7,13 @@ use PDO;
 use RuntimeException;
 use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Process;
+use ZipArchive;
 
 class RespaldoService
 {
     private const TABLAS_REQUERIDAS = ['users', 'inventarios', 'migrations'];
+    private const SQL_EN_ZIP = 'base_de_datos.sql';
+    private const CARPETA_ZIP_IMAGENES = 'public';
 
     public function carpeta(): string
     {
@@ -45,7 +48,12 @@ class RespaldoService
 
     public function extension(): string
     {
-        return $this->esSqlite() ? 'sqlite' : 'sql';
+        return $this->esSqlite() ? 'sqlite' : 'zip';
+    }
+
+    private function extensionesValidas(): array
+    {
+        return $this->esSqlite() ? ['sqlite'] : ['zip', 'sql'];
     }
 
     public function motivoNoDisponible(): ?string
@@ -56,6 +64,10 @@ class RespaldoService
 
         if (!$this->esMysql()) {
             return 'El respaldo automático solo está disponible para SQLite, MySQL y MariaDB.';
+        }
+
+        if (!class_exists(ZipArchive::class)) {
+            return 'Falta la extensión zip de PHP en el servidor (necesaria para incluir las imágenes en el respaldo).';
         }
 
         if (!$this->binario(['mariadb-dump', 'mysqldump'])) {
@@ -198,10 +210,128 @@ class RespaldoService
         }
     }
 
+    private function esZip(string $ruta): bool
+    {
+        $gestor = @fopen($ruta, 'rb');
+
+        if ($gestor === false) {
+            return false;
+        }
+
+        $cabecera = fread($gestor, 4);
+        fclose($gestor);
+
+        return $cabecera === "PK\x03\x04";
+    }
+
+    private function empaquetar(string $rutaSql, string $destinoZip): void
+    {
+        $zip = new ZipArchive();
+
+        if ($zip->open($destinoZip, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
+            throw new RuntimeException('No se pudo crear el archivo .zip del respaldo.');
+        }
+
+        $zip->addFile($rutaSql, self::SQL_EN_ZIP);
+
+        $base = storage_path('app/public');
+
+        if (is_dir($base)) {
+            $archivos = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($base, \FilesystemIterator::SKIP_DOTS)
+            );
+
+            foreach ($archivos as $archivo) {
+                if (!$archivo->isFile()) {
+                    continue;
+                }
+
+                $relativa = str_replace('\\', '/', substr($archivo->getPathname(), strlen($base) + 1));
+                $zip->addFile($archivo->getPathname(), self::CARPETA_ZIP_IMAGENES . '/' . $relativa);
+            }
+        }
+
+        if (!$zip->close()) {
+            @unlink($destinoZip);
+
+            throw new RuntimeException('No se pudo terminar de escribir el archivo .zip del respaldo.');
+        }
+    }
+
+    private function extraer(string $rutaZip): string
+    {
+        $zip = new ZipArchive();
+
+        if ($zip->open($rutaZip) !== true) {
+            throw new RuntimeException('El archivo .zip está dañado o no se puede leer.');
+        }
+
+        if ($zip->locateName(self::SQL_EN_ZIP) === false) {
+            $zip->close();
+
+            throw new RuntimeException('El archivo no pertenece a este sistema (no contiene la base de datos).');
+        }
+
+        $temporal = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'restaurar_' . uniqid();
+        mkdir($temporal, 0775, true);
+
+        $zip->extractTo($temporal);
+        $zip->close();
+
+        return $temporal;
+    }
+
+    private function restaurarImagenes(string $temporal): void
+    {
+        $origen = $temporal . DIRECTORY_SEPARATOR . self::CARPETA_ZIP_IMAGENES;
+
+        if (!is_dir($origen)) {
+            return;
+        }
+
+        $destino = storage_path('app/public');
+
+        $archivos = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($origen, \FilesystemIterator::SKIP_DOTS)
+        );
+
+        foreach ($archivos as $archivo) {
+            if (!$archivo->isFile()) {
+                continue;
+            }
+
+            $relativa = substr($archivo->getPathname(), strlen($origen) + 1);
+            $copia = $destino . DIRECTORY_SEPARATOR . $relativa;
+
+            if (!is_dir(dirname($copia))) {
+                mkdir(dirname($copia), 0775, true);
+            }
+
+            copy($archivo->getPathname(), $copia);
+        }
+    }
+
+    private function borrarCarpeta(string $ruta): void
+    {
+        if (!is_dir($ruta)) {
+            return;
+        }
+
+        $elementos = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($ruta, \FilesystemIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::CHILD_FIRST
+        );
+
+        foreach ($elementos as $elemento) {
+            $elemento->isDir() ? @rmdir($elemento->getPathname()) : @unlink($elemento->getPathname());
+        }
+
+        @rmdir($ruta);
+    }
 
     public function nombreValido(string $nombre): bool
     {
-        return (bool) preg_match('/^respaldo_[A-Za-z0-9_-]+\.' . $this->extension() . '$/', $nombre);
+        return (bool) preg_match('/^respaldo_[A-Za-z0-9_-]+\.(' . implode('|', $this->extensionesValidas()) . ')$/', $nombre);
     }
 
     public function rutaDe(string $nombre): string
@@ -223,16 +353,18 @@ class RespaldoService
     {
         $respaldos = [];
 
-        foreach (glob($this->carpeta() . DIRECTORY_SEPARATOR . 'respaldo_*.' . $this->extension()) ?: [] as $archivo) {
-            $nombre = basename($archivo);
+        foreach ($this->extensionesValidas() as $extension) {
+            foreach (glob($this->carpeta() . DIRECTORY_SEPARATOR . 'respaldo_*.' . $extension) ?: [] as $archivo) {
+                $nombre = basename($archivo);
 
-            $respaldos[] = [
-                'nombre'  => $nombre,
-                'tamano'  => filesize($archivo),
-                'fecha'   => \Carbon\Carbon::createFromTimestamp(filemtime($archivo)),
-                'tipo'    => str_contains($nombre, '_antes-de-restaurar') ? 'Automático (previo a restaurar)'
-                            : (str_contains($nombre, '_programado') ? 'Programado' : 'Manual'),
-            ];
+                $respaldos[] = [
+                    'nombre'  => $nombre,
+                    'tamano'  => filesize($archivo),
+                    'fecha'   => \Carbon\Carbon::createFromTimestamp(filemtime($archivo)),
+                    'tipo'    => str_contains($nombre, '_antes-de-restaurar') ? 'Automático (previo a restaurar)'
+                                : (str_contains($nombre, '_programado') ? 'Programado' : 'Manual'),
+                ];
+            }
         }
 
         usort($respaldos, fn ($a, $b) => $b['fecha']->timestamp <=> $a['fecha']->timestamp);
@@ -255,7 +387,14 @@ class RespaldoService
         if ($this->esSqlite()) {
             DB::statement('VACUUM INTO ' . DB::getPdo()->quote($destino));
         } else {
-            $this->volcarMysql($destino);
+            $temporal = $destino . '.tmp';
+
+            try {
+                $this->volcarMysql($temporal);
+                $this->empaquetar($temporal, $destino);
+            } finally {
+                @unlink($temporal);
+            }
         }
 
         if (!is_file($destino)) {
@@ -269,9 +408,23 @@ class RespaldoService
     {
         if ($this->esSqlite()) {
             $this->validarSqlite($ruta);
-        } else {
-            $this->validarSql($ruta);
+
+            return;
         }
+
+        if ($this->esZip($ruta)) {
+            $temporal = $this->extraer($ruta);
+
+            try {
+                $this->validarSql($temporal . DIRECTORY_SEPARATOR . self::SQL_EN_ZIP);
+            } finally {
+                $this->borrarCarpeta($temporal);
+            }
+
+            return;
+        }
+
+        $this->validarSql($ruta);
     }
 
     private function validarSqlite(string $ruta): void
@@ -367,9 +520,17 @@ class RespaldoService
             return $previo;
         }
 
+        $temporal = null;
+        $rutaSql = $rutaOrigen;
+
+        if ($this->esZip($rutaOrigen)) {
+            $temporal = $this->extraer($rutaOrigen);
+            $rutaSql = $temporal . DIRECTORY_SEPARATOR . self::SQL_EN_ZIP;
+        }
+
         $previo = $this->crear('antes-de-restaurar');
         $cliente = $this->binario(['mariadb', 'mysql']);
-        $entrada = fopen($rutaOrigen, 'rb');
+        $entrada = fopen($rutaSql, 'rb');
 
         try {
             $this->ejecutar(array_merge(
@@ -377,6 +538,10 @@ class RespaldoService
                 $this->argumentosConexion(),
                 ['--default-character-set=utf8mb4', $this->conexion()['database']]
             ), $entrada);
+
+            if ($temporal !== null) {
+                $this->restaurarImagenes($temporal);
+            }
         } catch (RuntimeException $e) {
             throw new RuntimeException(
                 'No se pudo restaurar: ' . $e->getMessage() . ' Se conserva la copia previa: ' . $previo
@@ -384,6 +549,10 @@ class RespaldoService
         } finally {
             if (is_resource($entrada)) {
                 fclose($entrada);
+            }
+
+            if ($temporal !== null) {
+                $this->borrarCarpeta($temporal);
             }
         }
 
