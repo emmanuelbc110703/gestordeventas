@@ -23,6 +23,17 @@
 
 <x-formulario-estilos />
 <x-pedido-estilos />
+@push('estilos')
+<style>
+    .ped-acciones-pie {
+        justify-content: flex-end;
+        flex-wrap: wrap;
+        margin-top: 32px;
+        padding-top: 24px;
+        border-top: 1px solid var(--borde);
+    }
+</style>
+@endpush
 
 <div class="frm-pagina">
     <div class="frm-encabezado">
@@ -152,13 +163,41 @@
             </dl>
         </section>
     </div>
+    <div class="frm-acciones ped-acciones-pie">
+        <a href="{{ route('admin.cotizaciones') }}" class="frm-btn-cancelar">Volver</a>
+
+        @if($cotizacion->estado === 'enviado')
+            <form action="{{ route('admin.cotizaciones.procesar', $cotizacion->id) }}" method="POST" class="ped-form-accion">
+                @csrf
+                <button type="submit" class="frm-btn-guardar">Procesar pedido</button>
+            </form>
+        @endif
+
+        @if($cotizacion->estado === 'procesando')
+            <a href="{{ route('admin.cotizaciones.editar', $cotizacion->id) }}" class="frm-btn-cancelar">Editar pedido</a>
+
+            <form action="{{ route('admin.cotizaciones.finalizar', $cotizacion->id) }}" method="POST" class="ped-form-accion">
+                @csrf
+                <button type="submit" class="frm-btn-guardar">Finalizar pedido</button>
+            </form>
+        @endif
+
+        @if($cotizacion->estado === 'finalizado')
+            <form action="{{ route('admin.cotizaciones.terminar', $cotizacion->id) }}" method="POST" class="ped-form-accion">
+                @csrf
+                <button type="submit" class="frm-btn-guardar">Marcar como terminado</button>
+            </form>
+        @endif
+    </div>
 </div>
 @push('scripts')
 <script>
     (function () {
         document.querySelectorAll('.ped-form-accion').forEach(function (formulario) {
             formulario.addEventListener('submit', function () {
-                formulario.querySelector('button').disabled = true;
+                document.querySelectorAll('.ped-form-accion button').forEach(function (boton) {
+                    boton.disabled = true;
+                });
             });
         });
         window.addEventListener('pageshow', function () {
