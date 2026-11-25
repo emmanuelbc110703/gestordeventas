@@ -284,7 +284,6 @@
                     </div>
                 </div>
                 <div class="seguridad">
-                    <i class="fa-solid fa-shield-halved"></i>
                     <span>
                         Tu contraseña debe tener al menos <strong>8 caracteres</strong>.
                         No compartas tu contraseña con otras personas.
