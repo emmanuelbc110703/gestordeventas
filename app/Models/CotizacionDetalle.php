@@ -38,11 +38,8 @@ class CotizacionDetalle extends Model
     /**
      * Servicio original del inventario.
      */
-    public function inventario(): BelongsTo
+    public function inventario()
     {
-        return $this->belongsTo(
-            Inventario::class,
-            'inventario_id'
-        );
+        return $this->belongsTo(Inventario::class)->withTrashed();
     }
 }

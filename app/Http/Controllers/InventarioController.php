@@ -283,19 +283,9 @@ class InventarioController extends Controller
     public function destroy($id)
     {
         $inventario = Inventario::findOrFail($id);
-
-        $tipo = $inventario->tipo;
-
-        if ($inventario->foto) {
-            Storage::disk('public')->delete($inventario->foto);
-        }
-
         $inventario->delete();
 
-        if ($tipo === 'servicio') {
-            return redirect()->route('admin.servicios')->with('success', 'Servicio eliminado correctamente.');
-        }
-
-        return redirect()->route('admin.inventario', ['tipo' => 'bien'])->with('success', 'Bien eliminado correctamente.');
+        return redirect()->route('admin.inventario')
+            ->with('success', 'Servicio eliminado correctamente.');
     }
 }
