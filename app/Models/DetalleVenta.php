@@ -15,6 +15,8 @@ class DetalleVenta extends Model
         'cantidad',
         'precio_unitario',
         'subtotal',
+        'promocion_id',
+        'descuento',
     ];
 
     protected $casts = [

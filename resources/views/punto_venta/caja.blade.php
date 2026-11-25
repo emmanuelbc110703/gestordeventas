@@ -428,6 +428,11 @@
     }
     .cj-folio span { display: block; margin-bottom: 6px; font-size: 13px; color: var(--texto-suave); }
     .cj-folio strong { font-size: 28px; color: var(--primario); }
+    .cj-promo-badge { display:inline-block; margin-bottom:6px; padding:2px 8px; background:#ecfdf3; border:1px solid #bbf7d0; font-size:11px; font-weight:600; color:#15803d; }
+    .cj-sin-promo { display:inline-block; margin-bottom:6px; font-size:11px; color:#9ca3af; }
+    .cj-precio-original { font-size:13px; font-weight:400; color:#9ca3af; text-decoration:line-through; margin-right:6px; }
+    .cj-linea-promo { font-size:11px; color:#15803d; }
+    .cj-valor-descuento { color:#15803d; font-weight:600; }
 
     @media (max-width: 1000px) {
         .cj-grid { grid-template-columns: 1fr; }
@@ -519,9 +524,25 @@
                                 </div>
                             @endif
                         </div>
+                        @php
+                            $promo = $servicio->promocionVigente();
+                            $descuentoUnit = $promo ? $promo->calcularDescuento((float) $servicio->precio) : 0;
+                            $precioFinal = (float) $servicio->precio - $descuentoUnit;
+                        @endphp
+
                         <h3>{{ $servicio->nombre }}</h3>
+
+                        @if($promo)
+                            <span class="cj-promo-badge"><i class="fa-solid fa-tags"></i> {{ $promo->nombre }}</span>
+                        @else
+                            <span class="cj-sin-promo">Sin descuento</span>
+                        @endif
+
                         <div class="cj-servicio-precio">
-                            ${{ number_format($servicio->precio, 2) }}
+                            @if($promo)
+                                <span class="cj-precio-original">${{ number_format($servicio->precio, 2) }}</span>
+                            @endif
+                            ${{ number_format($precioFinal, 2) }}
                         </div>
                         <div class="cj-servicio-stock">
                             Disponible: {{ $servicio->cantidad }}
@@ -534,7 +555,10 @@
                                 @js($servicio->nombre),
                                 {{ $servicio->precio }},
                                 @js($servicio->foto),
-                                {{ $servicio->cantidad }}
+                                {{ $servicio->cantidad }},
+                                {{ $descuentoUnit }},
+                                {{ $promo?->id ?? 'null' }},
+                                @js($promo?->nombre)
                             )"
                         >
                             <i class="fa-solid fa-plus"></i>
@@ -590,18 +614,12 @@
                     <strong id="subtotal">$0.00</strong>
                 </div>
                 <div class="cj-fila">
-                    <span>Descuento</span>
-                    <div class="cj-porcentaje">
-                        <input type="number" id="descuento" value="0" min="0" max="100" step="0.01">
-                        <span>%</span>
-                    </div>
+                    <span>Descuento por promociones</span>
+                    <strong id="descuentoMonto" class="cj-valor-descuento">-$0.00</strong>
                 </div>
                 <div class="cj-fila">
-                    <span>Impuesto</span>
-                    <div class="cj-porcentaje">
-                        <input type="number" id="impuesto" value="0" min="0" max="100" step="0.01">
-                        <span>%</span>
-                    </div>
+                    <span>IVA (16%)</span>
+                    <strong id="impuestoMonto">$0.00</strong>
                 </div>
                 <div class="cj-fila-final">
                     <span>Total</span>
@@ -763,15 +781,12 @@
     const urlRegistrarVenta = @json(route('venta.store'));
     const csrfToken = @json(csrf_token());
 
-    function agregarProducto(id, nombre, precio, foto, stock) {
+    function agregarProducto(id, nombre, precio, foto, stock, descuentoUnit = 0, promocionId = null, promocionNombre = null) {
         const producto = carrito.find(item => item.id === id);
 
         if (producto) {
             if (producto.cantidad >= stock) {
-                alert(
-                    'No puedes agregar más unidades de "' + nombre +
-                    '". Existencia disponible: ' + stock
-                );
+                alert('No puedes agregar más unidades de "' + nombre + '". Existencia disponible: ' + stock);
                 return;
             }
             producto.cantidad++;
@@ -787,7 +802,10 @@
                 precio: parseFloat(precio),
                 foto: foto,
                 cantidad: 1,
-                stock: stock
+                stock: stock,
+                descuentoUnit: parseFloat(descuentoUnit) || 0,
+                promocionId: promocionId,
+                promocionNombre: promocionNombre
             });
         }
 
@@ -812,7 +830,9 @@
 
         carrito.forEach((producto, indice) => {
 
-            const subtotalProducto = producto.precio * producto.cantidad;
+            const bruto = producto.precio * producto.cantidad;
+            const descLinea = producto.descuentoUnit * producto.cantidad;
+            const subtotalProducto = bruto - descLinea;
 
             let imagen;
 
@@ -828,7 +848,10 @@
                         <div class="cj-producto-imagen">${imagen}</div>
                         <div>
                             <div class="cj-producto-nombre">${escapeHtml(producto.nombre)}</div>
-                            <div class="cj-producto-precio">$${subtotalProducto.toFixed(2)}</div>
+                            <div class="cj-producto-precio">
+                                ${descLinea > 0 ? `<span class="cj-precio-original">$${bruto.toFixed(2)}</span>` : ''}$${subtotalProducto.toFixed(2)}
+                            </div>
+                            ${producto.promocionNombre ? `<div class="cj-linea-promo"><i class="fa-solid fa-tags"></i> ${escapeHtml(producto.promocionNombre)}</div>` : '<div class="cj-sin-promo">Sin descuento</div>'}
                         </div>
                     </div>
 
@@ -882,30 +905,31 @@
         calcularTotal();
     }
 
-    function obtenerTotales() {
+    const TASA_IVA = 0.16;
+    const r2 = n => Math.round((n + Number.EPSILON) * 100) / 100;
 
+    function obtenerTotales() {
         let subtotal = 0;
+        let descuento = 0;
 
         carrito.forEach(producto => {
-            subtotal += producto.precio * producto.cantidad;
+            subtotal  += producto.precio * producto.cantidad;
+            descuento += producto.descuentoUnit * producto.cantidad;
         });
 
-        let descuentoPorcentaje = parseFloat(document.getElementById('descuento').value) || 0;
-        let impuestoPorcentaje = parseFloat(document.getElementById('impuesto').value) || 0;
+        subtotal  = r2(subtotal);
+        descuento = r2(descuento);
 
-        descuentoPorcentaje = Math.min(Math.max(descuentoPorcentaje, 0), 100);
-        impuestoPorcentaje = Math.min(Math.max(impuestoPorcentaje, 0), 100);
-
-        const descuento = subtotal * (descuentoPorcentaje / 100);
-        const subtotalConDescuento = subtotal - descuento;
-        const impuesto = subtotalConDescuento * (impuestoPorcentaje / 100);
-        const total = Math.max(0, subtotalConDescuento + impuesto);
+        const base = r2(subtotal - descuento);
+        const impuesto = r2(base * TASA_IVA);
+        const total = r2(base + impuesto);
+        const descuentoPorcentaje = subtotal > 0 ? r2((descuento / subtotal) * 100) : 0;
 
         return {
             subtotal,
             descuentoPorcentaje,
             descuento,
-            impuestoPorcentaje,
+            impuestoPorcentaje: 16,
             impuesto,
             total
         };
@@ -914,13 +938,12 @@
     function calcularTotal() {
         const totales = obtenerTotales();
         document.getElementById('subtotal').textContent = '$' + totales.subtotal.toFixed(2);
+        document.getElementById('descuentoMonto').textContent = '-$' + totales.descuento.toFixed(2);
+        document.getElementById('impuestoMonto').textContent = '$' + totales.impuesto.toFixed(2);
         document.getElementById('total').textContent = '$' + totales.total.toFixed(2);
         document.getElementById('botonCobrar').disabled = carrito.length === 0;
     }
 
-
-    document.getElementById('descuento').addEventListener('input', calcularTotal);
-    document.getElementById('impuesto').addEventListener('input', calcularTotal);
 
     document.getElementById('buscarServicio').addEventListener('input', function () {
 
@@ -1278,7 +1301,9 @@
             productos: carrito.map(producto => ({
                 id: producto.id,
                 cantidad: producto.cantidad,
-                precio: Number(producto.precio.toFixed(2))
+                precio: Number(producto.precio.toFixed(2)),
+                promocion_id: producto.promocionId,
+                descuento_unitario: Number(producto.descuentoUnit.toFixed(2))
             }))
         };
 
@@ -1320,8 +1345,6 @@
 
             document.getElementById('clienteSeleccionado').style.display = 'none';
             document.getElementById('buscarCliente').value = '';
-            document.getElementById('descuento').value = '0';
-            document.getElementById('impuesto').value = '0';
 
             mostrarCarrito();
             calcularTotal();

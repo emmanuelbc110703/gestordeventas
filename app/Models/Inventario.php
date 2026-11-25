@@ -53,7 +53,11 @@ class Inventario extends Model
 
     public function promocionVigente(): ?Promocion
     {
-        return $this->promociones()->vigentes()->get()
+        $promos = $this->relationLoaded('promociones')
+            ? $this->promociones->filter(fn ($p) => $p->estaVigente())
+            : $this->promociones()->vigentes()->get();
+
+        return $promos
             ->sortByDesc(fn ($p) => $p->calcularDescuento((float) $this->precio))
             ->first();
     }
