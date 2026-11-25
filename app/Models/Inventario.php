@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Inventario extends Model
 {
@@ -43,5 +44,17 @@ class Inventario extends Model
             CotizacionDetalle::class,
             'inventario_id'
         );
+    }
+
+    public function promociones(): BelongsToMany
+    {
+        return $this->belongsToMany(Promocion::class, 'inventario_promocion', 'inventario_id', 'promocion_id');
+    }
+
+    public function promocionVigente(): ?Promocion
+    {
+        return $this->promociones()->vigentes()->get()
+            ->sortByDesc(fn ($p) => $p->calcularDescuento((float) $this->precio))
+            ->first();
     }
 }

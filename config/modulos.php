@@ -13,6 +13,7 @@ return [
             ['clave' => 'categorias',    'texto' => 'Categorias',               'icono' => 'fa-tags',              'ruta' => 'admin.categorias.index'],
             ['clave' => 'estadisticas',  'texto' => 'Estadísticas del negocio', 'icono' => 'fa-chart-line',        'ruta' => 'admin.estadisticas'],
             ['clave' => 'pagos',         'texto' => 'Pago de servicios',        'icono' => 'fa-file-invoice',      'ruta' => 'admin.pago_servicios.index'],
+            ['clave' => 'promociones',   'texto' => 'Promociones',              'icono' => 'fa-tags',              'ruta' => 'admin.promociones'],
             ['clave' => 'respaldos',     'texto' => 'Respaldos',                'icono' => 'fa-database',          'ruta' => 'admin.respaldos'],
         ],
         'Mi cuenta' => [

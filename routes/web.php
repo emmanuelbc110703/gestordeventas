@@ -18,6 +18,7 @@ use Livewire\Volt\Volt;
 use App\Http\Controllers\Admin\RegistroPagoServicioController;
 use App\Http\Controllers\Admin\CategoriaController;
 use App\Http\Controllers\Admin\EstadisticasController;
+use App\Http\Controllers\PromocionController;
 
 // ========================================
 // DASHBOARD ADMINISTRADOR
@@ -813,3 +814,15 @@ Route::prefix('admin/categorias')
 Route::get('/admin/estadisticas', [EstadisticasController::class, 'index'])
     ->middleware(['auth', 'rol:admin'])
     ->name('admin.estadisticas');
+
+Route::prefix('admin/promociones')
+    ->name('admin.promociones')
+    ->middleware(['auth', 'rol:admin'])
+    ->group(function () {
+        Route::get('/', [PromocionController::class, 'index']);
+        Route::get('/crear', [PromocionController::class, 'create'])->name('.crear');
+        Route::post('/', [PromocionController::class, 'store'])->name('.guardar');
+        Route::get('/{id}/editar', [PromocionController::class, 'edit'])->whereNumber('id')->name('.editar');
+        Route::put('/{id}', [PromocionController::class, 'update'])->whereNumber('id')->name('.actualizar');
+        Route::delete('/{id}', [PromocionController::class, 'destroy'])->whereNumber('id')->name('.eliminar');
+    });
