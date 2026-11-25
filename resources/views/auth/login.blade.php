@@ -7,432 +7,350 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Iniciar Sesión - Orquídeas y más Los Amates</title>
 
-    <!-- Font Awesome -->
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
     <style>
-        * {
-            box-sizing: border-box;
+        :root {
+            --primario: #6d28d9;
+            --primario-oscuro: #5b21b6;
+            --borde: #e5e7eb;
+            --texto: #111827;
+            --texto-suave: #6b7280;
+            --fondo: #f9fafb;
+            --fondo-suave: #f1f4f9;
         }
 
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 100px 20px 30px;
+            min-height: 100vh;
+            padding: 112px 20px 40px;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+            background: var(--fondo-suave);
+            color: var(--texto);
+            line-height: 1.6;
         }
 
-        /* =========================
-           BARRA SUPERIOR
-        ========================= */
+        img { display: block; max-width: 100%; }
         nav {
-            width: 100%;
-            padding: 15px 7%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.96);
             position: fixed;
             top: 0;
             left: 0;
+            width: 100%;
             z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            background: rgba(255, 255, 255, 0.97);
+            border-bottom: 1px solid var(--borde);
         }
-
+        .nav-interior {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            height: 72px;
+            width: 100%;
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 0 32px;
+        }
         .marca {
             display: flex;
             align-items: center;
-            gap: 10px;
-            color: #6a1b9a;
-            font-size: 20px;
-            font-weight: bold;
+            gap: 12px;
+            color: var(--texto);
+            font-size: 17px;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            text-decoration: none;
         }
-
-        .marca i {
-            font-size: 25px;
+        .marca-logo {
+            width: 44px;
+            height: 44px;
+            padding: 3px;
+            object-fit: contain;
+            background: #fff;
+            border: 1px solid var(--borde);
         }
-
         .menu {
             display: flex;
             align-items: center;
-            gap: 22px;
+            gap: 32px;
         }
-
         .menu a {
-            color: #444;
+            color: var(--texto-suave);
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
             text-decoration: none;
-            font-weight: bold;
-            transition: 0.3s;
+            transition: color 0.2s ease;
         }
+        .menu a:hover { color: var(--primario); }
 
-        .menu a:hover {
-            color: #6a1b9a;
-        }
-
-        /* =========================
-           CONTENEDOR LOGIN
-        ========================= */
-        .contenedor {
-            width: 90%;
-            max-width: 420px;
-            background-color: white;
-            border-radius: 15px;
-            padding: 35px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
-            text-align: center;
-        }
-
-        .logo {
-            width: 130px;
-            height: 130px;
-            object-fit: contain;
-            margin-bottom: 15px;
-        }
-
-        h1 {
-            color: #6a1b9a;
-            margin-bottom: 5px;
-        }
-
-        .subtitulo {
-            color: #666;
-            margin-bottom: 30px;
-        }
-
-        .campo {
-            position: relative;
-            margin-bottom: 20px;
-        }
-
-        .campo i {
-            position: absolute;
-            left: 15px;
-            top: 14px;
-            color: #6a1b9a;
-        }
-
-        .campo input {
+        .login {
             width: 100%;
-            padding: 13px 15px 13px 45px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
+            max-width: 440px;
+            background: #fff;
+            border: 1px solid rgba(109, 40, 217, 0.12);
+            box-shadow:
+                0 4px 12px rgba(109, 40, 217, 0.10),
+                0 18px 50px rgba(109, 40, 217, 0.22);
+            animation: aparecer 0.5s ease;
+        }
+        .login-cabecera {
+            padding: 36px 40px 28px;
+            text-align: center;
+            border-bottom: 1px solid var(--borde);
+        }
+        .logo {
+            width: 84px;
+            height: 84px;
+            margin: 0 auto 20px;
+            padding: 6px;
+            object-fit: contain;
+            background: #fff;
+            border: 1px solid var(--borde);
+        }
+        .etiqueta {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--primario);
+        }
+        .login-cabecera h1 {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+        }
+        .subtitulo {
+            margin-top: 8px;
             font-size: 15px;
-            outline: none;
+            color: var(--texto-suave);
         }
 
-        .campo input:focus {
-            border-color: #6a1b9a;
-        }
+        .login-cuerpo { padding: 32px 40px 36px; }
 
-        /* MENSAJES DE ERROR */
-        .error {
-            color: #c62828;
+        .alerta {
+            margin-bottom: 20px;
+            padding: 12px 16px;
             font-size: 14px;
             text-align: left;
-            margin-top: -12px;
-            margin-bottom: 15px;
+        }
+        .alerta-error {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #b42318;
+        }
+        .alerta-exito {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+        }
+        .error-campo {
+            margin-top: 8px;
+            font-size: 13px;
+            color: #b42318;
         }
 
-        .boton-login {
+        .campo { margin-bottom: 22px; }
+        .campo label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        .campo-control { position: relative; }
+        .campo-control i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 15px;
+            color: #9ca3af;
+            pointer-events: none;
+            transition: color 0.2s ease;
+        }
+        .campo-control input {
             width: 100%;
-            padding: 13px;
-            border: none;
-            border-radius: 8px;
-            background-color: #6a1b9a;
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
+            height: 52px;
+            padding: 0 16px 0 44px;
+            background: #fff;
+            border: 1px solid var(--borde);
+            border-radius: 0;
+            font-family: inherit;
+            font-size: 15px;
+            color: var(--texto);
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
-
-        .boton-login:hover {
-            background-color: #4a126d;
+        .campo-control input::placeholder { color: #9ca3af; }
+        .campo-control input:focus {
+            border-color: var(--primario);
+            box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.1);
         }
+        .campo-control:focus-within i { color: var(--primario); }
 
-        .registro {
-            margin-top: 25px;
-            color: #666;
-        }
-
-        .registro a {
-            color: #6a1b9a;
-            font-weight: bold;
+        .enlace-olvide {
+            display: block;
+            margin: -8px 0 24px;
+            text-align: right;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--primario);
             text-decoration: none;
         }
+        .enlace-olvide:hover { text-decoration: underline; }
 
-        .registro a:hover {
-            text-decoration: underline;
+        .boton-login {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            height: 48px;
+            background: var(--primario);
+            border: 1px solid var(--primario);
+            border-radius: 0;
+            font-family: inherit;
+            font-size: 15px;
+            font-weight: 600;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.2s ease, border-color 0.2s ease;
+        }
+        .boton-login:hover {
+            background: var(--primario-oscuro);
+            border-color: var(--primario-oscuro);
         }
 
-        /* =========================
-           RESPONSIVO
-        ========================= */
+        .login-pie {
+            padding: 20px 40px;
+            text-align: center;
+            font-size: 15px;
+            color: var(--texto-suave);
+            background: var(--fondo);
+            border-top: 1px solid var(--borde);
+        }
+        .login-pie a {
+            font-weight: 600;
+            color: var(--primario);
+            text-decoration: none;
+        }
+        .login-pie a:hover { text-decoration: underline; }
+
+        @keyframes aparecer {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: none; }
+        }
+
         @media (max-width: 750px) {
-
-            nav {
-                padding: 12px 5%;
+            body { padding-top: 150px; }
+            .nav-interior {
                 flex-direction: column;
-                gap: 12px;
-            }
-
-            .marca {
-                font-size: 18px;
-            }
-
-            .menu {
-                width: 100%;
                 justify-content: center;
-                flex-wrap: wrap;
-                gap: 8px 15px;
+                height: auto;
+                padding: 12px 24px;
+                gap: 10px;
             }
-
-            .menu a {
-                font-size: 14px;
-            }
-
-            body {
-                padding-top: 150px;
-            }
+            .menu { width: 100%; justify-content: center; flex-wrap: wrap; gap: 8px 18px; }
+            .menu a { font-size: 12px; }
         }
-
         @media (max-width: 500px) {
-
-            nav {
-                gap: 8px;
-            }
-
-            .marca {
-                font-size: 16px;
-            }
-
-            .marca i {
-                font-size: 20px;
-            }
-
-            .menu {
-                gap: 7px 10px;
-            }
-
-            .menu a {
-                font-size: 13px;
-            }
-
-            .contenedor {
-                width: 100%;
-                padding: 25px 20px;
-            }
-
-            body {
-                padding-top: 145px;
-            }
+            body { padding-left: 14px; padding-right: 14px; }
+            .login-cabecera { padding: 28px 22px 22px; }
+            .login-cuerpo { padding: 26px 22px 30px; }
+            .login-pie { padding: 18px 22px; }
+            .login-cabecera h1 { font-size: 24px; }
         }
-
-        .separador {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 20px 0;
-    color: #999;
-}
-
-.separador::before,
-.separador::after {
-    content: "";
-    flex: 1;
-    height: 1px;
-    background-color: #ddd;
-}
-
-.boton-google {
-    width: 100%;
-    padding: 13px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    background-color: white;
-    color: #333;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-.boton-google:hover {
-    background-color: #f5f5f5;
-    border-color: #bbb;
-}
-
-.boton-google i {
-    color: #4285f4;
-    margin-right: 8px;
-}
-.enlace-olvide {
-    display: block;
-    text-align: right;
-    margin: -4px 0 16px;
-    font-size: 13px;
-    color: #6a1b9a;
-    text-decoration: none;
-}
-.enlace-olvide:hover { text-decoration: underline; }
-
-.exito {
-    background: #e8f5e9;
-    color: #2e7d32;
-    border: 1px solid #c8e6c9;
-    padding: 10px 14px;
-    border-radius: 8px;
-    font-size: 14px;
-    margin-bottom: 15px;
-    text-align: center;
-}
-
     </style>
 </head>
-
 <body>
-
-    <!-- BARRA DE NAVEGACIÓN -->
     <nav>
-
-        <div class="marca">
-            <i class="fa-solid fa-seedling"></i>
-            Orquídeas y más
+        <div class="nav-interior">
+            <a href="{{ route('inicio') }}" class="marca">
+                <img
+                    src="{{ asset('images/logo-los-amates.png') }}"
+                    alt="Logo Los Amates"
+                    class="marca-logo"
+                >
+                Orquídeas y más
+            </a>
+            <div class="menu">
+                <a href="{{ route('inicio') }}">Inicio</a>
+                <a href="{{ route('inicio') }}#nosotros">Nosotros</a>
+                <a href="{{ route('inicio') }}#productos">Productos</a>
+            </div>
         </div>
-
-        <div class="menu">
-
-            <a href="{{ route('inicio') }}">
-                <i class="fa-solid fa-house"></i>
-                Inicio
-            </a>
-
-            <a href="{{ route('inicio') }}#nosotros">
-                <i class="fa-solid fa-circle-info"></i>
-                Nosotros
-            </a>
-
-            <a href="{{ route('inicio') }}#productos">
-                <i class="fa-solid fa-leaf"></i>
-                Productos
-            </a>
-
-        </div>
-
     </nav>
-
-
-    <!-- LOGIN -->
-    <form action="{{ route('login.store') }}" method="POST" class="contenedor">
-
+    <form action="{{ route('login.store') }}" method="POST" class="login">
         @csrf
-
-        <img
-            src="{{ asset('images/logo-los-amates.png') }}"
-            alt="Logo Los Amates"
-            class="logo"
-        >
-
-        <h1>Bienvenido</h1>
-
-        <p class="subtitulo">
-            Orquídeas y más "Los Amates"
-        </p>
-
-
-        <!-- MENSAJE GENERAL DE ERROR -->
-        @if(session('error'))
-            <div class="error">
-                {{ session('error') }}
-            </div>
-        @endif
-
-
-        <!-- CORREO -->
-        <div class="campo">
-
-            <i class="fa-solid fa-envelope"></i>
-
-            <input
-                type="email"
-                name="email"
-                value="{{ old('email') }}"
-                placeholder="Correo electrónico"
-                required
+        <div class="login-cabecera">
+            <img
+                src="{{ asset('images/logo-los-amates.png') }}"
+                alt="Logo Los Amates"
+                class="logo"
             >
-
+            <span class="etiqueta">Acceso</span>
+            <h1>Bienvenido</h1>
+            <p class="subtitulo">Orquídeas y más "Los Amates"</p>
         </div>
-
-        @error('email')
-            <div class="error">
-                {{ $message }}
+        <div class="login-cuerpo">
+            @if(session('error'))
+                <div class="alerta alerta-error">{{ session('error') }}</div>
+            @endif
+            @if(session('status'))
+                <div class="alerta alerta-exito">{{ session('status') }}</div>
+            @endif
+            <div class="campo">
+                <label for="email">Correo electrónico</label>
+                <div class="campo-control">
+                    <i class="fa-solid fa-envelope"></i>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        value="{{ old('email') }}"
+                        placeholder="correo@ejemplo.com"
+                        required
+                    >
+                </div>
+                @error('email')
+                    <div class="error-campo">{{ $message }}</div>
+                @enderror
             </div>
-        @enderror
-
-
-        <!-- CONTRASEÑA -->
-        <div class="campo">
-
-            <i class="fa-solid fa-lock"></i>
-
-            <input
-                type="password"
-                name="password"
-                placeholder="Contraseña"
-                required
-            >
-
+            <div class="campo">
+                <label for="password">Contraseña</label>
+                <div class="campo-control">
+                    <i class="fa-solid fa-lock"></i>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Tu contraseña"
+                        required
+                    >
+                </div>
+                @error('password')
+                    <div class="error-campo">{{ $message }}</div>
+                @enderror
+            </div>
+            <a href="{{ route('contrasena.solicitar') }}" class="enlace-olvide">¿Olvidaste tu contraseña?</a>
+            <button type="submit" class="boton-login">
+                <i class="fa-solid fa-right-to-bracket"></i>
+                Iniciar sesión
+            </button>
         </div>
-
-        @error('password')
-            <div class="error">
-                {{ $message }}
-            </div>
-        @enderror
-
-        <a href="{{ route('contrasena.solicitar') }}" class="enlace-olvide">¿Olvidaste tu contraseña?</a>
-        @if(session('status'))
-            <div class="exito">{{ session('status') }}</div>
-        @endif
-
-        <!-- BOTÓN -->
-        <button type="submit" class="boton-login">
-
-            <i class="fa-solid fa-right-to-bracket"></i>
-
-            Iniciar sesión
-
-        </button>
-
-        <div class="separador">
-    <span>o</span>
-</div>
-
-<button type="button" id="google-login" class="boton-google">
-    <i class="fa-brands fa-google"></i>
-    Continuar con Google
-</button>
-
-<div id="google-error" class="error" style="display: none;"></div>
-
-
-        <!-- ENLACE A REGISTRO -->
-        <div class="registro">
-
+        <div class="login-pie">
             ¿No tienes una cuenta?
-
-            <a href="{{ route('registro') }}">
-                Registrarse
-            </a>
-
+            <a href="{{ route('registro') }}">Registrarse</a>
         </div>
-
     </form>
-    @vite('resources/js/firebase-auth.js')
 </body>
 </html>
