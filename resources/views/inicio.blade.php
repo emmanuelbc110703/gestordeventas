@@ -2,649 +2,427 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-
     <link rel="icon" type="image/png" href="{{ asset('images/logo-los-amates.png') }}">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Orquídeas y más | Los Amates</title>
 
-    <!-- Font Awesome -->
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --primario: #6d28d9;
+            --primario-oscuro: #5b21b6;
+            --borde: #e5e7eb;
+            --texto: #111827;
+            --texto-suave: #6b7280;
+            --fondo: #f9fafb;
+            --fondo-suave: #f1f4f9;
         }
 
-        html {
-            scroll-behavior: smooth;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; scroll-padding-top: 80px; }
 
         body {
-            font-family: Arial, sans-serif;
-            background-color: #faf7fb;
-            color: #333;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+            background: #fff;
+            color: var(--texto);
+            line-height: 1.6;
         }
 
-        /* =========================
-           MENÚ SUPERIOR
-        ========================= */
-        nav {
+        img { display: block; max-width: 100%; }
+
+        .contenedor {
             width: 100%;
-            padding: 15px 7%;
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 0 32px;
+        }
+
+        /* ===== BOTONES ===== */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            height: 44px;
+            padding: 0 24px;
+            border-radius: 0;
+            font-family: inherit;
+            font-size: 15px;
+            font-weight: 600;
+            text-decoration: none;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+        }
+        .btn-primario {
+            background: var(--primario);
+            border: 1px solid var(--primario);
+            color: #fff;
+        }
+        .btn-primario:hover {
+            background: var(--primario-oscuro);
+            border-color: var(--primario-oscuro);
+        }
+        .btn-claro {
+            background: #fff;
+            border: 1px solid #fff;
+            color: var(--primario);
+        }
+        .btn-claro:hover {
+            background: #f5f3ff;
+            border-color: #f5f3ff;
+        }
+        .btn-borde {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.55);
+            color: #fff;
+        }
+        .btn-borde:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: #fff;
+        }
+
+        /* ===== MENÚ ===== */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.97);
+            border-bottom: 1px solid var(--borde);
+        }
+        .nav-interior {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(255, 255, 255, 0.96);
-            position: fixed;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            gap: 20px;
+            height: 72px;
         }
-
         .marca {
             display: flex;
             align-items: center;
-            gap: 10px;
-            color: #6a1b9a;
-            font-size: 20px;
-            font-weight: bold;
+            gap: 12px;
+            color: var(--texto);
+            font-size: 17px;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            text-decoration: none;
         }
-
-        .marca i {
-            font-size: 25px;
+        .marca-logo {
+            width: 44px;
+            height: 44px;
+            padding: 3px;
+            object-fit: contain;
+            background: #fff;
+            border: 1px solid var(--borde);
         }
-
         .menu {
             display: flex;
             align-items: center;
-            gap: 22px;
+            gap: 32px;
         }
-
         .menu a {
-            color: #444;
+            color: var(--texto-suave);
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
             text-decoration: none;
-            font-weight: bold;
-            transition: 0.3s;
+            transition: color 0.2s ease;
         }
-
-        .menu a:hover {
-            color: #6a1b9a;
+        .menu a:hover { color: var(--primario); }
+        .menu a.btn {
+            height: 40px;
+            padding: 0 20px;
+            color: #fff;
+            font-size: 13px;
         }
+        .menu a.btn:hover { color: #fff; }
 
-        .btn-login {
-            background-color: #6a1b9a;
-            color: white !important;
-            padding: 10px 18px;
-            border-radius: 8px;
-        }
-
-        .btn-login:hover {
-            background-color: #4a126d;
-            color: white !important;
-        }
-
-        /* =========================
-           PORTADA
-        ========================= */
+        /* ===== PORTADA ===== */
         .portada {
-            min-height: 100vh;
+            position: relative;
             display: flex;
             align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 120px 20px 50px;
-            position: relative;
-            overflow: hidden;
-
+            min-height: 100vh;
+            padding: 140px 0 90px;
             background:
-                linear-gradient(
-                    rgba(63, 15, 90, 0.75),
-                    rgba(106, 27, 154, 0.70)
-                ),
+                linear-gradient(105deg, rgba(36, 10, 64, 0.92) 0%, rgba(36, 10, 64, 0.72) 55%, rgba(36, 10, 64, 0.45) 100%),
                 url('{{ asset('images/portada.jpg') }}');
-
             background-size: cover;
             background-position: center;
+            color: #fff;
         }
-
         .portada-contenido {
-            color: white;
-            max-width: 850px;
-            animation: aparecer 1.2s ease;
+            max-width: 680px;
+            animation: aparecer 0.9s ease;
         }
-
-        .portada-logo {
-            width: 150px;
-            height: 150px;
-            object-fit: contain;
-            background-color: white;
-            border-radius: 20px;
-            padding: 10px;
-            margin-bottom: 25px;
+        .etiqueta {
+            display: inline-block;
+            margin-bottom: 18px;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #c4b5fd;
         }
-
         .portada h1 {
-            font-size: 60px;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            font-size: 56px;
+            font-weight: 700;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
         }
-
         .portada p {
-            font-size: 22px;
-            margin-bottom: 30px;
-            line-height: 1.6;
+            max-width: 520px;
+            margin-bottom: 36px;
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.82);
         }
-
         .botones-portada {
             display: flex;
-            justify-content: center;
-            gap: 15px;
             flex-wrap: wrap;
+            gap: 12px;
         }
 
-        .btn {
-            display: inline-block;
-            padding: 14px 25px;
-            border-radius: 10px;
-            text-decoration: none;
-            font-weight: bold;
-            transition: 0.3s;
-        }
+        /* ===== SECCIONES ===== */
+        section.bloque { padding: 100px 0; }
 
-        .btn-principal {
-            background-color: white;
-            color: #6a1b9a;
+        .encabezado-seccion {
+            max-width: 560px;
+            margin-bottom: 56px;
+            padding-bottom: 28px;
+            border-bottom: 1px solid var(--borde);
         }
-
-        .btn-principal:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.25);
-        }
-
-        .btn-secundario {
-            border: 2px solid white;
-            color: white;
-        }
-
-        .btn-secundario:hover {
-            background-color: white;
-            color: #6a1b9a;
-        }
-
-        /* =========================
-           SECCIONES GENERALES
-        ========================= */
-        section {
-            padding: 90px 8%;
-        }
-
-        .titulo-seccion {
-            text-align: center;
-            margin-bottom: 50px;
-        }
-
-        .titulo-seccion h2 {
-            color: #6a1b9a;
+        .encabezado-seccion .etiqueta { color: var(--primario); margin-bottom: 12px; }
+        .encabezado-seccion h2 {
             font-size: 36px;
-            margin-bottom: 10px;
+            font-weight: 700;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+        }
+        .encabezado-seccion p {
+            margin-top: 12px;
+            font-size: 16px;
+            color: var(--texto-suave);
         }
 
-        .titulo-seccion p {
-            color: #666;
-            font-size: 17px;
-        }
-
-        /* =========================
-           NOSOTROS
-        ========================= */
+        /* ===== NOSOTROS ===== */
         .nosotros {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 50px;
+            grid-template-columns: 5fr 6fr;
+            gap: 64px;
             align-items: center;
         }
-
+        .nosotros-imagen {
+            padding: 14px;
+            background: #fff;
+            border: 1px solid var(--borde);
+        }
         .nosotros-imagen img {
             width: 100%;
-            height: 380px;
+            height: 440px;
             object-fit: cover;
-            border-radius: 20px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            background: var(--fondo-suave);
         }
-
         .nosotros-texto h2 {
-            color: #6a1b9a;
-            font-size: 35px;
             margin-bottom: 20px;
+            font-size: 36px;
+            font-weight: 700;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
         }
-
-        .nosotros-texto p {
-            color: #555;
-            line-height: 1.8;
-            margin-bottom: 15px;
-            font-size: 17px;
+        .nosotros-texto > p {
+            margin-bottom: 14px;
+            font-size: 16px;
+            color: var(--texto-suave);
         }
-
         .datos-local {
-            margin-top: 25px;
-            display: grid;
-            gap: 15px;
+            margin-top: 32px;
+            border: 1px solid var(--borde);
         }
-
         .dato {
             display: flex;
             align-items: center;
-            gap: 15px;
-            background-color: white;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            gap: 16px;
+            padding: 16px 20px;
+            font-size: 15px;
+            color: var(--texto);
         }
-
+        .dato + .dato { border-top: 1px solid var(--borde); }
         .dato i {
-            color: #6a1b9a;
-            font-size: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            width: 40px;
+            height: 40px;
+            background: #f5f3ff;
+            border: 1px solid #ddd6fe;
+            font-size: 16px;
+            color: var(--primario);
         }
 
-        /* =========================
-           PRODUCTOS
-        ========================= */
+        /* ===== PRODUCTOS ===== */
         .productos {
-            background-color: #f3e8f7;
+            background: var(--fondo);
+            border-top: 1px solid var(--borde);
+            border-bottom: 1px solid var(--borde);
         }
-
         .productos-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 25px;
-            max-width: 1100px;
-            margin: auto;
+            gap: 32px;
         }
-
         .producto {
-            background-color: white;
-            border-radius: 18px;
+            background: #fff;
+            border: 1px solid var(--borde);
+            transition: border-color 0.2s ease;
+        }
+        .producto:hover { border-color: #c4b5fd; }
+        .producto-foto {
+            position: relative;
+            height: 270px;
+            background: var(--fondo-suave);
+            border-bottom: 1px solid var(--borde);
             overflow: hidden;
-            box-shadow: 0 5px 18px rgba(0, 0, 0, 0.10);
-            transition: 0.3s;
         }
-
-        .producto:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.18);
-        }
-
-        .producto img {
+        .producto-foto img {
             width: 100%;
-            height: 250px;
+            height: 100%;
             object-fit: cover;
+            transition: transform 0.5s ease;
         }
-
-        .producto-info {
-            padding: 25px;
-            text-align: center;
+        .producto:hover .producto-foto img { transform: scale(1.04); }
+        .badge-numero {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            padding: 4px 12px;
+            background: #fff;
+            border: 1px solid var(--borde);
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 13px;
+            color: var(--texto-suave);
         }
-
-        .producto-info i {
-            color: #6a1b9a;
-            font-size: 35px;
-            margin-bottom: 12px;
-        }
-
+        .producto-info { padding: 28px; }
         .producto-info h3 {
-            color: #333;
-            font-size: 23px;
             margin-bottom: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--texto);
         }
-
         .producto-info p {
-            color: #666;
-            line-height: 1.6;
+            font-size: 15px;
+            color: var(--texto-suave);
         }
 
-        /* =========================
-           LLAMADO A LA ACCIÓN
-        ========================= */
+        /* ===== LLAMADO A LA ACCIÓN ===== */
         .registro-seccion {
-            text-align: center;
+            padding: 90px 0;
             background:
-                linear-gradient(
-                    rgba(74, 18, 109, 0.92),
-                    rgba(106, 27, 154, 0.92)
-                ),
+                linear-gradient(rgba(36, 10, 64, 0.93), rgba(36, 10, 64, 0.93)),
                 url('{{ asset('images/fondo-registro.jpg') }}');
-
             background-size: cover;
             background-position: center;
-            color: white;
+            color: #fff;
+        }
+        .registro-interior {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 40px;
+            padding: 48px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+        }
+        .registro-interior h2 {
+            margin-bottom: 8px;
+            font-size: 30px;
+            font-weight: 700;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+        }
+        .registro-interior p {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.78);
         }
 
-        .registro-seccion h2 {
-            font-size: 40px;
-            margin-bottom: 15px;
-        }
-
-        .registro-seccion p {
-            font-size: 18px;
-            margin-bottom: 30px;
-        }
-
-        /* =========================
-           PIE DE PÁGINA
-        ========================= */
+        /* ===== FOOTER ===== */
         footer {
-            background-color: #3b104f;
-            color: white;
-            text-align: center;
-            padding: 30px;
+            padding: 32px 0;
+            background: #fff;
+            border-top: 1px solid var(--borde);
         }
-
+        .footer-interior {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
         footer h3 {
-            margin-bottom: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--texto);
         }
-
         footer p {
-            color: #ddd;
+            font-size: 14px;
+            color: var(--texto-suave);
         }
+        footer p i { color: var(--primario); margin-right: 6px; }
 
-        /* =========================
-           ANIMACIÓN
-        ========================= */
         @keyframes aparecer {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: none; }
         }
 
-       /* =========================
-   RESPONSIVO
-========================= */
+        /* ===== RESPONSIVO ===== */
+        @media (max-width: 950px) {
+            .contenedor { padding: 0 24px; }
+            .nosotros { grid-template-columns: 1fr; gap: 40px; }
+            .nosotros-imagen img { height: 340px; }
+            .productos-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; }
+            .producto:last-child { grid-column: 1 / -1; }
+            .registro-interior { flex-direction: column; align-items: flex-start; padding: 36px; }
+        }
 
-/* TABLETS */
-@media (max-width: 900px) {
+        @media (max-width: 700px) {
+            .nav-interior { flex-direction: column; justify-content: center; height: auto; padding: 12px 0; gap: 10px; }
+            .menu { width: 100%; justify-content: center; flex-wrap: wrap; gap: 8px 18px; }
+            .menu a { font-size: 12px; }
+            .menu a.btn { height: 36px; padding: 0 14px; font-size: 12px; }
 
-    /* La barra se adapta y NO oculta ninguna opción */
-    nav {
-        padding: 12px 5%;
-        flex-direction: column;
-        gap: 12px;
-    }
+            .portada { padding: 190px 0 60px; min-height: auto; }
+            .portada h1 { font-size: 36px; }
+            .portada p { font-size: 16px; }
+            .botones-portada { flex-direction: column; }
+            .botones-portada .btn { width: 100%; }
 
-    .marca {
-        font-size: 18px;
-    }
+            section.bloque { padding: 64px 0; }
+            .encabezado-seccion { margin-bottom: 36px; }
+            .encabezado-seccion h2,
+            .nosotros-texto h2 { font-size: 28px; }
+            .nosotros-imagen { padding: 10px; }
+            .nosotros-imagen img { height: 260px; }
 
-    .marca i {
-        font-size: 23px;
-    }
+            .productos-grid { grid-template-columns: 1fr; }
+            .producto:last-child { grid-column: auto; }
+            .producto-foto { height: 240px; }
 
-    .menu {
-        width: 100%;
-        justify-content: center;
-        flex-wrap: wrap;
-        gap: 10px 15px;
-    }
+            .registro-seccion { padding: 56px 0; }
+            .registro-interior { padding: 28px 22px; }
+            .registro-interior h2 { font-size: 24px; }
+            .registro-interior .btn { width: 100%; }
 
-    .menu a {
-        font-size: 14px;
-    }
-
-    .btn-login {
-        padding: 9px 15px;
-    }
-
-    /* Portada */
-    .portada {
-        padding: 170px 20px 60px;
-    }
-
-    .portada h1 {
-        font-size: 42px;
-    }
-
-    .portada p {
-        font-size: 18px;
-    }
-
-    .portada-logo {
-        width: 130px;
-        height: 130px;
-    }
-
-    /* Nosotros */
-    .nosotros {
-        grid-template-columns: 1fr;
-        gap: 35px;
-    }
-
-    .nosotros-imagen img {
-        height: 350px;
-    }
-
-    /* Productos */
-    .productos-grid {
-        grid-template-columns: repeat(2, 1fr);
-        max-width: 800px;
-    }
-
-    .producto:last-child {
-        grid-column: 1 / -1;
-        max-width: 380px;
-        width: 100%;
-        margin: auto;
-    }
-}
-
-
-/* CELULARES */
-@media (max-width: 600px) {
-
-    nav {
-        padding: 10px 4%;
-        gap: 10px;
-    }
-
-    .marca {
-        font-size: 17px;
-    }
-
-    .marca i {
-        font-size: 21px;
-    }
-
-    .menu {
-        gap: 8px 12px;
-    }
-
-    .menu a {
-        font-size: 13px;
-    }
-
-    .btn-login {
-        padding: 8px 12px;
-    }
-
-    /* Portada */
-    .portada {
-        min-height: 100vh;
-        padding: 165px 15px 50px;
-    }
-
-    .portada-logo {
-        width: 110px;
-        height: 110px;
-        margin-bottom: 20px;
-    }
-
-    .portada h1 {
-        font-size: 34px;
-        line-height: 1.2;
-    }
-
-    .portada p {
-        font-size: 17px;
-        line-height: 1.5;
-    }
-
-    .botones-portada {
-        flex-direction: column;
-        align-items: stretch;
-        width: 100%;
-    }
-
-    .btn {
-        width: 100%;
-        padding: 13px 15px;
-    }
-
-    /* Secciones */
-    section {
-        padding: 70px 5%;
-    }
-
-    .titulo-seccion {
-        margin-bottom: 35px;
-    }
-
-    .titulo-seccion h2 {
-        font-size: 30px;
-    }
-
-    .titulo-seccion p {
-        font-size: 16px;
-    }
-
-    /* Nosotros */
-    .nosotros {
-        gap: 25px;
-    }
-
-    .nosotros-imagen img {
-        height: 260px;
-    }
-
-    .nosotros-texto h2 {
-        font-size: 29px;
-    }
-
-    .nosotros-texto p {
-        font-size: 16px;
-        line-height: 1.6;
-    }
-
-    .dato {
-        padding: 13px;
-        gap: 12px;
-    }
-
-    .dato i {
-        font-size: 20px;
-    }
-
-    /* Productos */
-    .productos-grid {
-        grid-template-columns: 1fr;
-        max-width: 450px;
-    }
-
-    .producto:last-child {
-        grid-column: auto;
-        max-width: none;
-    }
-
-    .producto img {
-        height: 240px;
-    }
-
-    /* Registro */
-    .registro-seccion h2 {
-        font-size: 30px;
-    }
-
-    .registro-seccion p {
-        font-size: 16px;
-        line-height: 1.6;
-    }
-
-    /* Footer */
-    footer {
-        padding: 25px 15px;
-    }
-}
-
-
-/* CELULARES MUY PEQUEÑOS */
-@media (max-width: 380px) {
-
-    .marca {
-        font-size: 15px;
-    }
-
-    .marca i {
-        font-size: 19px;
-    }
-
-    .menu {
-        gap: 6px 8px;
-    }
-
-    .menu a {
-        font-size: 12px;
-    }
-
-    .btn-login {
-        padding: 7px 10px;
-    }
-
-    .portada {
-        padding-top: 155px;
-    }
-
-    .portada h1 {
-        font-size: 29px;
-    }
-
-    .portada p {
-        font-size: 15px;
-    }
-
-    .portada-logo {
-        width: 95px;
-        height: 95px;
-    }
-}
-
-        @media (max-width: 500px) {
-
-            nav {
-                padding: 15px 5%;
-            }
-
-            .marca {
-                font-size: 15px;
-            }
-
-            .portada h1 {
-                font-size: 34px;
-            }
-
-            section {
-                padding: 70px 5%;
-            }
-
-            .titulo-seccion h2 {
-                font-size: 30px;
-            }
+            .footer-interior { flex-direction: column; text-align: center; }
         }
     </style>
 </head>
@@ -653,254 +431,185 @@
 
     <!-- MENÚ -->
     <nav>
+        <div class="contenedor nav-interior">
+            <a href="{{ route('inicio') }}" class="marca">
+                <img
+                    src="{{ asset('images/logo-los-amates.png') }}"
+                    alt="Logo Los Amates"
+                    class="marca-logo"
+                >
+                Orquídeas y más
+            </a>
 
-    <div class="marca">
-        <i class="fa-solid fa-seedling"></i>
-        Orquídeas y más
-    </div>
-
-    <div class="menu">
-
-        <a href="{{ route('inicio') }}">
-            <i class="fa-solid fa-house"></i>
-            Inicio
-        </a>
-
-        <a href="{{ route('inicio') }}#nosotros">
-            <i class="fa-solid fa-circle-info"></i>
-            Nosotros
-        </a>
-
-        <a href="{{ route('inicio') }}#productos">
-            <i class="fa-solid fa-leaf"></i>
-            Productos
-        </a>
-
-        <a href="{{ route('login') }}" class="btn-login">
-            <i class="fa-solid fa-right-to-bracket"></i>
-            Iniciar sesión
-        </a>
-
-    </div>
-
-</nav>
+            <div class="menu">
+                <a href="{{ route('inicio') }}">Inicio</a>
+                <a href="{{ route('inicio') }}#nosotros">Nosotros</a>
+                <a href="{{ route('inicio') }}#productos">Productos</a>
+                <a href="{{ route('login') }}" class="btn btn-primario">
+                    <i class="fa-solid fa-right-to-bracket"></i>
+                    Iniciar sesión
+                </a>
+            </div>
+        </div>
+    </nav>
 
 
     <!-- PORTADA -->
-    <section class="portada" id="inicio">
+    <header class="portada" id="inicio">
+        <div class="contenedor">
+            <div class="portada-contenido">
+                <span class="etiqueta">Naturaleza, color y vida</span>
+                <h1>Orquídeas y más<br>Los Amates</h1>
 
-        <div class="portada-contenido">
+                <p>
+                    Plantas y productos pensados para transformar
+                    cada uno de tus espacios.
+                </p>
 
-            <img
-                src="{{ asset('images/logo-los-amates.png') }}"
-                alt="Logo Los Amates"
-                class="portada-logo"
-            >
-
-            <h1>Orquídeas y más Los Amates</h1>
-
-            <p>
-                Naturaleza, color y vida para transformar
-                cada uno de tus espacios.
-            </p>
-
-            <div class="botones-portada">
-
-                <a href="#productos" class="btn btn-principal">
-                    <i class="fa-solid fa-leaf"></i>
-                    Conoce nuestros productos
-                </a>
-
-                <a href="{{ route('registro') }}" class="btn btn-secundario">
-                    <i class="fa-solid fa-user-plus"></i>
-                    Crear una cuenta
-                </a>
-
+                <div class="botones-portada">
+                    <a href="#productos" class="btn btn-claro">
+                        <i class="fa-solid fa-leaf"></i>
+                        Conoce nuestros productos
+                    </a>
+                    <a href="{{ route('registro') }}" class="btn btn-borde">
+                        <i class="fa-solid fa-user-plus"></i>
+                        Crear una cuenta
+                    </a>
+                </div>
             </div>
-
         </div>
-
-    </section>
+    </header>
 
 
     <!-- INFORMACIÓN DEL LOCAL -->
-    <section id="nosotros">
+    <section class="bloque" id="nosotros">
+        <div class="contenedor">
+            <div class="nosotros">
 
-        <div class="nosotros">
+                <div class="nosotros-imagen">
+                    <img
+                        src="{{ asset('images/local.jpg') }}"
+                        alt="Orquídeas y más Los Amates"
+                    >
+                </div>
 
-            <div class="nosotros-imagen">
+                <div class="nosotros-texto">
+                    <span class="etiqueta" style="color: var(--primario);">Nosotros</span>
+                    <h2>Conoce nuestro local</h2>
 
-                <!-- AQUÍ COLOCARÁS LA IMAGEN DEL LOCAL -->
-                <img
-                    src="{{ asset('images/local.jpg') }}"
-                    alt="Orquídeas y más Los Amates"
-                >
+                    <p>
+                        En Orquídeas y más Los Amates encontrarás una variedad de
+                        plantas y productos pensados para darle vida, color y
+                        naturaleza a tus espacios.
+                    </p>
+                    <p>
+                        Nos especializamos en ofrecer hermosas orquídeas,
+                        anturios y macetas para diferentes gustos y ocasiones.
+                    </p>
 
-            </div>
-
-            <div class="nosotros-texto">
-
-                <h2>Conoce nuestro local</h2>
-
-                <p>
-                    En Orquídeas y más Los Amates encontrarás
-                    una variedad de plantas y productos pensados
-                    para darle vida, color y naturaleza a tus espacios.
-                </p>
-
-                <p>
-                    Nos especializamos en ofrecer hermosas orquídeas,
-                    anturios y macetas para diferentes gustos y ocasiones.
-                </p>
-
-                <div class="datos-local">
-
-                    <div class="dato">
-                        <i class="fa-solid fa-location-dot"></i>
-                        <span>Información de ubicación del local</span>
+                    <div class="datos-local">
+                        <div class="dato">
+                            <i class="fa-solid fa-location-dot"></i>
+                            <span>Información de ubicación del local</span>
+                        </div>
+                        <div class="dato">
+                            <i class="fa-solid fa-clock"></i>
+                            <span>Horario de atención</span>
+                        </div>
+                        <div class="dato">
+                            <i class="fa-solid fa-phone"></i>
+                            <span>Información de contacto</span>
+                        </div>
                     </div>
-
-                    <div class="dato">
-                        <i class="fa-solid fa-clock"></i>
-                        <span>Horario de atención</span>
-                    </div>
-
-                    <div class="dato">
-                        <i class="fa-solid fa-phone"></i>
-                        <span>Información de contacto</span>
-                    </div>
-
                 </div>
 
             </div>
-
         </div>
-
     </section>
 
 
     <!-- PRODUCTOS -->
-    <section class="productos" id="productos">
+    <section class="bloque productos" id="productos">
+        <div class="contenedor">
 
-        <div class="titulo-seccion">
+            <div class="encabezado-seccion">
+                <span class="etiqueta">Catálogo</span>
+                <h2>Nuestros productos</h2>
+                <p>Conoce algunos de los productos que puedes encontrar con nosotros.</p>
+            </div>
 
-            <h2>Nuestros productos</h2>
+            <div class="productos-grid">
 
-            <p>
-                Conoce algunos de los productos que puedes encontrar con nosotros.
-            </p>
+                <div class="producto">
+                    <div class="producto-foto">
+                        <img src="{{ asset('images/orquideas.jpg') }}" alt="Orquídeas">
+                        <span class="badge-numero">01</span>
+                    </div>
+                    <div class="producto-info">
+                        <h3>Orquídeas</h3>
+                        <p>
+                            Hermosas orquídeas para decorar, regalar
+                            o disfrutar de la belleza de la naturaleza.
+                        </p>
+                    </div>
+                </div>
 
+                <div class="producto">
+                    <div class="producto-foto">
+                        <img src="{{ asset('images/anturios.jpg') }}" alt="Anturios">
+                        <span class="badge-numero">02</span>
+                    </div>
+                    <div class="producto-info">
+                        <h3>Anturios</h3>
+                        <p>
+                            Plantas llenas de color y elegancia, ideales
+                            para darle un toque especial a cualquier espacio.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="producto">
+                    <div class="producto-foto">
+                        <img src="{{ asset('images/macetas.jpg') }}" alt="Macetas">
+                        <span class="badge-numero">03</span>
+                    </div>
+                    <div class="producto-info">
+                        <h3>Macetas</h3>
+                        <p>
+                            Diferentes estilos de macetas para acompañar
+                            y complementar tus plantas favoritas.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
         </div>
-
-
-        <div class="productos-grid">
-
-            <!-- ORQUÍDEAS -->
-            <div class="producto">
-
-                <!-- AQUÍ COLOCARÁS LA IMAGEN -->
-                <img
-                    src="{{ asset('images/orquideas.jpg') }}"
-                    alt="Orquídeas"
-                >
-
-                <div class="producto-info">
-
-                    <i class="fa-solid fa-spa"></i>
-
-                    <h3>Orquídeas</h3>
-
-                    <p>
-                        Hermosas orquídeas para decorar, regalar
-                        o disfrutar de la belleza de la naturaleza.
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <!-- ANTURIOS -->
-            <div class="producto">
-
-                <!-- AQUÍ COLOCARÁS LA IMAGEN -->
-                <img
-                    src="{{ asset('images/anturios.jpg') }}"
-                    alt="Anturios"
-                >
-
-                <div class="producto-info">
-
-                    <i class="fa-solid fa-heart"></i>
-
-                    <h3>Anturios</h3>
-
-                    <p>
-                        Plantas llenas de color y elegancia,
-                        ideales para darle un toque especial a cualquier espacio.
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <!-- MACETAS -->
-            <div class="producto">
-
-                <!-- AQUÍ COLOCARÁS LA IMAGEN -->
-                <img
-                    src="{{ asset('images/macetas.jpg') }}"
-                    alt="Macetas"
-                >
-
-                <div class="producto-info">
-
-                    <i class="fa-solid fa-seedling"></i>
-
-                    <h3>Macetas</h3>
-
-                    <p>
-                        Diferentes estilos de macetas para acompañar
-                        y complementar tus plantas favoritas.PRUEBAAA DE ACTUALIZACION EN EL SERVIDOR
-                    </p>
-
-                </div>
-
-            </div>
-
-        </div>
-
     </section>
 
 
     <!-- CREAR CUENTA -->
     <section class="registro-seccion">
-
-        <h2>¿Quieres formar parte de nuestros clientes?</h2>
-
-        <p>
-            Crea una cuenta y conoce mejor nuestros productos y servicios.
-        </p>
-
-        <a href="{{ route('registro') }}" class="btn btn-principal">
-            <i class="fa-solid fa-user-plus"></i>
-            Registrarme ahora
-        </a>
-
+        <div class="contenedor">
+            <div class="registro-interior">
+                <div>
+                    <h2>¿Quieres formar parte de nuestros clientes?</h2>
+                    <p>Crea una cuenta y conoce mejor nuestros productos y servicios.</p>
+                </div>
+                <a href="{{ route('registro') }}" class="btn btn-claro">
+                    <i class="fa-solid fa-user-plus"></i>
+                    Registrarme ahora
+                </a>
+            </div>
+        </div>
     </section>
 
 
     <!-- FOOTER -->
     <footer>
-
-        <h3>Orquídeas y más "Los Amates"</h3>
-
-        <p>
-            <i class="fa-solid fa-leaf"></i>
-            Naturaleza, color y vida
-        </p>
-
+        <div class="contenedor footer-interior">
+            <h3>Orquídeas y más "Los Amates"</h3>
+            <p><i class="fa-solid fa-leaf"></i>Naturaleza, color y vida</p>
+        </div>
     </footer>
 
 </body>
