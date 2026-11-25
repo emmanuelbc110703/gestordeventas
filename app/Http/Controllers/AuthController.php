@@ -676,6 +676,15 @@ public function mostrarActivarCuenta(Request $request)
     return view('auth.crear_password', compact('usuario'));
 }
 
+public function eliminarDefinitivoCliente($id)
+{
+    $cliente = User::withTrashed()->findOrFail($id);
+
+    $cliente->forceDelete();
+
+    return redirect()->route('admin.clientes')
+        ->with('success', 'El cliente fue eliminado definitivamente.');
+}
 
 // ========================================
 // GUARDAR CONTRASEÑA Y ACTIVAR CUENTA

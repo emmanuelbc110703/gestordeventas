@@ -98,6 +98,27 @@
     }
     .cli-form-reactivar { margin: 0; display: inline-flex; }
 
+    .cli-btn-borrar {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        padding: 0;
+        background: #fff;
+        border: 1px solid #fecaca;
+        border-radius: 0;
+        font-size: 14px;
+        color: var(--lst-rojo-oscuro);
+        cursor: pointer;
+        transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    }
+    .cli-btn-borrar:hover {
+        background: var(--lst-rojo);
+        border-color: var(--lst-rojo);
+        color: #fff;
+    }
+
     @media (max-width: 800px) {
         .cli-persona { justify-content: flex-end; }
         .cli-direccion { max-width: 60vw; }
@@ -286,6 +307,20 @@
                                             <i class="fa-solid fa-user-slash"></i>
                                         </button>
                                     @endif
+
+                                    <button
+                                        type="button"
+                                        class="cli-btn-borrar"
+                                        title="Eliminar definitivamente"
+                                        aria-label="Eliminar cliente definitivamente"
+                                        data-borrar
+                                        data-id="{{ $cliente->id }}"
+                                        data-nombre="{{ $nombreCompleto }}"
+                                        data-compras="{{ $compras }}"
+                                        data-cotizaciones="{{ $cotizaciones }}"
+                                    >
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -323,7 +358,7 @@
             @method('DELETE')
 
             <div class="lst-modal-botones">
-                <button type="button" class="lst-btn-cancelar" id="btnCancelarEliminar">
+                <button type="button" class="lst-btn-cancelar" data-cerrar-modal>
                     Cancelar
                 </button>
                 <button type="submit" class="lst-btn-confirmar">
@@ -334,51 +369,109 @@
 
     </div>
 </div>
+<div class="lst-modal" id="modalBorrar" role="dialog" aria-modal="true" aria-labelledby="tituloModalBorrar">
+    <div class="lst-modal-caja">
+
+        <h2 id="tituloModalBorrar">Eliminar cliente</h2>
+        <p id="mensajeBorrar"></p>
+
+        <form id="formBorrar" method="POST">
+            @csrf
+            @method('DELETE')
+
+            <div class="lst-modal-botones">
+                <button type="button" class="lst-btn-cancelar" data-cerrar-modal>
+                    Cancelar
+                </button>
+                <button type="submit" class="lst-btn-confirmar">
+                    Sí, eliminar
+                </button>
+            </div>
+        </form>
+
+    </div>
+</div>
 
 @push('scripts')
 <script>
     (function () {
-        const modal = document.getElementById('modalEliminar');
-        const formulario = document.getElementById('formEliminar');
-        const mensaje = document.getElementById('mensajeEliminar');
-        const urlEliminar = @js(route('admin.clientes.eliminar', '__ID__'));
+        const modalBaja = document.getElementById('modalEliminar');
+        const formBaja = document.getElementById('formEliminar');
+        const mensajeBaja = document.getElementById('mensajeEliminar');
+        const urlBaja = @js(route('admin.clientes.eliminar', '__ID__'));
 
-        function abrirModal(id, nombre, compras, cotizaciones) {
+        const modalBorrar = document.getElementById('modalBorrar');
+        const formBorrar = document.getElementById('formBorrar');
+        const mensajeBorrar = document.getElementById('mensajeBorrar');
+        const urlBorrar = @js(route('admin.clientes.eliminar_definitivo', '__ID__'));
+
+        function textoHistorial(compras, cotizaciones) {
+            return compras + (compras === '1' ? ' compra' : ' compras') + ' y ' +
+                   cotizaciones + (cotizaciones === '1' ? ' cotización' : ' cotizaciones');
+        }
+
+        function abrirBaja(id, nombre, compras, cotizaciones) {
             const fuerte = document.createElement('strong');
             fuerte.textContent = nombre;
 
-            mensaje.textContent = '';
-            mensaje.append(
+            mensajeBaja.textContent = '';
+            mensajeBaja.append(
                 '¿Seguro que deseas dar de baja a ',
                 fuerte,
                 '? Ya no podrá iniciar sesión, pero su historial (' +
-                compras + (compras === '1' ? ' compra' : ' compras') + ' y ' +
-                cotizaciones + (cotizaciones === '1' ? ' cotización' : ' cotizaciones') +
+                textoHistorial(compras, cotizaciones) +
                 ') se conserva y podrás reactivarlo cuando quieras.'
             );
 
-            formulario.action = urlEliminar.replace('__ID__', id);
-            modal.classList.add('activo');
+            formBaja.action = urlBaja.replace('__ID__', id);
+            modalBaja.classList.add('activo');
         }
 
-        function cerrarModal() {
-            modal.classList.remove('activo');
+        function abrirBorrar(id, nombre, compras, cotizaciones) {
+            const fuerte = document.createElement('strong');
+            fuerte.textContent = nombre;
+
+            mensajeBorrar.textContent = '';
+            mensajeBorrar.append(
+                '¿Seguro que deseas eliminar definitivamente a ',
+                fuerte,
+                '? Esta acción no se puede deshacer y no podrás reactivarlo después. ' +
+                'Tiene ' + textoHistorial(compras, cotizaciones) + ' registradas.'
+            );
+
+            formBorrar.action = urlBorrar.replace('__ID__', id);
+            modalBorrar.classList.add('activo');
+        }
+
+        function cerrarModales() {
+            modalBaja.classList.remove('activo');
+            modalBorrar.classList.remove('activo');
         }
 
         document.querySelectorAll('[data-eliminar]').forEach(function (boton) {
             boton.addEventListener('click', function () {
-                abrirModal(this.dataset.id, this.dataset.nombre, this.dataset.compras, this.dataset.cotizaciones);
+                abrirBaja(this.dataset.id, this.dataset.nombre, this.dataset.compras, this.dataset.cotizaciones);
             });
         });
 
-        document.getElementById('btnCancelarEliminar').addEventListener('click', cerrarModal);
+        document.querySelectorAll('[data-borrar]').forEach(function (boton) {
+            boton.addEventListener('click', function () {
+                abrirBorrar(this.dataset.id, this.dataset.nombre, this.dataset.compras, this.dataset.cotizaciones);
+            });
+        });
 
-        modal.addEventListener('click', function (evento) {
-            if (evento.target === modal) cerrarModal();
+        document.querySelectorAll('[data-cerrar-modal]').forEach(function (boton) {
+            boton.addEventListener('click', cerrarModales);
+        });
+
+        [modalBaja, modalBorrar].forEach(function (modal) {
+            modal.addEventListener('click', function (evento) {
+                if (evento.target === modal) cerrarModales();
+            });
         });
 
         document.addEventListener('keydown', function (evento) {
-            if (evento.key === 'Escape') cerrarModal();
+            if (evento.key === 'Escape') cerrarModales();
         });
 
         const cuerpo = document.getElementById('listaClientes');

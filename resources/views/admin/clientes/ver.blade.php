@@ -127,6 +127,26 @@
         border-color: var(--lst-rojo);
         color: #fff;
     }
+    .cli-btn-eliminar {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 44px;
+        padding: 0 22px;
+        background: var(--lst-rojo);
+        border: 1px solid var(--lst-rojo);
+        border-radius: 0;
+        font-family: inherit;
+        font-size: 15px;
+        font-weight: 600;
+        color: #fff;
+        cursor: pointer;
+        transition: background 0.2s ease, border-color 0.2s ease;
+    }
+    .cli-btn-eliminar:hover {
+        background: var(--lst-rojo-oscuro);
+        border-color: var(--lst-rojo-oscuro);
+    }
     .cli-acciones-pie {
         justify-content: flex-end;
         flex-wrap: wrap;
@@ -171,8 +191,9 @@
                 </form>
             @else
                 <a href="{{ route('admin.clientes.editar', $cliente->id) }}" class="frm-btn-guardar" style="text-decoration:none;">Editar cliente</a>
-                <button type="button" class="cli-btn-baja" data-abrir-baja>Dar de baja</button>
+                <button type="button" class="cli-btn-baja" data-abrir-modal="modalBaja">Dar de baja</button>
             @endif
+            <button type="button" class="cli-btn-eliminar" data-abrir-modal="modalEliminar">Eliminar</button>
         </div>
     </div>
 
@@ -345,11 +366,12 @@
             </form>
         @else
             <a href="{{ route('admin.clientes.editar', $cliente->id) }}" class="frm-btn-guardar" style="text-decoration:none;">Editar cliente</a>
-            <button type="button" class="cli-btn-baja" data-abrir-baja>Dar de baja</button>
+            <button type="button" class="cli-btn-baja" data-abrir-modal="modalBaja">Dar de baja</button>
         @endif
+
+        <button type="button" class="cli-btn-eliminar" data-abrir-modal="modalEliminar">Eliminar</button>
     </div>
 </div>
-
 @unless($dadoDeBaja)
 <div class="lst-modal" id="modalBaja" role="dialog" aria-modal="true" aria-labelledby="tituloModalBaja">
     <div class="lst-modal-caja">
@@ -366,8 +388,34 @@
             @csrf
             @method('DELETE')
             <div class="lst-modal-botones">
-                <button type="button" class="lst-btn-cancelar" id="btnCancelarBaja">Cancelar</button>
+                <button type="button" class="lst-btn-cancelar" data-cerrar-modal>Cancelar</button>
                 <button type="submit" class="lst-btn-confirmar">Sí, dar de baja</button>
+            </div>
+        </form>
+    </div>
+</div>
+@endunless
+<div class="lst-modal" id="modalEliminar" role="dialog" aria-modal="true" aria-labelledby="tituloModalEliminar">
+    <div class="lst-modal-caja">
+        <h2 id="tituloModalEliminar">Eliminar cliente</h2>
+        <p>
+            ¿Seguro que deseas eliminar definitivamente a <strong>{{ $nombreCompleto }}</strong>?
+            Esta acción no se puede deshacer y no podrás reactivarlo después.
+            @if($ventas->count() || $cotizaciones->count())
+                Tiene {{ $ventas->count() }} {{ $ventas->count() === 1 ? 'compra' : 'compras' }} y
+                {{ $cotizaciones->count() }} {{ $cotizaciones->count() === 1 ? 'cotización' : 'cotizaciones' }} registradas.
+            @endif
+            @unless($dadoDeBaja)
+                Si solo quieres que no pueda iniciar sesión, usa mejor <strong>Dar de baja</strong>.
+            @endunless
+        </p>
+
+        <form action="{{ route('admin.clientes.eliminar_definitivo', $cliente->id) }}" method="POST">
+            @csrf
+            @method('DELETE')
+            <div class="lst-modal-botones">
+                <button type="button" class="lst-btn-cancelar" data-cerrar-modal>Cancelar</button>
+                <button type="submit" class="lst-btn-confirmar">Sí, eliminar</button>
             </div>
         </form>
     </div>
@@ -376,21 +424,36 @@
 @push('scripts')
 <script>
     (function () {
-        const modal = document.getElementById('modalBaja');
-        if (!modal) return;
-
-        function cerrar() { modal.classList.remove('activo'); }
+        function abrir(id) {
+            const modal = document.getElementById(id);
+            if (modal) modal.classList.add('activo');
+        }
+        function cerrarTodos() {
+            document.querySelectorAll('.lst-modal.activo').forEach(function (modal) {
+                modal.classList.remove('activo');
+            });
+        }
 
         document.addEventListener('click', function (e) {
-            if (e.target.closest('[data-abrir-baja]')) modal.classList.add('activo');
+            const abrirBtn = e.target.closest('[data-abrir-modal]');
+            if (abrirBtn) {
+                abrir(abrirBtn.dataset.abrirModal);
+                return;
+            }
+            if (e.target.closest('[data-cerrar-modal]')) {
+                cerrarTodos();
+                return;
+            }
+            if (e.target.classList && e.target.classList.contains('lst-modal')) {
+                cerrarTodos();
+            }
         });
 
-        document.getElementById('btnCancelarBaja').addEventListener('click', cerrar);
-        modal.addEventListener('click', function (e) { if (e.target === modal) cerrar(); });
-        document.addEventListener('keydown', function (e) { if (e.key === 'Escape') cerrar(); });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') cerrarTodos();
+        });
     })();
 </script>
 @endpush
-@endunless
 
 </x-layouts.panel>

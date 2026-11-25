@@ -617,6 +617,9 @@ Route::middleware(['auth', 'rol:admin'])
 
         Route::post('/{id}/restaurar', [AuthController::class, 'restaurarCliente'])
             ->whereNumber('id')->name('.restaurar');
+
+        Route::delete('/{id}/eliminar-definitivo', [AuthController::class, 'eliminarDefinitivoCliente'])
+            ->whereNumber('id')->name('.eliminar_definitivo');
     });
 
 
