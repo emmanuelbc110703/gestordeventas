@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class EstadisticasController extends Controller
 {
@@ -17,6 +18,33 @@ class EstadisticasController extends Controller
     private const STOCK_BAJO = 5;
 
     public function index(Request $request)
+    {
+        return view('admin.estadisticas.index', $this->datos($request));
+    }
+
+    public function pdf(Request $request, string $seccion)
+    {
+        $request->validate([
+            'imgs'   => ['nullable', 'array', 'max:20'],
+            'imgs.*' => ['string', 'max:3000000'],
+        ]);
+
+        $imagenes = collect($request->input('imgs', []))
+            ->filter(fn ($v) => is_string($v) && preg_match('#^data:image/png;base64,[A-Za-z0-9+/=]+$#', $v))
+            ->all();
+
+        $datos = $this->datos($request) + ['seccion' => $seccion, 'imagenes' => $imagenes];
+
+        $nombre = 'reporte-' . $seccion . '-'
+            . $datos['inicio']->format('Ymd') . '-'
+            . $datos['fin']->format('Ymd') . '.pdf';
+
+        return Pdf::loadView('admin.estadisticas.pdf', $datos)
+            ->setPaper('letter', 'portrait')
+            ->download($nombre);
+    }
+
+    private function datos(Request $request): array
     {
         $request->validate([
             'desde' => ['nullable', 'date'],
@@ -214,9 +242,9 @@ class EstadisticasController extends Controller
                              'd' => $pagos['porServicio']->pluck('total')->map(fn ($v) => round($v, 2))->all()],
         ];
 
-        return view('admin.estadisticas.index', compact(
+        return compact(
             'inicio', 'fin', 'general', 'ventas', 'categorias', 'inventario',
             'pedidos', 'compras', 'pagos', 'graficas'
-        ));
+        );
     }
 }

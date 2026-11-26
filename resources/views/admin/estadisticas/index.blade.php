@@ -105,6 +105,12 @@
                 <input type="date" name="desde" value="{{ $inicio->toDateString() }}">
                 <input type="date" name="hasta" value="{{ $fin->toDateString() }}">
                 <button class="est-btn" type="submit">Aplicar</button>
+                <button type="button" id="btnPdf" class="est-btn" style="display:inline-flex;align-items:center;gap:8px;background:#fff;color:var(--primario);border:1px solid var(--primario)">
+                    <i class="fa-solid fa-file-pdf"></i> Descargar PDF
+                </button>
+                <button type="button" id="btnPdfCompleto" class="est-btn" style="display:inline-flex;align-items:center;gap:8px;background:#fff;color:var(--texto);border:1px solid var(--borde)">
+                    <i class="fa-solid fa-file-lines"></i> Reporte completo
+                </button>
             </form>
         </div>
     
@@ -389,11 +395,15 @@
         function grafica(id, tipo, labels, series, formato = 'm') {
             const el = document.getElementById(id);
             if (!el) return;
+            construir(el, tipo, labels, series, formato);
+        }
+
+        function construir(el, tipo, labels, series, formato = 'm', extra = {}) {
             const circular = tipo === 'doughnut';
             const linea = tipo === 'line';
             const fmt = v => formato === 'n' ? Number(v).toLocaleString('es-MX') : dinero(v);
 
-            new Chart(el, {
+            return new Chart(el, {
                 type: tipo,
                 data: {
                     labels,
@@ -439,6 +449,7 @@
                             y: { beginAtZero: true, grid: { color: '#f0f0f3' }, border: { display: false }, ticks: { callback: v => fmt(v) } },
                         },
                     }),
+                    ...extra,
                 },
             });
         }
@@ -469,11 +480,13 @@
         };
 
         const creadas = {};
+        let seccionActual = 'general';
         function activar(nombre) {
             if (!iniciadores[nombre]) nombre = 'general';
             document.querySelectorAll('.est-tab').forEach(b => b.classList.toggle('activo', b.dataset.tab === nombre));
             document.querySelectorAll('.est-panel').forEach(p => p.classList.toggle('activo', p.id === 'tab-' + nombre));
             if (!creadas[nombre]) { iniciadores[nombre](); creadas[nombre] = true; }
+            seccionActual = nombre;
             history.replaceState(null, '', '#' + nombre);
         }
 
@@ -483,6 +496,64 @@
             e.target.action = e.target.action.split('#')[0] + location.hash;
         });
 
+        const PDF = {
+            general:    { general: ['line', G.periodos, [
+                            { nombre: 'Ingresos', datos: G.ingresos, color: '#10b981' },
+                            { nombre: 'Egresos',  datos: G.egresos,  color: '#ef4444' }]] },
+            ventas:     { ventas: ['bar', G.periodos, [{ nombre: 'Ventas', datos: G.ventas }]],
+                        formas: ['doughnut', G.formas.l, [{ nombre: 'Forma de pago', datos: G.formas.d }]] },
+            categorias: { catVentas: ['doughnut', G.catVentas.l, [{ nombre: 'Ventas', datos: G.catVentas.d }]],
+                        catGastos: ['doughnut', G.catGastos.l, [{ nombre: 'Gastos', datos: G.catGastos.d }]] },
+            inventario: { invCat: ['bar', G.invCat.l, [{ nombre: 'Unidades', datos: G.invCat.d }], 'n'] },
+            pedidos:    { pedidos: ['bar', G.periodos, [{ nombre: 'Pedidos', datos: G.pedidos }], 'n'],
+                        estados: ['doughnut', G.estados.l, [{ nombre: 'Pedidos', datos: G.estados.d }], 'n'] },
+            compras:    { gastos: ['bar', G.periodos, [{ nombre: 'Gastos', datos: G.gastos }]],
+                        catGastos2: ['doughnut', G.catGastos.l, [{ nombre: 'Gastos', datos: G.catGastos.d }]] },
+            pagos:      { servicios: ['bar', G.servicios.l, [{ nombre: 'Monto', datos: G.servicios.d }]] },
+        };
+
+        function generarPdf(seccion) {
+            const secciones = seccion === 'completo' ? Object.keys(PDF) : [seccion];
+            const imgs = {};
+            const tamanoOriginal = Chart.defaults.font.size;
+            Chart.defaults.font.size = 15;
+
+            secciones.forEach(s => Object.entries(PDF[s]).forEach(([clave, [tipo, labels, series, fmt]]) => {
+            const lienzo = document.createElement('canvas');
+            lienzo.width = 800; lienzo.height = 320;
+            lienzo.style.cssText = 'position:fixed;left:-9999px;top:0;';
+            document.body.appendChild(lienzo);
+                const ch = construir(lienzo, tipo, labels, series, fmt || 'm',
+                    { responsive: false, animation: false, devicePixelRatio: 1 });
+                    
+                const ctx = lienzo.getContext('2d');
+                ctx.globalCompositeOperation = 'destination-over';
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(0, 0, lienzo.width, lienzo.height);
+                imgs[clave] = lienzo.toDataURL('image/png');
+                ch.destroy();
+                lienzo.remove();
+            }));
+            Chart.defaults.font.size = tamanoOriginal;
+
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = @json(route('admin.estadisticas.pdf', 'SECCION')).replace('SECCION', seccion);
+
+            const campos = { _token: @json(csrf_token()), desde: @json($inicio->toDateString()), hasta: @json($fin->toDateString()) };
+            Object.entries(imgs).forEach(([k, v]) => campos['imgs[' + k + ']'] = v);
+            Object.entries(campos).forEach(([nombre, valor]) => {
+                const i = document.createElement('input');
+                i.type = 'hidden'; i.name = nombre; i.value = valor;
+                form.appendChild(i);
+            });
+            document.body.appendChild(form);
+            form.submit();
+            form.remove();
+        }
+
+        document.getElementById('btnPdf').addEventListener('click', () => generarPdf(seccionActual));
+        document.getElementById('btnPdfCompleto').addEventListener('click', () => generarPdf('completo'));
         activar(location.hash.replace('#', '') || 'general');
     </script>
     @endpush

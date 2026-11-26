@@ -826,3 +826,8 @@ Route::prefix('admin/promociones')
         Route::put('/{id}', [PromocionController::class, 'update'])->whereNumber('id')->name('.actualizar');
         Route::delete('/{id}', [PromocionController::class, 'destroy'])->whereNumber('id')->name('.eliminar');
     });
+
+Route::match(['get', 'post'], '/admin/estadisticas/pdf/{seccion}', [EstadisticasController::class, 'pdf'])
+    ->whereIn('seccion', ['general', 'ventas', 'categorias', 'inventario', 'pedidos', 'compras', 'pagos', 'completo'])
+    ->middleware(['auth', 'rol:admin'])
+    ->name('admin.estadisticas.pdf');
