@@ -12,8 +12,8 @@
 @endphp
 
 <x-layouts.panel
-    titulo="Gastos comerciales"
-    :migas="[['texto' => 'Gastos comerciales', 'url' => null]]"
+    titulo="Compras"
+    :migas="[['texto' => 'Compras', 'url' => null]]"
 >
 
 <x-lista-estilos />
@@ -124,7 +124,7 @@
                 <button type="button" class="btn-menu-lateral" data-abrir-sidebar aria-label="Mostrar menú lateral">
                     <i class="fa-solid fa-bars"></i>
                 </button>
-                <h1>Gastos comerciales</h1>
+                <h1>Compras</h1>
             </div>
             <p>Consulta y administra los gastos del negocio.</p>
         </div>

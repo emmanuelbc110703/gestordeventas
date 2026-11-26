@@ -1,8 +1,8 @@
 <x-layouts.panel
-    titulo="Cuenta del negocio"
+    titulo="Cartera del negocio"
     :regresar="route('admin.dashboard')"
     :migas="[
-        ['texto' => 'Cuenta del negocio', 'url' => route('admin.cuentas.index')],
+        ['texto' => 'Cartera del negocio', 'url' => route('admin.cuentas.index')],
     ]"
 >
 
@@ -118,7 +118,7 @@
                 <button type="button" class="btn-menu-lateral" data-abrir-sidebar aria-label="Mostrar menú lateral">
                     <i class="fa-solid fa-bars"></i>
                 </button>
-                <h1>Cuenta del negocio</h1>
+                <h1>Cartera del negocio</h1>
             </div>
             <p>Administra las tarjetas y cuentas financieras del negocio.</p>
         </div>

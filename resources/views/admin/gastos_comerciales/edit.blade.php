@@ -1,7 +1,7 @@
 <x-layouts.panel
     :titulo="'Editar ' . $gasto->concepto"
     :migas="[
-        ['texto' => 'Gastos comerciales', 'url' => route('admin.gastos_comerciales')],
+        ['texto' => 'Compras', 'url' => route('admin.gastos_comerciales')],
         ['texto' => 'Editar gasto', 'url' => null],
     ]"
 >

@@ -2,7 +2,7 @@
     titulo="Editar cuenta"
     :regresar="route('admin.cuentas.index')"
     :migas="[
-        ['texto' => 'Cuenta del negocio', 'url' => route('admin.cuentas.index')],
+        ['texto' => 'Cartera del negocio', 'url' => route('admin.cuentas.index')],
         ['texto' => $cuenta->nombre],
     ]"
 >
