@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Inventario;
 use App\Models\Promocion;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class PromocionController extends Controller
 {
@@ -17,7 +18,7 @@ class PromocionController extends Controller
 
     public function create()
     {
-        $inventarios = Inventario::orderBy('nombre')->get();
+        $inventarios = Inventario::where('tipo', 'servicio')->orderBy('nombre')->get();
 
         return view('admin.promociones.crear', compact('inventarios'));
     }
@@ -36,7 +37,7 @@ class PromocionController extends Controller
     public function edit($id)
     {
         $promocion = Promocion::with('inventarios')->findOrFail($id);
-        $inventarios = Inventario::orderBy('nombre')->get();
+        $inventarios = Inventario::where('tipo', 'servicio')->orderBy('nombre')->get();
 
         return view('admin.promociones.editar', compact('promocion', 'inventarios'));
     }
