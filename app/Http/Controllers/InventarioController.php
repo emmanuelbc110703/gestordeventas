@@ -288,4 +288,13 @@ class InventarioController extends Controller
         return redirect()->route('admin.inventario')
             ->with('success', 'Servicio eliminado correctamente.');
     }
+
+    public function destroyBien($id)
+    {
+        $inventario = Inventario::findOrFail($id);
+        $inventario->delete();
+
+        return redirect()->route('admin.inventario')
+            ->with('success', 'Bien eliminado correctamente.');
+    }
 }

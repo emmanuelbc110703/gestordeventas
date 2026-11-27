@@ -449,9 +449,10 @@
         </div>
     @endif
     <form
-        id="formEliminar"
-        action="{{ route('admin.inventario.eliminar', $inventario->id) }}"
+        id="formEditar"
+        action="{{ route('admin.inventario.actualizar', $inventario->id) }}"
         method="POST"
+        enctype="multipart/form-data"
     >
         @csrf
         @method('PUT')
@@ -579,6 +580,8 @@
                 Guardar cambios
             </button>
         </div>
+    </form>
+    <form id="formEliminar" action="{{ route('admin.inventario.eliminar', $inventario->id) }}" method="POST">
         @csrf
         @method('DELETE')
     </form>

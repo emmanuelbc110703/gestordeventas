@@ -337,7 +337,7 @@ Route::put(
 
 Route::delete(
     '/admin/inventario/{id}',
-    [InventarioController::class, 'destroy']
+    [InventarioController::class, 'destroyBien']
 )->name('admin.inventario.eliminar');
 
 // ========================================
