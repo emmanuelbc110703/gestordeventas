@@ -181,6 +181,14 @@
                             <td class="lst-col-acciones">
                                 <div class="lst-acciones">
                                     <a
+                                        href="{{ route('admin.empleados.ventas', $empleado->id) }}"
+                                        class="lst-btn-editar"
+                                        title="Ver ventas"
+                                        aria-label="Ver ventas del empleado"
+                                    >
+                                        <i class="fa-solid fa-receipt"></i>
+                                    </a>
+                                    <a
                                         href="{{ route('admin.empleados.editar', $empleado->id) }}"
                                         class="lst-btn-editar"
                                         title="Editar"

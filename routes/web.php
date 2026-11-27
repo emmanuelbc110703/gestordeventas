@@ -831,3 +831,6 @@ Route::match(['get', 'post'], '/admin/estadisticas/pdf/{seccion}', [Estadisticas
     ->whereIn('seccion', ['general', 'ventas', 'categorias', 'inventario', 'pedidos', 'compras', 'pagos', 'completo'])
     ->middleware(['auth', 'rol:admin'])
     ->name('admin.estadisticas.pdf');
+
+Route::get('/empleados/{id}/ventas', [EmpleadoController::class, 'ventas'])
+    ->name('admin.empleados.ventas');
