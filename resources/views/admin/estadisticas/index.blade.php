@@ -518,7 +518,8 @@
             const tamanoOriginal = Chart.defaults.font.size;
             Chart.defaults.font.size = 15;
 
-            secciones.forEach(s => Object.entries(PDF[s]).forEach(([clave, [tipo, labels, series, fmt]]) => {
+            secciones.forEach(s => Object.entries(PDF[s]).forEach(([clave, [tipo, labels, seriesOrig, fmt]]) => {
+    const series = seriesOrig.map(x => ({ ...x, color: undefined }));
             const lienzo = document.createElement('canvas');
             lienzo.width = 800; lienzo.height = 320;
             lienzo.style.cssText = 'position:fixed;left:-9999px;top:0;';
