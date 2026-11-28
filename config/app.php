@@ -123,4 +123,7 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'timezone' => 'America/Mexico_City',
+    'locale' => env('APP_LOCALE', 'es'),
+
 ];

@@ -31,6 +31,8 @@
         .est-atajos a.activo { background:var(--primario-suave); color:var(--primario); border-color:var(--primario); font-weight:600; }
         .est-filtros input[type=date] { height:40px; padding:0 10px; border:1px solid var(--borde); border-radius:0; font:inherit; font-size:13px; background:#fff; color:var(--texto); outline:none; }
         .est-filtros input[type=date]:focus { border-color:var(--primario); box-shadow:0 0 0 3px rgba(109,40,217,.1); }
+        .est-filtros select, .est-filtros .est-txt { height:40px; padding:0 10px; border:1px solid var(--borde); border-radius:0; font:inherit; font-size:13px; background:#fff; color:var(--texto); }
+        .est-filtros-extra { display:flex; flex-wrap:wrap; gap:8px; width:100%; }
         .est-btn { height:40px; padding:0 20px; border:none; border-radius:0; background:var(--primario); color:#fff; font:inherit; font-size:13px; font-weight:600; cursor:pointer; transition:background .2s ease; }
         .est-btn:hover { background:var(--primario-oscuro); }
 
@@ -111,13 +113,42 @@
                 <button type="button" id="btnPdfCompleto" class="est-btn" style="display:inline-flex;align-items:center;gap:8px;background:#fff;color:var(--texto);border:1px solid var(--borde)">
                     <i class="fa-solid fa-file-lines"></i> Reporte completo
                 </button>
+
+                <div class="est-filtros-extra">
+                    <select name="estado_pago" title="Estado de pago (servicios)">
+                        <option value="">Servicios: todos</option>
+                        @foreach(['Pendiente', 'Pagado'] as $e)
+                            <option value="{{ $e }}" @selected($filtros['estadoPago'] === $e)>{{ $e }}</option>
+                        @endforeach
+                    </select>
+                    <select name="tipo_inv" title="Tipo de inventario">
+                        <option value="">Inventario: todos</option>
+                        <option value="bien" @selected($filtros['tipoInv'] === 'bien')>Bienes</option>
+                        <option value="servicio" @selected($filtros['tipoInv'] === 'servicio')>Servicios</option>
+                    </select>
+                    <select name="tipo_cat" title="Tipo de categoría">
+                        <option value="">Categorías: todas</option>
+                        <option value="bien" @selected($filtros['tipoCat'] === 'bien')>Bienes</option>
+                        <option value="servicio" @selected($filtros['tipoCat'] === 'servicio')>Servicios</option>
+                        <option value="gasto" @selected($filtros['tipoCat'] === 'gasto')>Gastos</option>
+                    </select>
+                    <select name="estado_pedido" title="Estado del pedido">
+                        <option value="">Pedidos: todos</option>
+                        @foreach(['enviado', 'procesando', 'finalizado', 'terminado'] as $e)
+                            <option value="{{ $e }}" @selected($filtros['estadoPedido'] === $e)>{{ ucfirst($e) }}</option>
+                        @endforeach
+                    </select>
+                    <input class="est-txt" type="text" name="producto" value="{{ $filtros['producto'] }}" placeholder="Producto (descuentos)">
+                    <input class="est-txt" type="number" name="porcentaje" min="0" max="100" step="1" value="{{ $filtros['porcentaje'] }}" placeholder="% descuento" style="width:120px">
+                </div>
             </form>
         </div>
-    
 
         <div class="est-tabs" id="estTabs">
             <button class="est-tab activo" data-tab="general">Reporte general</button>
             <button class="est-tab" data-tab="ventas">Ventas</button>
+            <button class="est-tab" data-tab="puntos">Por punto de venta</button>
+            <button class="est-tab" data-tab="descuentos">Descuentos</button>
             <button class="est-tab" data-tab="categorias">Categorías</button>
             <button class="est-tab" data-tab="inventario">Inventario</button>
             <button class="est-tab" data-tab="pedidos">Pedidos</button>
@@ -163,9 +194,14 @@
                 <div class="est-tarjeta"><small>Descuentos</small><strong>{{ $m($ventas['descuentos']) }}</strong></div>
                 <div class="est-tarjeta"><small>Impuestos</small><strong>{{ $m($ventas['impuestos']) }}</strong></div>
             </div>
+            <div class="est-tarjetas">
+                <div class="est-tarjeta"><small>Pedidos en línea considerados</small><strong>{{ $n($pedidos['concluidos']) }}</strong><span>{{ $m($general['ingresos_pedidos']) }} · solo finalizados/terminados</span></div>
+                <div class="est-tarjeta"><small>Pedidos pendientes (excluidos)</small><strong>{{ $n($ventas['pedidos_pendientes']) }}</strong><span>No suman a ingresos</span></div>
+            </div>
 
             <div class="est-rejilla">
                 <div class="est-caja"><h3>Ventas por periodo</h3><div class="est-grafica"><canvas id="g-ventas"></canvas></div></div>
+                <div class="est-caja"><h3>Ingresos por mes</h3><div class="est-grafica"><canvas id="g-ventasMes"></canvas></div></div>
                 <div class="est-caja"><h3>Forma de pago</h3><div class="est-grafica"><canvas id="g-formas"></canvas></div></div>
             </div>
 
@@ -190,6 +226,50 @@
                         <div class="est-vacio">Sin ventas en el periodo.</div>
                     @endforelse
                 </div>
+            </div>
+        </section>
+        <section class="est-panel" id="tab-puntos">
+            <div class="est-tarjetas">
+                <div class="est-tarjeta"><small>Puntos con ventas</small><strong>{{ $n($ventas['puntos']->count()) }}</strong></div>
+                <div class="est-tarjeta"><small>Ingresos totales</small><strong>{{ $m($ventas['total']) }}</strong></div>
+                <div class="est-tarjeta"><small>Ventas</small><strong>{{ $n($ventas['n']) }}</strong></div>
+                <div class="est-tarjeta"><small>Importe promedio</small><strong>{{ $m($ventas['promedio']) }}</strong></div>
+            </div>
+
+            <div class="est-rejilla">
+                <div class="est-caja"><h3>Ingresos por punto de venta</h3><div class="est-grafica"><canvas id="g-puntos"></canvas></div></div>
+                <div class="est-caja">
+                    <h3>Comparativa</h3>
+                    @forelse($ventas['puntos'] as $p)
+                        @if($loop->first)<div class="est-scroll"><table class="est-tabla"><thead><tr><th>Caja</th><th>Sucursal</th><th class="est-der">Ventas</th><th class="est-der">Ingresos</th><th class="est-der">Promedio</th></tr></thead><tbody>@endif
+                        <tr><td>{{ $p->nombre_caja }}</td><td>{{ $p->sucursal }}</td><td class="est-der">{{ $n($p->n) }}</td><td class="est-der">{{ $m($p->total) }}</td><td class="est-der">{{ $m($p->promedio) }}</td></tr>
+                        @if($loop->last)</tbody></table></div>@endif
+                    @empty
+                        <div class="est-vacio">Sin ventas en el periodo.</div>
+                    @endforelse
+                </div>
+            </div>
+        </section>
+        <section class="est-panel" id="tab-descuentos">
+            <p class="est-nota">Solo se consideran descuentos de ventas completadas del punto de venta; los pedidos pendientes no se incluyen.</p>
+            <div class="est-tarjetas">
+                <div class="est-tarjeta"><small>Total descontado</small><strong class="est-negativo">{{ $m($descuentos['total']) }}</strong></div>
+                <div class="est-tarjeta"><small>Líneas con descuento</small><strong>{{ $n($descuentos['n']) }}</strong></div>
+                <div class="est-tarjeta"><small>Precio original</small><strong>{{ $m($descuentos['original']) }}</strong></div>
+                <div class="est-tarjeta"><small>Descuento promedio</small><strong>{{ number_format($descuentos['promedio'], 1) }}%</strong></div>
+            </div>
+
+            <div class="est-caja" style="margin-bottom:24px"><h3>Descuento por producto</h3><div class="est-grafica"><canvas id="g-descProd"></canvas></div></div>
+
+            <div class="est-caja">
+                <h3>Detalle de descuentos</h3>
+                @forelse($descuentos['filas'] as $d)
+                    @if($loop->first)<div class="est-scroll"><table class="est-tabla"><thead><tr><th>Folio</th><th>Fecha</th><th>Producto</th><th class="est-der">Precio original</th><th class="est-der">%</th><th class="est-der">Descontado</th><th class="est-der">Precio final</th></tr></thead><tbody>@endif
+                    <tr><td>{{ $d->folio }}</td><td>{{ $f($d->fecha) }}</td><td>{{ $d->nombre }}</td><td class="est-der">{{ $m($d->precio_original) }}</td><td class="est-der">{{ number_format($d->porcentaje, 1) }}%</td><td class="est-der">{{ $m($d->descontado) }}</td><td class="est-der">{{ $m($d->precio_final) }}</td></tr>
+                    @if($loop->last)</tbody></table></div>@endif
+                @empty
+                    <div class="est-vacio">No hay descuentos con esos criterios.</div>
+                @endforelse
             </div>
         </section>
         <section class="est-panel" id="tab-categorias">
@@ -230,6 +310,19 @@
                     @endforelse
                 </div>
             </div>
+            <div class="est-rejilla">
+                <div class="est-caja"><h3>Registros por categoría</h3><div class="est-grafica"><canvas id="g-catRegistros"></canvas></div></div>
+                <div class="est-caja">
+                    <h3>Categorías registradas</h3>
+                    @forelse($categorias['lista'] as $c)
+                        @if($loop->first)<div class="est-scroll"><table class="est-tabla"><thead><tr><th>Nombre</th><th>Tipo</th><th>Descripción</th><th class="est-der">Inventario</th><th class="est-der">Gastos (periodo)</th></tr></thead><tbody>@endif
+                        <tr><td>{{ $c->nombre }}</td><td><span class="est-etiqueta">{{ $c->tipo_etiqueta }}</span></td><td>{{ $c->descripcion ?: '—' }}</td><td class="est-der">{{ $n($c->inventarios_count) }}</td><td class="est-der">{{ $n($c->gastos_periodo_count) }}</td></tr>
+                        @if($loop->last)</tbody></table></div>@endif
+                    @empty
+                        <div class="est-vacio">Sin categorías con esos criterios.</div>
+                    @endforelse
+                </div>
+            </div>
         </section>
         <section class="est-panel" id="tab-inventario">
             <p class="est-nota">El inventario muestra el estado actual; solo “Adquiridos en el periodo” depende de las fechas.</p>
@@ -242,7 +335,7 @@
             </div>
 
             <div class="est-rejilla">
-                <div class="est-caja"><h3>Unidades por categoría</h3><div class="est-grafica"><canvas id="g-invCat"></canvas></div></div>
+                <div class="est-caja"><h3>Registros por categoría</h3><div class="est-grafica"><canvas id="g-invCat"></canvas></div></div>
                 <div class="est-caja">
                     <h3>Existencia baja (≤ {{ $inventario['stock_bajo'] }})</h3>
                     @forelse($inventario['bajo'] as $i)
@@ -269,6 +362,17 @@
                         </tbody>
                     </table>
                 </div>
+            </div>
+
+            <div class="est-caja" style="margin-top:24px">
+                <h3>Registros del inventario</h3>
+                @forelse($inventario['lista'] as $i)
+                    @if($loop->first)<div class="est-scroll"><table class="est-tabla"><thead><tr><th>Nombre</th><th>Tipo</th><th>Categoría</th><th class="est-der">Precio</th><th class="est-der">Existencia</th></tr></thead><tbody>@endif
+                    <tr><td>{{ $i->nombre }}</td><td><span class="est-etiqueta">{{ ucfirst($i->tipo) }}</span></td><td>{{ $i->categoria->nombre ?? 'Sin categoría' }}</td><td class="est-der">{{ $m($i->precio) }}</td><td class="est-der">{{ $i->cantidad }}</td></tr>
+                    @if($loop->last)</tbody></table></div>@endif
+                @empty
+                    <div class="est-vacio">Sin registros.</div>
+                @endforelse
             </div>
         </section>
         <section class="est-panel" id="tab-pedidos">
@@ -339,13 +443,25 @@
                     <div class="est-vacio">Sin gastos en el periodo.</div>
                 @endforelse
             </div>
+
+            <div class="est-caja" style="margin-top:24px">
+                <h3>Bienes adquiridos en el periodo</h3>
+                @forelse($compras['bienes'] as $b)
+                    @if($loop->first)<div class="est-scroll"><table class="est-tabla"><thead><tr><th>Fecha</th><th>Bien</th><th>Categoría</th><th class="est-der">Cantidad</th><th class="est-der">Costo</th></tr></thead><tbody>@endif
+                    <tr><td>{{ $f($b->fecha_adquisicion) }}</td><td>{{ $b->nombre }}</td><td>{{ $b->categoria->nombre ?? 'Sin categoría' }}</td><td class="est-der">{{ $n($b->cantidad) }}</td><td class="est-der">{{ $b->costo !== null ? $m($b->costo) : '—' }}</td></tr>
+                    @if($loop->last)</tbody></table></div>@endif
+                @empty
+                    <div class="est-vacio">Sin bienes adquiridos en el periodo.</div>
+                @endforelse
+            </div>
         </section>
         <section class="est-panel" id="tab-pagos">
             <div class="est-tarjetas">
-                <div class="est-tarjeta"><small>Pagado (egresos)</small><strong class="est-negativo">{{ $m($pagos['egresos']) }}</strong></div>
-                <div class="est-tarjeta"><small>Recibido (ingresos)</small><strong class="est-positivo">{{ $m($pagos['ingresos']) }}</strong></div>
+                <div class="est-tarjeta"><small>Monto registrado</small><strong>{{ $m($pagos['registrado']) }}</strong><span>{{ $n($pagos['lista']->count()) }} servicios</span></div>
+                <div class="est-tarjeta"><small>Pagado</small><strong class="est-positivo">{{ $m($pagos['pagado_periodo']) }}</strong></div>
+                <div class="est-tarjeta"><small>Pendiente</small><strong class="est-negativo">{{ $m($pagos['pendiente_periodo']) }}</strong><span>{{ $n($pagos['pendientes_n']) }} pendientes · {{ $n($pagos['vencidos']) }} vencidos</span></div>
+                <div class="est-tarjeta"><small>Egresos por recibos</small><strong>{{ $m($pagos['egresos']) }}</strong></div>
                 <div class="est-tarjeta"><small>Recibos del periodo</small><strong>{{ $n($pagos['n']) }}</strong></div>
-                <div class="est-tarjeta"><small>Pendientes</small><strong>{{ $n($pagos['pendientes_n']) }}</strong><span>{{ $m($pagos['pendientes_monto']) }} · {{ $n($pagos['vencidos']) }} vencidos</span></div>
             </div>
 
             <div class="est-rejilla">
@@ -381,8 +497,20 @@
                     </table>
                 </div>
             </div>
+
+            <div class="est-caja" style="margin-top:24px">
+                <h3>Servicios del periodo</h3>
+                @forelse($pagos['lista'] as $s)
+                    @if($loop->first)<div class="est-scroll"><table class="est-tabla"><thead><tr><th>Servicio</th><th>Estado</th><th>Vence</th><th class="est-der">Monto</th></tr></thead><tbody>@endif
+                    <tr><td>{{ $s->servicio }}</td><td><span class="est-etiqueta">{{ $s->estado }}</span></td><td>{{ $f($s->fecha_vencimiento) }}</td><td class="est-der">{{ $s->monto !== null ? $m($s->monto) : '—' }}</td></tr>
+                    @if($loop->last)</tbody></table></div>@endif
+                @empty
+                    <div class="est-vacio">Sin servicios con esos criterios.</div>
+                @endforelse
+            </div>
         </section>
     </div>
+
     @push('scripts')
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <script>
@@ -461,13 +589,17 @@
             ]),
             ventas:     () => {
                 grafica('g-ventas', 'bar', G.periodos, [{ nombre: 'Ventas', datos: G.ventas }]);
+                grafica('g-ventasMes', 'bar', G.etiqMes, [{ nombre: 'Ingresos', datos: G.ventasMes }]);
                 grafica('g-formas', 'doughnut', G.formas.l, [{ nombre: 'Forma de pago', datos: G.formas.d }]);
             },
+            puntos:     () => grafica('g-puntos', 'bar', G.puntos.l, [{ nombre: 'Ingresos', datos: G.puntos.d }]),
+            descuentos: () => grafica('g-descProd', 'bar', G.descProd.l, [{ nombre: 'Descontado', datos: G.descProd.d }]),
             categorias: () => {
                 grafica('g-catVentas', 'doughnut', G.catVentas.l, [{ nombre: 'Ventas', datos: G.catVentas.d }]);
                 grafica('g-catGastos', 'doughnut', G.catGastos.l, [{ nombre: 'Gastos', datos: G.catGastos.d }]);
+                grafica('g-catRegistros', 'bar', G.catRegistros.l, [{ nombre: 'Registros', datos: G.catRegistros.d }], 'n');
             },
-            inventario: () => grafica('g-invCat', 'bar', G.invCat.l, [{ nombre: 'Unidades', datos: G.invCat.d }], 'n'),
+            inventario: () => grafica('g-invCat', 'bar', G.invCat.l, [{ nombre: 'Registros', datos: G.invCat.d }], 'n'),
             pedidos:    () => {
                 grafica('g-pedidos', 'bar', G.periodos, [{ nombre: 'Pedidos', datos: G.pedidos }], 'n');
                 grafica('g-estados', 'doughnut', G.estados.l, [{ nombre: 'Pedidos', datos: G.estados.d }], 'n');
@@ -501,14 +633,18 @@
                             { nombre: 'Ingresos', datos: G.ingresos, color: '#10b981' },
                             { nombre: 'Egresos',  datos: G.egresos,  color: '#ef4444' }]] },
             ventas:     { ventas: ['bar', G.periodos, [{ nombre: 'Ventas', datos: G.ventas }]],
-                        formas: ['doughnut', G.formas.l, [{ nombre: 'Forma de pago', datos: G.formas.d }]] },
+                          ventasMes: ['bar', G.etiqMes, [{ nombre: 'Ingresos', datos: G.ventasMes }]],
+                          formas: ['doughnut', G.formas.l, [{ nombre: 'Forma de pago', datos: G.formas.d }]] },
+            puntos:     { puntos: ['bar', G.puntos.l, [{ nombre: 'Ingresos', datos: G.puntos.d }]] },
+            descuentos: { descProd: ['bar', G.descProd.l, [{ nombre: 'Descontado', datos: G.descProd.d }]] },
             categorias: { catVentas: ['doughnut', G.catVentas.l, [{ nombre: 'Ventas', datos: G.catVentas.d }]],
-                        catGastos: ['doughnut', G.catGastos.l, [{ nombre: 'Gastos', datos: G.catGastos.d }]] },
-            inventario: { invCat: ['bar', G.invCat.l, [{ nombre: 'Unidades', datos: G.invCat.d }], 'n'] },
+                          catGastos: ['doughnut', G.catGastos.l, [{ nombre: 'Gastos', datos: G.catGastos.d }]],
+                          catRegistros: ['bar', G.catRegistros.l, [{ nombre: 'Registros', datos: G.catRegistros.d }], 'n'] },
+            inventario: { invCat: ['bar', G.invCat.l, [{ nombre: 'Registros', datos: G.invCat.d }], 'n'] },
             pedidos:    { pedidos: ['bar', G.periodos, [{ nombre: 'Pedidos', datos: G.pedidos }], 'n'],
-                        estados: ['doughnut', G.estados.l, [{ nombre: 'Pedidos', datos: G.estados.d }], 'n'] },
+                          estados: ['doughnut', G.estados.l, [{ nombre: 'Pedidos', datos: G.estados.d }], 'n'] },
             compras:    { gastos: ['bar', G.periodos, [{ nombre: 'Gastos', datos: G.gastos }]],
-                        catGastos2: ['doughnut', G.catGastos.l, [{ nombre: 'Gastos', datos: G.catGastos.d }]] },
+                          catGastos2: ['doughnut', G.catGastos.l, [{ nombre: 'Gastos', datos: G.catGastos.d }]] },
             pagos:      { servicios: ['bar', G.servicios.l, [{ nombre: 'Monto', datos: G.servicios.d }]] },
         };
 
@@ -519,14 +655,15 @@
             Chart.defaults.font.size = 15;
 
             secciones.forEach(s => Object.entries(PDF[s]).forEach(([clave, [tipo, labels, seriesOrig, fmt]]) => {
-    const series = seriesOrig.map(x => ({ ...x, color: undefined }));
-            const lienzo = document.createElement('canvas');
-            lienzo.width = 800; lienzo.height = 320;
-            lienzo.style.cssText = 'position:fixed;left:-9999px;top:0;';
-            document.body.appendChild(lienzo);
+                const series = seriesOrig.map(x => ({ ...x, color: undefined }));
+                const lienzo = document.createElement('canvas');
+                lienzo.width = 800; lienzo.height = 320;
+                lienzo.style.cssText = 'position:fixed;left:-9999px;top:0;';
+                document.body.appendChild(lienzo);
+
                 const ch = construir(lienzo, tipo, labels, series, fmt || 'm',
                     { responsive: false, animation: false, devicePixelRatio: 1 });
-                    
+
                 const ctx = lienzo.getContext('2d');
                 ctx.globalCompositeOperation = 'destination-over';
                 ctx.fillStyle = '#fff';
@@ -541,7 +678,8 @@
             form.method = 'POST';
             form.action = @json(route('admin.estadisticas.pdf', 'SECCION')).replace('SECCION', seccion);
 
-            const campos = { _token: @json(csrf_token()), desde: @json($inicio->toDateString()), hasta: @json($fin->toDateString()) };
+            const filtros = Object.fromEntries(new FormData(document.getElementById('formFiltros')));
+            const campos = { ...filtros, _token: @json(csrf_token()), desde: @json($inicio->toDateString()), hasta: @json($fin->toDateString()) };
             Object.entries(imgs).forEach(([k, v]) => campos['imgs[' + k + ']'] = v);
             Object.entries(campos).forEach(([nombre, valor]) => {
                 const i = document.createElement('input');

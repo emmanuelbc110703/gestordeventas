@@ -828,7 +828,7 @@ Route::prefix('admin/promociones')
     });
 
 Route::match(['get', 'post'], '/admin/estadisticas/pdf/{seccion}', [EstadisticasController::class, 'pdf'])
-    ->whereIn('seccion', ['general', 'ventas', 'categorias', 'inventario', 'pedidos', 'compras', 'pagos', 'completo'])
+    ->whereIn('seccion', ['general', 'ventas', 'puntos', 'descuentos', 'categorias', 'inventario', 'pedidos', 'compras', 'pagos', 'completo'])
     ->middleware(['auth', 'rol:admin'])
     ->name('admin.estadisticas.pdf');
 

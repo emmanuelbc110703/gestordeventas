@@ -16,12 +16,13 @@
         : '<div class="vacio">Gráfica no disponible.</div>';
 
     $titulos = [
-        'general' => 'Reporte general', 'ventas' => 'Ventas', 'categorias' => 'Categorías',
+        'general' => 'Reporte general', 'ventas' => 'Ventas', 'puntos' => 'Ventas por punto de venta',
+        'descuentos' => 'Descuentos aplicados', 'categorias' => 'Categorías',
         'inventario' => 'Inventario', 'pedidos' => 'Pedidos', 'compras' => 'Compras',
         'pagos' => 'Pagos de servicios', 'completo' => 'Reporte completo',
     ];
     $secciones = $seccion === 'completo'
-        ? ['general', 'ventas', 'categorias', 'inventario', 'pedidos', 'compras', 'pagos']
+        ? ['general', 'ventas', 'puntos', 'descuentos', 'categorias', 'inventario', 'pedidos', 'compras', 'pagos']
         : [$seccion];
 
     $folio = 'RPT-' . now()->format('Ymd-His');
@@ -72,6 +73,7 @@
     table.ind em { display: block; font-style: normal; font-size: 6.5px; color: #6b7280; }
 
     .caja { margin: 0 0 12px; page-break-inside: avoid; }
+    .caja.libre { page-break-inside: auto; }
     .graf { width: 100%; border: 1px solid #ddd6fe; }
     table.t { width: 100%; border-collapse: collapse; }
     table.t th { text-align: left; font-size: 7px; text-transform: uppercase; letter-spacing: .4px; color: #4c1d95; padding: 4px 5px; border-top: 1px solid #6d28d9; border-bottom: 1px solid #6d28d9; background: #f5f3ff; }
@@ -152,7 +154,13 @@
             <td><small>Impuestos</small><strong>{{ $m($ventas['impuestos']) }}</strong></td>
         </tr></table>
 
+        <p class="nota">
+            Pedidos en línea considerados: {{ $n($pedidos['concluidos']) }} ({{ $m($general['ingresos_pedidos']) }}, solo finalizados/terminados).
+            Pedidos pendientes excluidos de los ingresos: {{ $n($ventas['pedidos_pendientes']) }}.
+        </p>
+
         <div class="caja"><h3>Ventas por periodo</h3>{!! $img('ventas') !!}</div>
+        <div class="caja"><h3>Ingresos por mes</h3>{!! $img('ventasMes') !!}</div>
         <div class="caja"><h3>Forma de pago</h3>{!! $img('formas') !!}</div>
 
         <div class="caja">
@@ -183,9 +191,75 @@
             </table>
         </div>
     @endif
+    @if($s === 'puntos')
+        <table class="ind"><tr>
+            <td><small>Puntos con ventas</small><strong>{{ $n($ventas['puntos']->count()) }}</strong></td>
+            <td><small>Ingresos</small><strong>{{ $m($ventas['total']) }}</strong></td>
+            <td><small>Ventas</small><strong>{{ $n($ventas['n']) }}</strong></td>
+            <td><small>Promedio</small><strong>{{ $m($ventas['promedio']) }}</strong></td>
+        </tr></table>
+
+        <div class="caja"><h3>Ingresos por punto de venta</h3>{!! $img('puntos') !!}</div>
+
+        <div class="caja">
+            <h3>Comparativa</h3>
+            <table class="t">
+                <thead><tr><th>Caja</th><th>Sucursal</th><th class="der">Ventas</th><th class="der">Ingresos</th><th class="der">Promedio</th></tr></thead>
+                <tbody>
+                @forelse($ventas['puntos'] as $p)
+                    <tr><td>{{ $p->nombre_caja }}</td><td>{{ $p->sucursal }}</td><td class="der">{{ $n($p->n) }}</td><td class="der">{{ $m($p->total) }}</td><td class="der">{{ $m($p->promedio) }}</td></tr>
+                @empty
+                    <tr><td colspan="5" class="vacio">Sin ventas en el periodo.</td></tr>
+                @endforelse
+                </tbody>
+            </table>
+        </div>
+    @endif
+    @if($s === 'descuentos')
+        <p class="nota">Solo se consideran descuentos de ventas completadas; los pedidos pendientes no se incluyen.</p>
+
+        <table class="ind"><tr>
+            <td><small>Total descontado</small><strong>{{ $m($descuentos['total']) }}</strong></td>
+            <td><small>Líneas con descuento</small><strong>{{ $n($descuentos['n']) }}</strong></td>
+            <td><small>Precio original</small><strong>{{ $m($descuentos['original']) }}</strong></td>
+            <td><small>Descuento promedio</small><strong>{{ number_format($descuentos['promedio'], 1) }}%</strong></td>
+        </tr></table>
+
+        <div class="caja"><h3>Descuento por producto</h3>{!! $img('descProd') !!}</div>
+
+        <div class="caja libre">
+            <h3>Detalle de descuentos</h3>
+            <table class="t">
+                <thead><tr><th>Folio</th><th>Fecha</th><th>Producto</th><th class="der">Original</th><th class="der">%</th><th class="der">Descontado</th><th class="der">Final</th></tr></thead>
+                <tbody>
+                @forelse($descuentos['filas'] as $d)
+                    <tr><td>{{ $d->folio }}</td><td>{{ $f($d->fecha) }}</td><td>{{ $d->nombre }}</td><td class="der">{{ $m($d->precio_original) }}</td><td class="der">{{ number_format($d->porcentaje, 1) }}%</td><td class="der">{{ $m($d->descontado) }}</td><td class="der">{{ $m($d->precio_final) }}</td></tr>
+                @empty
+                    <tr><td colspan="7" class="vacio">Sin descuentos con esos criterios.</td></tr>
+                @endforelse
+                <tr class="total"><td colspan="5">Total descontado</td><td class="der">{{ $m($descuentos['total']) }}</td><td></td></tr>
+                </tbody>
+            </table>
+        </div>
+    @endif
     @if($s === 'categorias')
         <div class="caja"><h3>Ventas por categoría</h3>{!! $img('catVentas') !!}</div>
         <div class="caja"><h3>Gastos por categoría</h3>{!! $img('catGastos') !!}</div>
+        <div class="caja"><h3>Registros por categoría</h3>{!! $img('catRegistros') !!}</div>
+
+        <div class="caja libre">
+            <h3>Categorías registradas</h3>
+            <table class="t">
+                <thead><tr><th>Nombre</th><th>Tipo</th><th>Descripción</th><th class="der">Inventario</th><th class="der">Gastos (periodo)</th></tr></thead>
+                <tbody>
+                @forelse($categorias['lista'] as $c)
+                    <tr><td>{{ $c->nombre }}</td><td>{{ $c->tipo_etiqueta }}</td><td>{{ $c->descripcion ?: '—' }}</td><td class="der">{{ $n($c->inventarios_count) }}</td><td class="der">{{ $n($c->gastos_periodo_count) }}</td></tr>
+                @empty
+                    <tr><td colspan="5" class="vacio">Sin categorías con esos criterios.</td></tr>
+                @endforelse
+                </tbody>
+            </table>
+        </div>
 
         <div class="caja">
             <h3>Detalle de ventas por categoría</h3>
@@ -240,7 +314,7 @@
             <td><small>Adquiridos en el periodo</small><strong>{{ $n($inventario['adquiridos']) }}</strong></td>
         </tr></table>
 
-        <div class="caja"><h3>Unidades por categoría</h3>{!! $img('invCat') !!}</div>
+        <div class="caja"><h3>Registros por categoría</h3>{!! $img('invCat') !!}</div>
 
         <div class="caja">
             <h3>Existencia baja (≤ {{ $inventario['stock_bajo'] }})</h3>
@@ -265,6 +339,20 @@
                     <tr><td>{{ $c->nombre }}</td><td>{{ ucfirst($c->tipo) }}</td><td class="der">{{ $n($c->registros) }}</td><td class="der">{{ $n($c->unidades) }}</td><td class="der">{{ $m($c->valor) }}</td></tr>
                 @empty
                     <tr><td colspan="5" class="vacio">Sin registros de inventario.</td></tr>
+                @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        <div class="caja libre">
+            <h3>Registros del inventario</h3>
+            <table class="t">
+                <thead><tr><th>Nombre</th><th>Tipo</th><th>Categoría</th><th class="der">Precio</th><th class="der">Existencia</th></tr></thead>
+                <tbody>
+                @forelse($inventario['lista'] as $i)
+                    <tr><td>{{ $i->nombre }}</td><td>{{ ucfirst($i->tipo) }}</td><td>{{ $i->categoria->nombre ?? 'Sin categoría' }}</td><td class="der">{{ $m($i->precio) }}</td><td class="der {{ $i->cantidad == 0 ? 'neg' : '' }}">{{ $i->cantidad }}</td></tr>
+                @empty
+                    <tr><td colspan="5" class="vacio">Sin registros.</td></tr>
                 @endforelse
                 </tbody>
             </table>
@@ -334,7 +422,7 @@
         <div class="caja"><h3>Gastos por periodo</h3>{!! $img('gastos') !!}</div>
         <div class="caja"><h3>Gastos por categoría</h3>{!! $img('catGastos2') !!}</div>
 
-        <div class="caja">
+        <div class="caja libre">
             <h3>Últimos registros</h3>
             <table class="t">
                 <thead><tr><th>Fecha</th><th>Concepto</th><th>Categoría</th><th class="der">Monto</th></tr></thead>
@@ -347,16 +435,44 @@
                 </tbody>
             </table>
         </div>
+
+        <div class="caja libre">
+            <h3>Bienes adquiridos en el periodo</h3>
+            <table class="t">
+                <thead><tr><th>Fecha</th><th>Bien</th><th>Categoría</th><th class="der">Cantidad</th><th class="der">Costo</th></tr></thead>
+                <tbody>
+                @forelse($compras['bienes'] as $b)
+                    <tr><td>{{ $f($b->fecha_adquisicion) }}</td><td>{{ $b->nombre }}</td><td>{{ $b->categoria->nombre ?? 'Sin categoría' }}</td><td class="der">{{ $n($b->cantidad) }}</td><td class="der">{{ $b->costo !== null ? $m($b->costo) : '—' }}</td></tr>
+                @empty
+                    <tr><td colspan="5" class="vacio">Sin bienes adquiridos en el periodo.</td></tr>
+                @endforelse
+                </tbody>
+            </table>
+        </div>
     @endif
     @if($s === 'pagos')
         <table class="ind"><tr>
-            <td><small>Pagado (egresos)</small><strong>{{ $m($pagos['egresos']) }}</strong></td>
-            <td><small>Recibido (ingresos)</small><strong>{{ $m($pagos['ingresos']) }}</strong></td>
+            <td><small>Monto registrado</small><strong>{{ $m($pagos['registrado']) }}</strong><em>{{ $n($pagos['lista']->count()) }} servicios</em></td>
+            <td><small>Pagado</small><strong>{{ $m($pagos['pagado_periodo']) }}</strong></td>
+            <td><small>Pendiente</small><strong class="neg">{{ $m($pagos['pendiente_periodo']) }}</strong><em>{{ $n($pagos['pendientes_n']) }} pendientes · {{ $n($pagos['vencidos']) }} vencidos</em></td>
+            <td><small>Egresos por recibos</small><strong>{{ $m($pagos['egresos']) }}</strong></td>
             <td><small>Recibos del periodo</small><strong>{{ $n($pagos['n']) }}</strong></td>
-            <td><small>Pendientes</small><strong>{{ $n($pagos['pendientes_n']) }}</strong><em>{{ $m($pagos['pendientes_monto']) }} · {{ $n($pagos['vencidos']) }} vencidos</em></td>
         </tr></table>
-
         <div class="caja"><h3>Monto por servicio</h3>{!! $img('servicios') !!}</div>
+        <div class="caja libre">
+            <h3>Servicios del periodo</h3>
+            <table class="t">
+                <thead><tr><th>Servicio</th><th>Estado</th><th>Vence</th><th class="der">Monto</th></tr></thead>
+                <tbody>
+                @forelse($pagos['lista'] as $x)
+                    <tr><td>{{ $x->servicio }}</td><td>{{ $x->estado }}</td><td>{{ $f($x->fecha_vencimiento) }}</td><td class="der">{{ $x->monto !== null ? $m($x->monto) : '—' }}</td></tr>
+                @empty
+                    <tr><td colspan="4" class="vacio">Sin servicios con esos criterios.</td></tr>
+                @endforelse
+                <tr class="total"><td colspan="3">Pagado / Pendiente</td><td class="der">{{ $m($pagos['pagado_periodo']) }} / {{ $m($pagos['pendiente_periodo']) }}</td></tr>
+                </tbody>
+            </table>
+        </div>
 
         <div class="caja">
             <h3>Próximos vencimientos</h3>
